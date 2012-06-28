@@ -49,7 +49,13 @@ def upload(name):
 
 @views.route('/upload/<string:name>/file', methods=['POST'])
 def upload_file(name):
-    return flask.redirect(flask.url_for('views.upload', name=name))
+    posted_file = flask.request.files['file']
+    with warehouse() as wh:
+        upload = wh.get_upload(name)
+        # TODO make sure filename is safe and within the folder
+        filename = posted_file.filename.rsplit('/', 1)[-1]
+        posted_file.save(upload.get_path()/filename)
+        return flask.redirect(flask.url_for('views.upload', name=name))
 
 
 def register_on(app):

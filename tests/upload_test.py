@@ -1,5 +1,6 @@
 import unittest
 import tempfile
+from StringIO import StringIO
 import flask
 from path import path
 
@@ -47,3 +48,14 @@ class UploadTest(unittest.TestCase):
 
         resp2 = client.get('/upload/' + upload_name)
         self.assertIn('some.txt', resp2.data)
+
+    def test_http_post_saves_file_in_upload(self):
+        client = self.app.test_client()
+        resp = client.post('/upload')
+        upload_name = resp.location.rsplit('/', 1)[-1]
+        upload_path = self.uploads_path/upload_name
+
+        resp2 = client.post('/upload/' + upload_name + '/file', data={
+            'file': (StringIO("teh file contents"), 'data.gml'),
+        })
+        self.assertEqual(upload_path.listdir(), [upload_path/'data.gml'])
