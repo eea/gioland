@@ -11,6 +11,8 @@ METADATA_FIELDS = [
     'stage',
 ]
 
+INITIAL_STAGE = 'intermediate'
+
 
 views = flask.Blueprint('views', __name__)
 
@@ -43,6 +45,8 @@ def new_upload():
         with warehouse() as wh:
             form = flask.request.form.to_dict()
             metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
+            metadata['stage'] = INITIAL_STAGE
+            metadata['user'] = flask.g.username or ''
             upload = wh.new_upload()
             upload.save_metadata(metadata)
             transaction.commit()

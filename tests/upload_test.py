@@ -16,6 +16,14 @@ def create_mock_app(warehouse_path):
 
 class UploadTest(unittest.TestCase):
 
+    metadata = {
+        'country': 'be',
+        'theme': 'grc',
+        'projection': 'european',
+        'resolution': '25m',
+        'extent': 'full',
+    }
+
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
@@ -39,26 +47,28 @@ class UploadTest(unittest.TestCase):
         upload_name = resp.location.rsplit('/', 1)[-1]
         self.assertTrue((self.uploads_path/upload_name).isdir())
 
-    def test_begin_upload_saves_metadata(self):
+    def test_begin_upload_saves_user_selected_metadata(self):
         import views
-
-        metadata = {
-            'country': 'be',
-            'theme': 'grc',
-            'projection': 'european',
-            'resolution': '25m',
-            'extent': 'full',
-            'stage': 'intermediate',
-        }
-
         client = self.app.test_client()
-        resp = client.post('/upload', data=dict(metadata, bogus='not here'))
+        resp = client.post('/upload', data=dict(self.metadata, bogus='not here'))
         upload_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             with views.warehouse() as wh:
                 upload = wh.get_upload(upload_name)
-                self.assertDictContainsSubset(metadata, upload.metadata)
+                self.assertDictContainsSubset(self.metadata, upload.metadata)
                 self.assertNotIn('bogus', upload.metadata)
+
+    def test_begin_upload_saves_default_metadata(self):
+        import views
+        client = self.app.test_client()
+        client.post('/login', data={'username': 'somebody'})
+        resp = client.post('/upload', data=self.metadata)
+        upload_name = resp.location.rsplit('/', 1)[-1]
+        with self.app.test_request_context():
+            with views.warehouse() as wh:
+                upload = wh.get_upload(upload_name)
+                self.assertEqual(upload.metadata['stage'], 'intermediate')
+                self.assertEqual(upload.metadata['user'], 'somebody')
 
     def test_show_existing_files_in_upload(self):
         client = self.app.test_client()
