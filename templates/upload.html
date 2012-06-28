@@ -4,31 +4,41 @@
 
 <h1>Upload "{{ upload.name }}"</h1>
 
-
-
 <h2>Metadata</h2>
 
-<dl>
+<table class="datatable">
 
-  <dt>Country</dt>
-  <dd>Belgium</dd>
+  <tr>
+    <th>Country</th>
+    <td>{{ upload.metadata['country'] }}</td>
+  </tr>
 
-  <dt>Theme</dt>
-  <dd>Grassland Cover</dd>
+  <tr>
+    <th>Theme</th>
+    <td>{{ upload.metadata['theme'] }}</td>
+  </tr>
 
-  <dt>Projection</dt>
-  <dd>National</dd>
+  <tr>
+    <th>Projection</th>
+    <td>{{ upload.metadata['projection'] }}</td>
+  </tr>
 
-  <dt>Spatial resolution</dt>
-  <dd>25m</dd>
+  <tr>
+    <th>Spatial resolution</th>
+    <td>{{ upload.metadata['resolution'] }}</td>
+  </tr>
 
-  <dt>Extent</dt>
-  <dd>Full</dd>
+  <tr>
+    <th>Extent</th>
+    <td>{{ upload.metadata['extent'] }}</td>
+  </tr>
 
-  <dt>Processing stage</dt>
-  <dd>Intermediate</dd>
+  <tr>
+    <th>Processing stage</th>
+    <td>{{ upload.metadata['stage'] }}</td>
+  </tr>
 
-</dl>
+</table>
 
 <h2>Existing files</h2>
 
