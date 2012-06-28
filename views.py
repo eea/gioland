@@ -47,5 +47,10 @@ def upload(name):
         return flask.render_template('upload.html', upload=upload)
 
 
+@views.route('/upload/<string:name>/file', methods=['POST'])
+def upload_file(name):
+    return flask.redirect(flask.url_for('views.upload', name=name))
+
+
 def register_on(app):
     app.register_blueprint(views)

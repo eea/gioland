@@ -4,13 +4,52 @@
 
 <h1>Upload "{{ upload.name }}"</h1>
 
+
+
+<h2>Metadata</h2>
+
+<dl>
+
+  <dt>Country</dt>
+  <dd>Belgium</dd>
+
+  <dt>Theme</dt>
+  <dd>Grassland Cover</dd>
+
+  <dt>Projection</dt>
+  <dd>National</dd>
+
+  <dt>Spatial resolution</dt>
+  <dd>25m</dd>
+
+  <dt>Extent</dt>
+  <dd>Full</dd>
+
+  <dt>Processing stage</dt>
+  <dd>Intermediate</dd>
+
+</dl>
+
 <h2>Existing files</h2>
-<ul>
-{% for file_path in upload.get_files() %}
-  <li>
-  {{ file_path.name }} ({{ file_path.getsize() }} bytes)
-  </li>
-{% endfor %}
-</ul>
+
+{% set files = upload.get_files() %}
+{% if files %}
+  <ul>
+  {% for file_path in files %}
+    <li>
+    {{ file_path.name }} ({{ file_path.getsize() }} bytes)
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p><i>No files uploaded yet.</i></p>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data"
+      action="{{ url_for('views.upload_file', name=upload.name) }}">
+  <label for="form-upload-file">Add file</label>
+  <input id="form-upload-file" type="file" name="file">
+  <input type="submit" value="Upload">
+</form>
 
 {% endblock %}
