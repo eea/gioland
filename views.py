@@ -2,6 +2,16 @@ import flask
 import transaction
 
 
+METADATA_FIELDS = [
+    'country',
+    'theme',
+    'projection',
+    'resolution',
+    'extent',
+    'stage',
+]
+
+
 views = flask.Blueprint('views', __name__)
 
 
@@ -31,7 +41,10 @@ def index():
 def new_upload():
     if flask.request.method == 'POST':
         with warehouse() as wh:
+            form = flask.request.form.to_dict()
+            metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
             upload = wh.new_upload()
+            upload.save_metadata(metadata)
             transaction.commit()
             url = flask.url_for('views.upload', name=upload.name)
             return flask.redirect(url)
