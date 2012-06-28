@@ -27,12 +27,17 @@ def index():
     return flask.render_template('index.html')
 
 
-@views.route('/upload', methods=['POST'])
+@views.route('/upload', methods=['GET', 'POST'])
 def new_upload():
-    with warehouse() as wh:
-        upload = wh.new_upload()
-        transaction.commit()
-        return flask.redirect(flask.url_for('views.upload', name=upload.name))
+    if flask.request.method == 'POST':
+        with warehouse() as wh:
+            upload = wh.new_upload()
+            transaction.commit()
+            url = flask.url_for('views.upload', name=upload.name)
+            return flask.redirect(url)
+
+    else:
+        return flask.render_template('new_upload.html')
 
 
 @views.route('/upload/<string:name>')
