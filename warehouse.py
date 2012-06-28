@@ -44,6 +44,11 @@ class Upload(Persistent):
     def __init__(self, warehouse, name):
         self._warehouse = warehouse
         self.name = name
+        self.metadata = PersistentMapping()
+
+    def save_metadata(self, new_metadata):
+        for key, value in new_metadata.iteritems():
+            self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
 
     def get_path(self):
         return self._warehouse.uploads_path/self.name

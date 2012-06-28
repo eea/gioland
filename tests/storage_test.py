@@ -3,6 +3,14 @@ import tempfile
 from path import path
 
 
+BAD_METADATA_VALUES = [
+    {2: 'a'},
+    {'\xcc': 'a'},
+    {'a': 2},
+    {'a': '\xcc'},
+]
+
+
 class ParcelTest(unittest.TestCase):
 
     def setUp(self):
@@ -52,13 +60,7 @@ class ParcelTest(unittest.TestCase):
         self.assertEqual(parcel.metadata, {'a': 'b', 'hello': 'world'})
 
     def test_invalid_metadata_raises_exception(self):
-        bad_values = [
-            {2: 'a'},
-            {'\xcc': 'a'},
-            {'a': 2},
-            {'a': '\xcc'},
-        ]
-        for bad in bad_values:
+        for bad in BAD_METADATA_VALUES:
             self.assertRaises(ValueError, self.wh.add_parcel,
                               self.new_parcel(), bad)
 
@@ -134,3 +136,15 @@ class UploadTest(unittest.TestCase):
         file1_path.write_text('one')
         file2_path.write_text('two')
         self.assertItemsEqual(upload.get_files(), [file1_path, file2_path])
+
+    def test_upload_stores_metadata(self):
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        upload.save_metadata({'a': 'b', 'x': 'y'})
+        self.assertDictContainsSubset({'a': 'b', 'x': 'y'}, upload.metadata)
+
+    def test_upload_verifies_metadata_keys_and_values(self):
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        for bad in BAD_METADATA_VALUES:
+            self.assertRaises(ValueError, upload.save_metadata, bad)
