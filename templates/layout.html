@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    {% include "eionet/headstyles.html" %}
+  </head>
+
+  <body>
+
+    <div id="container">
+      <div id="toolribbon">
+        <div id="lefttools">
+          <a id="skiplink" accesskey="2"
+             href="#workarea"><span>Skip to content</span></a>
+          <a id="eealink" href="http://www.eea.europa.eu/">EEA</a>
+          <a id="ewlink" href="http://ew.eea.europa.eu/">EnviroWindows</a>
+        </div>
+        <div id="righttools">
+          <a href="{{ url_for('views.login') }}">login</a>
+        </div>
+      </div>
+      <div id="pagehead">
+        <a title="Frontpage" href="/"><img
+          src="http://eionet.europa.eu/styles/eionet2007/eea-print-logo.gif"
+          alt="Logo" id="logo" width="428" height="87" /></a>
+        <div id="networktitle">Eionet</div>
+        <div id="sitetitle">[title]</div>
+        <div id="sitetagline">[tagline]</div>
+      </div>
+
+      {% include "eionet/menuribbon.html" %}
+
+      {% include "eionet/breadcrumbtrail.html" %}
+
+      <div id="leftcolumn">
+       {% include "eionet/localnav.html" %}
+      </div>
+
+      <div id="workarea">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <div id="pagefoot">
+      <p>[footer]</p>
+    </div>
+
+  </body>
+</html>

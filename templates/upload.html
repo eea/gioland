@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h1>Upload "{{ upload.name }}"</h1>
+
+<h2>Existing files</h2>
+<ul>
+{% for file_path in upload.get_files() %}
+  <li>
+  {{ file_path.name }} ({{ file_path.getsize() }} bytes)
+  </li>
+{% endfor %}
+</ul>
+
+{% endblock %}

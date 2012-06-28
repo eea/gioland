@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<form action="{{ url_for('views.new_upload') }}" method="post">
+  <input type="submit" value="New upload">
+</form>
+
+{% endblock %}
