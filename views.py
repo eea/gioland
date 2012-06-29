@@ -75,5 +75,19 @@ def upload_file(name):
         return flask.redirect(flask.url_for('views.upload', name=name))
 
 
+@views.route('/upload/<string:name>/finalize', methods=['POST'])
+def upload_finalize(name):
+    with warehouse() as wh:
+        upload = wh.get_upload(name)
+        parcel = upload.finalize()
+        transaction.commit()
+        return flask.redirect(flask.url_for('views.parcel', name=parcel.name))
+
+
+@views.route('/parcel/<string:name>')
+def parcel(name):
+    return 'hi'
+
+
 def register_on(app):
     app.register_blueprint(views)
