@@ -77,9 +77,6 @@ class Warehouse(Persistent):
     def get_all_parcels(self):
         return iter(self._parcels.values())
 
-    def get_upload(self, name):
-        return self.get_parcel(name)
-
 
 class WarehouseConnector(object):
 

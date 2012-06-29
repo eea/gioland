@@ -50,46 +50,39 @@ def index():
                                      all_parcels=wh.get_all_parcels())
 
 
-@views.route('/upload', methods=['GET', 'POST'])
-def new_upload():
+@views.route('/parcel/new', methods=['GET', 'POST'])
+def new_parcel():
     if flask.request.method == 'POST':
         with warehouse() as wh:
             form = flask.request.form.to_dict()
             metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
             metadata['stage'] = INITIAL_STAGE
             metadata['user'] = flask.g.username or ''
-            upload = wh.new_parcel()
-            upload.save_metadata(metadata)
+            parcel = wh.new_parcel()
+            parcel.save_metadata(metadata)
             transaction.commit()
-            url = flask.url_for('views.upload', name=upload.name)
+            url = flask.url_for('views.parcel', name=parcel.name)
             return flask.redirect(url)
 
     else:
-        return flask.render_template('new_upload.html')
+        return flask.render_template('new_parcel.html')
 
 
-@views.route('/upload/<string:name>')
-def upload(name):
-    with warehouse() as wh:
-        upload = get_or_404(wh.get_upload, name, _exc=KeyError)
-        return flask.render_template('upload.html', upload=upload)
-
-
-@views.route('/upload/<string:name>/file', methods=['POST'])
-def upload_file(name):
+@views.route('/parcel/<string:name>/file', methods=['POST'])
+def parcel_file(name):
     posted_file = flask.request.files['file']
     with warehouse() as wh:
-        upload = get_or_404(wh.get_upload, name, _exc=KeyError)
+        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         # TODO make sure filename is safe and within the folder
         filename = posted_file.filename.rsplit('/', 1)[-1]
-        posted_file.save(upload.get_path()/filename)
-        return flask.redirect(flask.url_for('views.upload', name=name))
+        posted_file.save(parcel.get_path()/filename)
+        return flask.redirect(flask.url_for('views.parcel', name=name))
 
 
-@views.route('/upload/<string:name>/finalize', methods=['POST'])
-def upload_finalize(name):
+@views.route('/parcel/<string:name>/finalize', methods=['POST'])
+def parcel_finalize(name):
     with warehouse() as wh:
-        parcel = get_or_404(wh.get_upload, name, _exc=KeyError)
+        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         parcel.finalize()
         transaction.commit()
         return flask.redirect(flask.url_for('views.parcel', name=parcel.name))

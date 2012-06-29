@@ -12,4 +12,24 @@
 <h2>Existing files</h2>
 {{ files_table(parcel.get_path(), parcel=parcel) }}
 
+{% if parcel.uploading %}
+
+  <form method="post" enctype="multipart/form-data"
+        action="{{ url_for('views.parcel_file', name=parcel.name) }}">
+    <label for="form-upload-file">Add file</label>
+    <input id="form-upload-file" type="file" name="file">
+    <input type="submit" value="Upload">
+  </form>
+
+  <form method="post"
+        action="{{ url_for('views.parcel_finalize', name=parcel.name) }}">
+    <p>
+      When all files are ready, finalize the parcel, which will trigger
+      the next workflow step.
+    </p>
+    <input type="submit" value="Finalize">
+  </form>
+
+{% endif %}
+
 {% endblock %}
