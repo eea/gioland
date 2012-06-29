@@ -7,7 +7,20 @@
 <h1>Parcel "{{ parcel.name }}"</h1>
 
 <h2>Metadata</h2>
-{{ metadata_table(parcel.metadata) }}
+{% set metadata = parcel.metadata %}
+{{ metadata_table(metadata) }}
+
+<p>
+  {% set prev_parcel_name = metadata['prev_parcel'] %}
+  {% if prev_parcel_name %}
+    <a href="{{ url_for('views.parcel', name=prev_parcel_name) }}">previous</a>
+  {% endif %}
+
+  {% set next_parcel_name = metadata['next_parcel'] %}
+  {% if next_parcel_name %}
+    <a href="{{ url_for('views.parcel', name=next_parcel_name) }}">next</a>
+  {% endif %}
+</p>
 
 <h2>Existing files</h2>
 {{ files_table(parcel.get_path(), parcel=parcel) }}

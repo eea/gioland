@@ -35,7 +35,13 @@
       <td>{{ metadata['resolution'] }}</td>
       <td>{{ metadata['extent'] }}</td>
       <td>{{ metadata['stage'] }}</td>
-      <td>{{ metadata['upload_time'] }}</td>
+      <td>
+        {% if parcel.uploading %}
+          <em>in progress</em>
+        {% else %}
+          {{ metadata['upload_time'] }}
+        {% endif %}
+      </td>
       <td>{{ metadata['user'] }}</td>
     </tr>
   {% endfor %}
