@@ -33,6 +33,15 @@ class ParcelTest(unittest.TestCase):
         self.wh.add_parcel(self.new_parcel())
         self.assertEqual(len(list(self.wh.get_all_parcels())), 1)
 
+    def test_add_parcel_returns_the_parcel(self):
+        parcel = self.wh.add_parcel(self.new_parcel())
+        self.assertEqual([parcel], list(self.wh.get_all_parcels()))
+
+    def test_get_parcel_returns_the_right_parcel(self):
+        parcel1 = self.wh.add_parcel(self.new_parcel())
+        parcel2 = self.wh.add_parcel(self.new_parcel())
+        self.assertIs(self.wh.get_parcel(parcel1.name), parcel1)
+
     def test_saving_parcel_creates_warehouse_folder(self):
         self.assertEqual(len(self.parcels_path.listdir()), 0)
         self.wh.add_parcel(self.new_parcel())

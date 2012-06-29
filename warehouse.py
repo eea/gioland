@@ -82,6 +82,14 @@ class Warehouse(Persistent):
 
         parcel = Parcel(self, parcel_path.name, metadata)
         self._parcels.append(parcel)
+        return parcel
+
+    def get_parcel(self, name):
+        for parcel in self._parcels:
+            if parcel.name == name:
+                return parcel
+        else:
+            raise KeyError
 
     def get_all_parcels(self):
         return iter(self._parcels)
