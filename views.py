@@ -9,7 +9,6 @@ METADATA_FIELDS = [
     'projection',
     'resolution',
     'extent',
-    'stage',
 ]
 
 STAGES = [
@@ -106,6 +105,8 @@ def parcel_finalize(name):
             'prev_parcel': parcel.name,
             'stage': next_stage,
         })
+        next_parcel.save_metadata({k: parcel.metadata.get(k, '')
+                                   for k in METADATA_FIELDS})
         parcel.save_metadata({'next_parcel': next_parcel.name})
         transaction.commit()
         return flask.redirect(flask.url_for('views.parcel', name=parcel.name))

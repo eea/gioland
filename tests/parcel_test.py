@@ -50,3 +50,22 @@ class ParcelTest(unittest.TestCase):
             next_parcel = wh.get_parcel(next_parcel_name)
             self.assertEqual(next_parcel.metadata['prev_parcel'], parcel.name)
             self.assertEqual(next_parcel.metadata['stage'], 'enh') # enhancement
+
+    def test_finalize_preserves_metadata(self):
+        metadata = {
+            'country': 'be',
+            'theme': 'grc',
+            'projection': 'european',
+            'resolution': '25m',
+            'extent': 'full',
+        }
+
+        client = self.app.test_client()
+        resp = client.post('/parcel/new', data=metadata)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        client.post('/parcel/%s/finalize' % parcel_name)
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.get_parcel(parcel_name)
+            next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
+            self.assertDictContainsSubset(metadata, next_parcel.metadata)
