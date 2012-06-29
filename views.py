@@ -36,7 +36,9 @@ def login():
 
 @views.route('/')
 def index():
-    return flask.render_template('index.html')
+    with warehouse() as wh:
+        return flask.render_template('index.html',
+                                     all_parcels=wh.get_all_parcels())
 
 
 @views.route('/upload', methods=['GET', 'POST'])

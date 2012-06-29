@@ -2,6 +2,45 @@
 
 {% block content %}
 
-<a href="{{ url_for('views.new_upload') }}">Begin a new upload</a>
+<p>
+  <a href="{{ url_for('views.new_upload') }}">Begin a new upload</a>
+</p>
+
+
+<h2>Parcels</h2>
+
+<table class="datatable">
+
+  <thead>
+    <th>id</th>
+    <th>Country</th>
+    <th>Theme</th>
+    <th>Projection</th>
+    <th>Resolution</th>
+    <th>Extent</th>
+    <th>Stage</th>
+    <th>Upload time</th>
+    <th>User</th>
+  </thead>
+
+  <tbody>
+  {% for parcel in all_parcels %}
+    <tr>
+      {% set url = url_for('views.parcel', name=parcel.name) %}
+      {% set metadata = parcel.metadata %}
+      <td><a href="{{ url }}">{{ parcel.name }}</a></td>
+      <td>{{ metadata['country'] }}</td>
+      <td>{{ metadata['theme'] }}</td>
+      <td>{{ metadata['projection'] }}</td>
+      <td>{{ metadata['resolution'] }}</td>
+      <td>{{ metadata['extent'] }}</td>
+      <td>{{ metadata['stage'] }}</td>
+      <td>{{ metadata['upload_time'] }}</td>
+      <td>{{ metadata['user'] }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+
+</table>
 
 {% endblock %}
