@@ -58,7 +58,7 @@ def new_upload():
             metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
             metadata['stage'] = INITIAL_STAGE
             metadata['user'] = flask.g.username or ''
-            upload = wh.new_upload()
+            upload = wh.new_parcel()
             upload.save_metadata(metadata)
             transaction.commit()
             url = flask.url_for('views.upload', name=upload.name)
@@ -89,8 +89,8 @@ def upload_file(name):
 @views.route('/upload/<string:name>/finalize', methods=['POST'])
 def upload_finalize(name):
     with warehouse() as wh:
-        upload = get_or_404(wh.get_upload, name, _exc=KeyError)
-        parcel = upload.finalize()
+        parcel = get_or_404(wh.get_upload, name, _exc=KeyError)
+        parcel.finalize()
         transaction.commit()
         return flask.redirect(flask.url_for('views.parcel', name=parcel.name))
 

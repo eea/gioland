@@ -23,12 +23,10 @@ class ParcelTest(unittest.TestCase):
         client = self.app.test_client()
         client.post('/login', data={'username': 'somebody'})
 
-        newparcel_path = self.tmp/'newparcel'
-        newparcel_path.mkdir()
-        (newparcel_path/'data.gml').write_text(map_data)
-
         with get_warehouse(self.app) as wh:
-            parcel = wh.add_parcel(newparcel_path)
+            parcel = wh.new_parcel()
+            (parcel.get_path()/'data.gml').write_text(map_data)
+            parcel.finalize()
             transaction.commit()
             parcel_name = parcel.name
 

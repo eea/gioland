@@ -27,24 +27,12 @@ def _ensure_dir(dir_path):
     return dir_path
 
 
+
 class Parcel(Persistent):
 
-    uploading = False
-
-    def __init__(self, warehouse, name, metadata):
-        self._warehouse = warehouse
-        self.name = name
-        self.metadata = PersistentMapping()
-        for key, value in metadata.iteritems():
-            self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
-
-    def get_path(self):
-        return self._warehouse.parcels_path/self.name
-
-
-class Upload(Persistent):
-
-    uploading = True
+    @property
+    def uploading(self):
+        return 'upload_time' not in self.metadata
 
     def __init__(self, warehouse, name):
         self._warehouse = warehouse
@@ -56,18 +44,13 @@ class Upload(Persistent):
             self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
 
     def get_path(self):
-        return self._warehouse.uploads_path/self.name
+        return self._warehouse.parcels_path/self.name
 
     def get_files(self):
         return self.get_path().listdir()
 
     def finalize(self):
-        del self._warehouse._uploads[self.name]
-        metadata = dict(self.metadata,
-                        upload_time=datetime.utcnow().isoformat())
-        parcel = self._warehouse.add_parcel(self.get_path(), metadata)
-        self.get_path().rmdir()
-        return parcel
+        self.save_metadata({'upload_time': datetime.utcnow().isoformat()})
 
 
 class Warehouse(Persistent):
@@ -76,45 +59,26 @@ class Warehouse(Persistent):
     __slots__ = ('fs_path', '__dict__')
 
     def __init__(self):
-        self._parcels = PersistentList()
-        self._uploads = OOBTree()
+        self._parcels = OOBTree()
 
     @property
     def parcels_path(self):
         return self.fs_path/'parcels'
 
-    @property
-    def uploads_path(self):
-        return self.fs_path/'uploads'
-
-    def add_parcel(self, parcel_src, metadata={}):
+    def new_parcel(self):
         parcel_path = path(tempfile.mkdtemp(prefix='', dir=self.parcels_path))
-        for item_path in parcel_src.listdir():
-            wh_item_path = parcel_path/item_path.name
-            item_path.rename(wh_item_path)
-
-        parcel = Parcel(self, parcel_path.name, metadata)
-        self._parcels.append(parcel)
+        parcel = Parcel(self, parcel_path.name)
+        self._parcels[parcel.name] = parcel
         return parcel
 
     def get_parcel(self, name):
-        for parcel in self._parcels:
-            if parcel.name == name:
-                return parcel
-        else:
-            raise KeyError
+        return self._parcels[name]
 
     def get_all_parcels(self):
-        return iter(self._parcels)
-
-    def new_upload(self):
-        upload_path = path(tempfile.mkdtemp(prefix='', dir=self.uploads_path))
-        upload = Upload(self, upload_path.name)
-        self._uploads[upload.name] = upload
-        return upload
+        return iter(self._parcels.values())
 
     def get_upload(self, name):
-        return self._uploads[name]
+        return self.get_parcel(name)
 
 
 class WarehouseConnector(object):
@@ -147,7 +111,6 @@ class WarehouseConnector(object):
         warehouse = zodb_root['warehouse']
         warehouse.fs_path = _ensure_dir(self._fs_path)
         _ensure_dir(warehouse.parcels_path)
-        _ensure_dir(warehouse.uploads_path)
 
         return warehouse, cleanup
 

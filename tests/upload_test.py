@@ -20,7 +20,6 @@ class UploadTest(unittest.TestCase):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
-        self.uploads_path = self.wh_path/'uploads'
         self.parcels_path = self.wh_path/'parcels'
         self.app = create_mock_app(self.wh_path)
 
@@ -37,16 +36,16 @@ class UploadTest(unittest.TestCase):
         resp = client.post('/upload')
         self.assertIsNotNone(resp.location)
         upload_name = resp.location.rsplit('/', 1)[-1]
-        self.assertTrue((self.uploads_path/upload_name).isdir())
+        self.assertTrue((self.parcels_path/upload_name).isdir())
 
     def test_begin_upload_saves_user_selected_metadata(self):
         client = self.app.test_client()
         resp = client.post('/upload', data=dict(self.metadata, bogus='not here'))
         upload_name = resp.location.rsplit('/', 1)[-1]
         with get_warehouse(self.app) as wh:
-            upload = wh.get_upload(upload_name)
-            self.assertDictContainsSubset(self.metadata, upload.metadata)
-            self.assertNotIn('bogus', upload.metadata)
+            parcel = wh.get_parcel(upload_name)
+            self.assertDictContainsSubset(self.metadata, parcel.metadata)
+            self.assertNotIn('bogus', parcel.metadata)
 
     def test_begin_upload_saves_default_metadata(self):
         client = self.app.test_client()
@@ -54,15 +53,15 @@ class UploadTest(unittest.TestCase):
         resp = client.post('/upload', data=self.metadata)
         upload_name = resp.location.rsplit('/', 1)[-1]
         with get_warehouse(self.app) as wh:
-            upload = wh.get_upload(upload_name)
-            self.assertEqual(upload.metadata['stage'], 'intermediate')
-            self.assertEqual(upload.metadata['user'], 'somebody')
+            parcel = wh.get_parcel(upload_name)
+            self.assertEqual(parcel.metadata['stage'], 'intermediate')
+            self.assertEqual(parcel.metadata['user'], 'somebody')
 
     def test_show_existing_files_in_upload(self):
         client = self.app.test_client()
         resp = client.post('/upload')
         upload_name = resp.location.rsplit('/', 1)[-1]
-        upload_path = self.uploads_path/upload_name
+        upload_path = self.parcels_path/upload_name
         (upload_path/'some.txt').write_text('hello world')
 
         resp2 = client.get('/upload/' + upload_name)
@@ -72,23 +71,25 @@ class UploadTest(unittest.TestCase):
         client = self.app.test_client()
         resp = client.post('/upload')
         upload_name = resp.location.rsplit('/', 1)[-1]
-        upload_path = self.uploads_path/upload_name
+        upload_path = self.parcels_path/upload_name
 
         resp2 = client.post('/upload/' + upload_name + '/file', data={
             'file': (StringIO("teh file contents"), 'data.gml'),
         })
         self.assertEqual(upload_path.listdir(), [upload_path/'data.gml'])
 
-    def test_finalize_removes_upload_and_creates_parcel(self):
+    def test_finalize_changes_uploading_flag(self):
         client = self.app.test_client()
         resp = client.post('/upload')
         upload_name = resp.location.rsplit('/', 1)[-1]
+
+        with get_warehouse(self.app) as wh:
+            upload = wh.get_parcel(upload_name)
+            self.assertTrue(upload.uploading)
+
         resp2 = client.post('/upload/%s/finalize' % upload_name)
         parcel_name = resp2.location.rsplit('/', 1)[-1]
 
-        self.assertEqual(self.uploads_path.listdir(), [])
         with get_warehouse(self.app) as wh:
-            self.assertRaises(KeyError, wh.get_upload, upload_name)
             parcel = wh.get_parcel(parcel_name)
-            parcel_path = parcel.get_path().isdir()
-            self.assertTrue(parcel_path)
+            self.assertFalse(parcel.uploading)
