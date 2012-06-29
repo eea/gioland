@@ -91,5 +91,16 @@ def parcel(name):
         return flask.render_template('parcel.html', parcel=parcel)
 
 
+@views.route('/parcel/<string:name>/download/<string:filename>')
+def parcel_download(name, filename):
+    from werkzeug.security import safe_join
+    with warehouse() as wh:
+        parcel = wh.get_parcel(name)
+        file_path = safe_join(parcel.get_path(), filename)
+    return flask.send_file(file_path,
+                           as_attachment=True,
+                           attachment_filename=filename)
+
+
 def register_on(app):
     app.register_blueprint(views)

@@ -1,18 +1,9 @@
 import unittest
 import tempfile
 from StringIO import StringIO
-from contextlib import contextmanager
 import flask
 from path import path
-
-
-def create_mock_app(warehouse_path):
-    from manage import create_app
-    return create_app({
-        'TESTING': True,
-        'SECRET_KEY': 'asdf',
-        'WAREHOUSE_PATH': str(warehouse_path),
-    })
+from common import create_mock_app, get_warehouse
 
 
 class UploadTest(unittest.TestCase):
@@ -33,13 +24,6 @@ class UploadTest(unittest.TestCase):
         self.parcels_path = self.wh_path/'parcels'
         self.app = create_mock_app(self.wh_path)
 
-    @contextmanager
-    def get_warehouse(self):
-        import views
-        with self.app.test_request_context():
-            with views.warehouse() as wh:
-                yield wh
-
     def test_login(self):
         client = self.app.test_client()
         client.post('/login', data={'username': 'tester'})
@@ -59,7 +43,7 @@ class UploadTest(unittest.TestCase):
         client = self.app.test_client()
         resp = client.post('/upload', data=dict(self.metadata, bogus='not here'))
         upload_name = resp.location.rsplit('/', 1)[-1]
-        with self.get_warehouse() as wh:
+        with get_warehouse(self.app) as wh:
             upload = wh.get_upload(upload_name)
             self.assertDictContainsSubset(self.metadata, upload.metadata)
             self.assertNotIn('bogus', upload.metadata)
@@ -69,7 +53,7 @@ class UploadTest(unittest.TestCase):
         client.post('/login', data={'username': 'somebody'})
         resp = client.post('/upload', data=self.metadata)
         upload_name = resp.location.rsplit('/', 1)[-1]
-        with self.get_warehouse() as wh:
+        with get_warehouse(self.app) as wh:
             upload = wh.get_upload(upload_name)
             self.assertEqual(upload.metadata['stage'], 'intermediate')
             self.assertEqual(upload.metadata['user'], 'somebody')
@@ -103,7 +87,7 @@ class UploadTest(unittest.TestCase):
         parcel_name = resp2.location.rsplit('/', 1)[-1]
 
         self.assertEqual(self.uploads_path.listdir(), [])
-        with self.get_warehouse() as wh:
+        with get_warehouse(self.app) as wh:
             self.assertRaises(KeyError, wh.get_upload, upload_name)
             parcel = wh.get_parcel(parcel_name)
             parcel_path = parcel.get_path().isdir()

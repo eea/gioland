@@ -10,6 +10,6 @@
 {{ metadata_table(parcel.metadata) }}
 
 <h2>Existing files</h2>
-{{ files_table(parcel.get_path()) }}
+{{ files_table(parcel.get_path(), parcel=parcel) }}
 
 {% endblock %}
