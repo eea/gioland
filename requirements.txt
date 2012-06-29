@@ -10,3 +10,5 @@ Flask==0.8
 Jinja2==2.6
 Werkzeug==0.8.3
 argparse==1.2.1
+path.py==2.2.2
+CherryPy==3.2.2
