@@ -93,3 +93,15 @@ class UploadTest(unittest.TestCase):
         with get_warehouse(self.app) as wh:
             parcel = wh.get_parcel(parcel_name)
             self.assertFalse(parcel.uploading)
+
+    def test_uploading_in_finalized_parcel_is_not_allowed(self):
+        client = self.app.test_client()
+        resp = client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        parcel_path = self.parcels_path/parcel_name
+        client.post('/parcel/%s/finalize' % parcel_name)
+
+        resp2 = client.post('/parcel/' + parcel_name + '/file', data={
+            'file': (StringIO("teh file contents"), 'data.gml')})
+        self.assertEqual(resp2.status_code, 403)
+        self.assertEqual(parcel_path.listdir(), [])

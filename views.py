@@ -73,6 +73,8 @@ def parcel_file(name):
     posted_file = flask.request.files['file']
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+        if not parcel.uploading:
+            flask.abort(403)
         # TODO make sure filename is safe and within the folder
         filename = posted_file.filename.rsplit('/', 1)[-1]
         posted_file.save(parcel.get_path()/filename)
