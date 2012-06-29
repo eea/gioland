@@ -1,5 +1,6 @@
 import tempfile
 from contextlib import contextmanager
+from datetime import datetime
 from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
 from BTrees.OOBTree import OOBTree
@@ -58,7 +59,9 @@ class Upload(Persistent):
 
     def finalize(self):
         del self._warehouse._uploads[self.name]
-        parcel = self._warehouse.add_parcel(self.get_path(), self.metadata)
+        metadata = dict(self.metadata,
+                        upload_time=datetime.utcnow().isoformat())
+        parcel = self._warehouse.add_parcel(self.get_path(), metadata)
         self.get_path().rmdir()
         return parcel
 

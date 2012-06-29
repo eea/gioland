@@ -1,5 +1,6 @@
 import unittest
 import tempfile
+from datetime import datetime
 from path import path
 
 
@@ -206,3 +207,11 @@ class UploadFinalizationTest(unittest.TestCase):
         file_path = parcel.get_path()/'somefile.txt'
         self.assertTrue(file_path.isfile())
         self.assertEqual(file_path.text(), 'the contents')
+
+    def test_finalize_upload_marks_timestamp(self):
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        t0 = datetime.utcnow().isoformat()
+        parcel = upload.finalize()
+        t1 = datetime.utcnow().isoformat()
+        self.assertTrue(t0 <= parcel.metadata['upload_time'] <= t1)
