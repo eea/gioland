@@ -157,3 +157,52 @@ class UploadTest(unittest.TestCase):
         upload = wh.new_upload()
         for bad in BAD_METADATA_VALUES:
             self.assertRaises(ValueError, upload.save_metadata, bad)
+
+
+class UploadFinalizationTest(unittest.TestCase):
+
+    def setUp(self):
+        import warehouse
+        self.tmp = path(tempfile.mkdtemp())
+        self.addCleanup(self.tmp.rmtree)
+        self.wh_path = self.tmp/'warehouse'
+        self.uploads_path = self.wh_path/'uploads'
+        self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
+
+    def get_warehouse(self):
+        wh, warehouse_cleanup = self.wh_connector.get_warehouse()
+        self.addCleanup(warehouse_cleanup)
+        return wh
+
+    def test_finalize_upload_removes_it_from_warehouse(self):
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        upload_path = upload.get_path()
+        upload_name = upload.name
+        self.assertTrue(upload_path.isdir())
+        upload.finalize()
+        self.assertFalse(upload_path.isdir())
+        self.assertRaises(KeyError, wh.get_upload, upload_name)
+
+    def test_finalize_upload_creates_parcel(self):
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        parcel = upload.finalize()
+        self.assertIs(wh.get_parcel(parcel.name), parcel)
+
+    def test_finalize_upload_preserves_metadata(self):
+        metadata = {'hello': 'world'}
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        upload.save_metadata(metadata)
+        parcel = upload.finalize()
+        self.assertDictContainsSubset(metadata, parcel.metadata)
+
+    def test_finalize_upload_preserves_files(self):
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        (upload.get_path()/'somefile.txt').write_text('the contents')
+        parcel = upload.finalize()
+        file_path = parcel.get_fs_path()/'somefile.txt'
+        self.assertTrue(file_path.isfile())
+        self.assertEqual(file_path.text(), 'the contents')

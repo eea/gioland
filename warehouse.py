@@ -56,6 +56,12 @@ class Upload(Persistent):
     def get_files(self):
         return self.get_path().listdir()
 
+    def finalize(self):
+        del self._warehouse._uploads[self.name]
+        parcel = self._warehouse.add_parcel(self.get_path(), self.metadata)
+        self.get_path().rmdir()
+        return parcel
+
 
 class Warehouse(Persistent):
 
