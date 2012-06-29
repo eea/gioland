@@ -12,7 +12,21 @@ METADATA_FIELDS = [
     'stage',
 ]
 
-INITIAL_STAGE = 'intermediate'
+STAGES = [
+    ('int', "Intermediate"),
+    ('sch', "Semantic Check"),
+    ('ver', "Verification"),
+    ('vch', "Verification Check"),
+    ('enh', "Enhancement"),
+    ('ech', "Enhancement check"),
+    ('fin', "Final Integrated"),
+    ('fva', "Final Validated"),
+]
+
+STAGE_MAP = dict(STAGES)
+STAGE_ORDER = [s[0] for s in STAGES]
+
+INITIAL_STAGE = STAGE_ORDER[0]
 
 
 views = flask.Blueprint('views', __name__)
@@ -86,6 +100,13 @@ def parcel_finalize(name):
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         parcel.finalize()
+        next_stage = STAGE_ORDER[STAGE_ORDER.index(parcel.metadata['stage'])+1]
+        next_parcel = wh.new_parcel()
+        next_parcel.save_metadata({
+            'prev_parcel': parcel.name,
+            'stage': next_stage,
+        })
+        parcel.save_metadata({'next_parcel': next_parcel.name})
         transaction.commit()
         return flask.redirect(flask.url_for('views.parcel', name=parcel.name))
 

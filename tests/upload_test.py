@@ -54,7 +54,7 @@ class UploadTest(unittest.TestCase):
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with get_warehouse(self.app) as wh:
             parcel = wh.get_parcel(parcel_name)
-            self.assertEqual(parcel.metadata['stage'], 'intermediate')
+            self.assertEqual(parcel.metadata['stage'], 'int')
             self.assertEqual(parcel.metadata['user'], 'somebody')
 
     def test_show_existing_files_in_parcel(self):

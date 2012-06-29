@@ -32,3 +32,21 @@ class ParcelTest(unittest.TestCase):
 
         resp = client.get('/parcel/%s/download/data.gml' % parcel_name)
         self.assertEqual(resp.data, map_data)
+
+    def test_finalize_triggers_next_step_with_forward_backward_references(self):
+        with get_warehouse(self.app) as wh:
+            parcel = wh.new_parcel()
+            parcel.save_metadata({'stage': 'vch'}) # verification check
+            transaction.commit()
+            parcel_name = parcel.name
+
+        client = self.app.test_client()
+        client.post('/parcel/%s/finalize' % parcel_name)
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.get_parcel(parcel_name)
+            self.assertIn('next_parcel', parcel.metadata)
+            next_parcel_name = parcel.metadata['next_parcel']
+            next_parcel = wh.get_parcel(next_parcel_name)
+            self.assertEqual(next_parcel.metadata['prev_parcel'], parcel.name)
+            self.assertEqual(next_parcel.metadata['stage'], 'enh') # enhancement
