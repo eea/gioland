@@ -29,6 +29,8 @@ def _ensure_dir(dir_path):
 
 class Parcel(Persistent):
 
+    uploading = False
+
     def __init__(self, warehouse, name, metadata):
         self._warehouse = warehouse
         self.name = name
@@ -41,6 +43,8 @@ class Parcel(Persistent):
 
 
 class Upload(Persistent):
+
+    uploading = True
 
     def __init__(self, warehouse, name):
         self._warehouse = warehouse

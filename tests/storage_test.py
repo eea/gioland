@@ -215,3 +215,10 @@ class UploadFinalizationTest(unittest.TestCase):
         parcel = upload.finalize()
         t1 = datetime.utcnow().isoformat()
         self.assertTrue(t0 <= parcel.metadata['upload_time'] <= t1)
+
+    def test_finalize_upload_changes_uploading_flag(self):
+        wh = self.get_warehouse()
+        upload = wh.new_upload()
+        self.assertTrue(upload.uploading)
+        parcel = upload.finalize()
+        self.assertFalse(parcel.uploading)
