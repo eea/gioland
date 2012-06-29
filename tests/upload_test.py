@@ -106,5 +106,5 @@ class UploadTest(unittest.TestCase):
         with self.get_warehouse() as wh:
             self.assertRaises(KeyError, wh.get_upload, upload_name)
             parcel = wh.get_parcel(parcel_name)
-            parcel_path = parcel.get_fs_path().isdir()
+            parcel_path = parcel.get_path().isdir()
             self.assertTrue(parcel_path)

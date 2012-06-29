@@ -35,7 +35,7 @@ class Parcel(Persistent):
         for key, value in metadata.iteritems():
             self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
 
-    def get_fs_path(self):
+    def get_path(self):
         return self._warehouse.parcels_path/self.name
 
 

@@ -51,7 +51,7 @@ class ParcelTest(unittest.TestCase):
         self.wh.add_parcel(self.new_parcel())
         [wh_parcel_path] = self.parcels_path.listdir()
         [parcel] = self.wh.get_all_parcels()
-        self.assertEqual(parcel.get_fs_path(), wh_parcel_path)
+        self.assertEqual(parcel.get_path(), wh_parcel_path)
 
     def test_saving_parcel_moves_folder_contents(self):
         new_parcel_path = self.new_parcel()
@@ -91,13 +91,13 @@ class ZodbPersistenceTest(unittest.TestCase):
             wh1.add_parcel(new_parcel_path)
             self.assertEqual(len(list(wh1.get_all_parcels())), 1)
             [parcel_1] = wh1.get_all_parcels()
-            parcel_path_1 = parcel_1.get_fs_path()
+            parcel_path_1 = parcel_1.get_path()
             import transaction; transaction.commit()
 
         with self.wh_connector.warehouse() as wh2:
             self.assertEqual(len(list(wh2.get_all_parcels())), 1)
             [parcel] = wh2.get_all_parcels()
-            parcel_path = parcel.get_fs_path()
+            parcel_path = parcel.get_path()
             self.assertEqual(parcel_path, parcel_path_1)
             self.assertEqual(parcel_path.listdir(), [parcel_path/'one'])
             self.assertEqual((parcel_path/'one').text(), "hello world")
@@ -203,6 +203,6 @@ class UploadFinalizationTest(unittest.TestCase):
         upload = wh.new_upload()
         (upload.get_path()/'somefile.txt').write_text('the contents')
         parcel = upload.finalize()
-        file_path = parcel.get_fs_path()/'somefile.txt'
+        file_path = parcel.get_path()/'somefile.txt'
         self.assertTrue(file_path.isfile())
         self.assertEqual(file_path.text(), 'the contents')
