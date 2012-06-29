@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+{% from 'bits.html' import metadata_table, files_table %}
+
+<h1>Parcel "{{ parcel.name }}"</h1>
+
+<h2>Metadata</h2>
+{{ metadata_table(parcel.metadata) }}
+
+<h2>Existing files</h2>
+{{ files_table(parcel.get_path()) }}
+
+{% endblock %}

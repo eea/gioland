@@ -86,7 +86,9 @@ def upload_finalize(name):
 
 @views.route('/parcel/<string:name>')
 def parcel(name):
-    return 'hi'
+    with warehouse() as wh:
+        parcel = wh.get_parcel(name)
+        return flask.render_template('parcel.html', parcel=parcel)
 
 
 def register_on(app):

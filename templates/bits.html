@@ -1,0 +1,60 @@
+{% macro metadata_table(metadata) %}
+
+  <table class="datatable">
+
+    <tr>
+      <th>Country</th>
+      <td>{{ metadata['country'] }}</td>
+    </tr>
+
+    <tr>
+      <th>Theme</th>
+      <td>{{ metadata['theme'] }}</td>
+    </tr>
+
+    <tr>
+      <th>Projection</th>
+      <td>{{ metadata['projection'] }}</td>
+    </tr>
+
+    <tr>
+      <th>Spatial resolution</th>
+      <td>{{ metadata['resolution'] }}</td>
+    </tr>
+
+    <tr>
+      <th>Extent</th>
+      <td>{{ metadata['extent'] }}</td>
+    </tr>
+
+    <tr>
+      <th>Processing stage</th>
+      <td>{{ metadata['stage'] }}</td>
+    </tr>
+
+  </table>
+
+{% endmacro %}
+
+
+{% macro files_table(folder_path) %}
+
+  {% set files = folder_path.listdir() %}
+
+  {% if files %}
+
+    <ul>
+    {% for file_path in files %}
+      <li>
+      {{ file_path.name }} ({{ file_path.getsize() }} bytes)
+      </li>
+    {% endfor %}
+    </ul>
+
+  {% else %}
+
+    <p><i>No files uploaded.</i></p>
+
+  {% endif %}
+
+{% endmacro %}

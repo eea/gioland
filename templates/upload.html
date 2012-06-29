@@ -2,58 +2,15 @@
 
 {% block content %}
 
+{% from 'bits.html' import metadata_table, files_table %}
+
 <h1>Upload "{{ upload.name }}"</h1>
 
 <h2>Metadata</h2>
-
-<table class="datatable">
-
-  <tr>
-    <th>Country</th>
-    <td>{{ upload.metadata['country'] }}</td>
-  </tr>
-
-  <tr>
-    <th>Theme</th>
-    <td>{{ upload.metadata['theme'] }}</td>
-  </tr>
-
-  <tr>
-    <th>Projection</th>
-    <td>{{ upload.metadata['projection'] }}</td>
-  </tr>
-
-  <tr>
-    <th>Spatial resolution</th>
-    <td>{{ upload.metadata['resolution'] }}</td>
-  </tr>
-
-  <tr>
-    <th>Extent</th>
-    <td>{{ upload.metadata['extent'] }}</td>
-  </tr>
-
-  <tr>
-    <th>Processing stage</th>
-    <td>{{ upload.metadata['stage'] }}</td>
-  </tr>
-
-</table>
+{{ metadata_table(upload.metadata) }}
 
 <h2>Existing files</h2>
-
-{% set files = upload.get_files() %}
-{% if files %}
-  <ul>
-  {% for file_path in files %}
-    <li>
-    {{ file_path.name }} ({{ file_path.getsize() }} bytes)
-    </li>
-  {% endfor %}
-  </ul>
-{% else %}
-  <p><i>No files uploaded yet.</i></p>
-{% endif %}
+{{ files_table(upload.get_path()) }}
 
 <form method="post" enctype="multipart/form-data"
       action="{{ url_for('views.upload_file', name=upload.name) }}">
