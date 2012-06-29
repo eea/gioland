@@ -1,5 +1,6 @@
 import flask
 import transaction
+from path import path
 
 
 METADATA_FIELDS = [
@@ -19,6 +20,14 @@ views = flask.Blueprint('views', __name__)
 
 def warehouse():
     return flask.current_app.extensions['warehouse_connector'].warehouse()
+
+
+def get_or_404(func, *args, **kwargs):
+    exc = kwargs.pop('_exc')
+    try:
+        return func(*args, **kwargs)
+    except KeyError:
+        flask.abort(404)
 
 
 @views.before_request
@@ -62,7 +71,7 @@ def new_upload():
 @views.route('/upload/<string:name>')
 def upload(name):
     with warehouse() as wh:
-        upload = wh.get_upload(name)
+        upload = get_or_404(wh.get_upload, name, _exc=KeyError)
         return flask.render_template('upload.html', upload=upload)
 
 
@@ -70,7 +79,7 @@ def upload(name):
 def upload_file(name):
     posted_file = flask.request.files['file']
     with warehouse() as wh:
-        upload = wh.get_upload(name)
+        upload = get_or_404(wh.get_upload, name, _exc=KeyError)
         # TODO make sure filename is safe and within the folder
         filename = posted_file.filename.rsplit('/', 1)[-1]
         posted_file.save(upload.get_path()/filename)
@@ -80,7 +89,7 @@ def upload_file(name):
 @views.route('/upload/<string:name>/finalize', methods=['POST'])
 def upload_finalize(name):
     with warehouse() as wh:
-        upload = wh.get_upload(name)
+        upload = get_or_404(wh.get_upload, name, _exc=KeyError)
         parcel = upload.finalize()
         transaction.commit()
         return flask.redirect(flask.url_for('views.parcel', name=parcel.name))
@@ -89,7 +98,7 @@ def upload_finalize(name):
 @views.route('/parcel/<string:name>')
 def parcel(name):
     with warehouse() as wh:
-        parcel = wh.get_parcel(name)
+        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         return flask.render_template('parcel.html', parcel=parcel)
 
 
@@ -97,8 +106,10 @@ def parcel(name):
 def parcel_download(name, filename):
     from werkzeug.security import safe_join
     with warehouse() as wh:
-        parcel = wh.get_parcel(name)
+        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         file_path = safe_join(parcel.get_path(), filename)
+        if not path(file_path).isfile():
+            flask.abort(404)
     return flask.send_file(file_path,
                            as_attachment=True,
                            attachment_filename=filename)
