@@ -5,7 +5,6 @@ import flaskext.script
 
 
 default_config = {
-    'DEBUG': True,
 }
 
 
@@ -51,6 +50,58 @@ class ReverseProxied(object):
 manager = flaskext.script.Manager(create_app)
 
 
+def _set_up_logging(app):
+    import logging
+    root_logger = logging.getLogger()
+
+    stderr_handler = logging.StreamHandler()
+    stderr_handler.level = logging.INFO
+    log_fmt = logging.Formatter("[%(asctime)s] %(module)s "
+                                "%(levelname)s %(message)s")
+    stderr_handler.setFormatter(log_fmt)
+    app.logger.addHandler(stderr_handler)
+    root_logger.addHandler(stderr_handler)
+
+    recipients = app.config.get('ERROR_MAIL_RECIPIENTS', [])
+    if recipients:
+        from logging.handlers import SMTPHandler
+        smtp_host = app.config.get('MAIL_SERVER', 'localhost')
+        smtp_port = int(app.config.get('MAIL_PORT', 25))
+
+        mail_handler_cfg = {
+            'fromaddr': app.config['DEFAULT_MAIL_SENDER'],
+            'toaddrs': recipients,
+            'subject': "Error in %s" % app.config['DEPLOYMENT_NAME'],
+            'mailhost': (smtp_host, smtp_port),
+        }
+        print mail_handler_cfg
+
+        error_mail_handler = SMTPHandler(**mail_handler_cfg)
+        error_mail_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(error_mail_handler)
+
+
+def get_configuration_from_sarge():
+    import os
+    from path import path
+
+    config = {}
+    with open(os.environ['SARGEAPP_CFG'], 'rb') as f:
+        sargeapp_cfg = flask.json.load(f)
+
+    config['WAREHOUSE_PATH'] = path(sargeapp_cfg['services'][0]['path'])
+
+    monitoring = sargeapp_cfg['services'][1]
+    if 'DEPLOYMENT_NAME' in monitoring:
+        config['DEPLOYMENT_NAME'] = monitoring['DEPLOYMENT_NAME']
+    if 'DEFAULT_MAIL_SENDER' in monitoring:
+        config['DEFAULT_MAIL_SENDER'] = monitoring['DEFAULT_MAIL_SENDER']
+    if 'ERROR_MAIL_RECIPIENTS' in monitoring:
+        config['ERROR_MAIL_RECIPIENTS'] = monitoring['ERROR_MAIL_RECIPIENTS']
+
+    return config
+
+
 class RunCherryPyCommand(flaskext.script.Command):
 
     option_list = [
@@ -58,23 +109,13 @@ class RunCherryPyCommand(flaskext.script.Command):
     ]
 
     def handle(self, app, port):
-        import sys
-        import os
-        import logging
-        from path import path
-
-        with open(os.environ['SARGEAPP_CFG'], 'rb') as f:
-            sargeapp_cfg = flask.json.load(f)
-        warehouse_path = path(sargeapp_cfg['services'][0]['path'])
+        app.config.update(get_configuration_from_sarge())
 
         import warehouse
-        app.config['WAREHOUSE_PATH'] = warehouse_path
         app.extensions['warehouse_connector'] = \
             warehouse.WarehouseConnector(app.config['WAREHOUSE_PATH'])
 
-        handler = logging.StreamHandler()
-        handler.level = logging.INFO
-        logging.getLogger().addHandler(handler)
+        _set_up_logging(app)
 
         import cherrypy.wsgiserver
         listen = ('127.0.0.1', port)
