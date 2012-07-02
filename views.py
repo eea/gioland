@@ -56,6 +56,17 @@ def login():
     return flask.render_template('login.html')
 
 
+@views.route('/ping')
+def ping():
+    with warehouse() as wh:
+        return 'gioland is ok'
+
+
+@views.route('/crash')
+def crash():
+    raise ValueError("Crashing as requested")
+
+
 @views.route('/')
 def index():
     with warehouse() as wh:
