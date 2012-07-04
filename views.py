@@ -128,7 +128,7 @@ def index():
 
 
 @views.route('/parcel/new', methods=['GET', 'POST'])
-def new_parcel():
+def parcel_new():
     if flask.request.method == 'POST':
         with warehouse() as wh:
             form = flask.request.form.to_dict()
@@ -142,7 +142,7 @@ def new_parcel():
             return flask.redirect(url)
 
     else:
-        return flask.render_template('new_parcel.html')
+        return flask.render_template('parcel_new.html')
 
 
 @views.route('/parcel/<string:name>/file', methods=['POST'])
