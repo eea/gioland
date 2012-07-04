@@ -1,3 +1,9 @@
 a.delete-parcel {
     color: #C71F1F;
 }
+
+.countrybox {
+   display: block;
+   float: left;
+   width: 14em;
+}

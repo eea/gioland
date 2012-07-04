@@ -31,6 +31,34 @@ COUNTRIES = [
     ('be', "Belgium"),
     ('bg', "Bulgaria"),
     ('cy', "Cyprus"),
+    ('cz', "Czech Republic"),
+    ('dk', "Denmark"),
+    ('ee', "Estonia"),
+    ('fi', "Finland"),
+    ('fr', "France"),
+    ('de', "Germany"),
+    ('gr', "Greece"),
+    ('hu', "Hungary"),
+    ('is', "Iceland"),
+    ('ie', "Ireland"),
+    ('it', "Italy"),
+    ('lv', "Latvia"),
+    ('li', "Liechtenstein"),
+    ('lt', "Lithuania"),
+    ('lu', "Luxembourg"),
+    ('mt', "Malta"),
+    ('nl', "Netherlands"),
+    ('no', "Norway"),
+    ('pl', "Poland"),
+    ('pt', "Portugal"),
+    ('ro', "Romania"),
+    ('sk', "Slovakia"),
+    ('si', "Slovenia"),
+    ('es', "Spain"),
+    ('se', "Sweden"),
+    ('ch', "Switzerland"),
+    ('tr', "Turkey"),
+    ('gb', "United Kingdom"),
 ]
 
 
@@ -128,9 +156,18 @@ def chain_tails(wh):
 
 @views.route('/')
 def index():
+    return flask.render_template('index.html')
+
+
+@views.route('/country/<string:code>')
+def country(code):
     with warehouse() as wh:
-        all_parcels = list(chain_tails(wh))
-        return flask.render_template('index.html', all_parcels=all_parcels)
+        all_parcels = [p for p in chain_tails(wh)
+                       if p.metadata['country'] == code]
+        return flask.render_template('country.html', **{
+            'code': code,
+            'all_parcels': all_parcels,
+        })
 
 
 @views.route('/parcel/new', methods=['GET', 'POST'])

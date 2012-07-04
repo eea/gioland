@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; {{ COUNTRY_MAP[code] }}</h1>
+{% endblock %}
+
+{% block content %}
+
+<p><a href="{{ url_for('views.parcel_new') }}">Begin a new upload</a></p>
+
+<table class="datatable">
+
+  <thead>
+    <th>Country</th>
+    <th>Theme</th>
+    <th>Projection</th>
+    <th>Resolution</th>
+    <th>Extent</th>
+    <th>Stage</th>
+  </thead>
+
+  <tbody>
+  {% for parcel in all_parcels %}
+    <tr>
+      {% set url = url_for('views.parcel', name=parcel.name) %}
+      {% set metadata = parcel.metadata %}
+      <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+      <td>{{ THEME_MAP[metadata['theme']] }}</td>
+      <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
+      <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
+      <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
+      <td><a href="{{ url }}">{{ STAGE_MAP[metadata['stage']] }}</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+
+</table>
+
+{% endblock %}
