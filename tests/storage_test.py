@@ -199,3 +199,28 @@ class UploadFinalizationTest(unittest.TestCase):
         self.assertTrue(upload.uploading)
         upload.finalize()
         self.assertFalse(upload.uploading)
+
+
+class DeleteParcelTest(unittest.TestCase):
+
+    def setUp(self):
+        import warehouse
+        self.tmp = path(tempfile.mkdtemp())
+        self.addCleanup(self.tmp.rmtree)
+        self.wh_path = self.tmp/'warehouse'
+        self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
+        self.wh, warehouse_cleanup = self.wh_connector.get_warehouse()
+        self.addCleanup(warehouse_cleanup)
+
+    def test_delete_removes_parcel_from_list(self):
+        parcel = self.wh.new_parcel()
+        parcel_name = parcel.name
+        self.wh.delete_parcel(parcel_name)
+        self.assertRaises(KeyError, self.wh.get_parcel, parcel_name)
+        self.assertEqual(list(self.wh.get_all_parcels()), [])
+
+    def test_delete_removes_folder(self):
+        parcel = self.wh.new_parcel()
+        parcel_path = parcel.get_path()
+        self.wh.delete_parcel(parcel.name)
+        self.assertFalse(parcel_path.isdir())

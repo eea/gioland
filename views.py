@@ -198,9 +198,15 @@ def parcel_download(name, filename):
 
 @views.route('/parcel/<string:name>/delete', methods=['GET', 'POST'])
 def parcel_delete(name):
-    if flask.request.method == 'POST':
-        raise NotImplementedError
-    return flask.render_template('parcel_delete.html', name=name)
+    with warehouse() as wh:
+        get_or_404(wh.get_parcel, name, _exc=KeyError)
+        if flask.request.method == 'POST':
+            wh.delete_parcel(name)
+            transaction.commit()
+            flask.flash("Parcel %s was deleted." % name, 'system')
+            return flask.redirect(flask.url_for('views.index'))
+        else:
+            return flask.render_template('parcel_delete.html', name=name)
 
 
 def register_on(app):

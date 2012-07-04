@@ -71,6 +71,10 @@ class Warehouse(Persistent):
         self._parcels[parcel.name] = parcel
         return parcel
 
+    def delete_parcel(self, name):
+        parcel = self._parcels.pop(name)
+        parcel.get_path().rmtree()
+
     def get_parcel(self, name):
         return self._parcels[name]
 

@@ -14,8 +14,6 @@ class ParcelTest(unittest.TestCase):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
-        self.uploads_path = self.wh_path/'uploads'
-        self.parcels_path = self.wh_path/'parcels'
         self.app = create_mock_app(self.wh_path)
 
     def test_download_file(self):
@@ -69,3 +67,12 @@ class ParcelTest(unittest.TestCase):
             parcel = wh.get_parcel(parcel_name)
             next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
             self.assertDictContainsSubset(metadata, next_parcel.metadata)
+
+    def test_delete_parcel(self):
+        client = self.app.test_client()
+        resp = client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        client.post('/parcel/%s/delete' % parcel_name)
+
+        resp2 = client.get('/parcel/%s' % parcel_name)
+        self.assertEqual(resp2.status_code, 404)
