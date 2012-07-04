@@ -20,6 +20,9 @@
   {% if next_parcel_name %}
     <a href="{{ url_for('views.parcel', name=next_parcel_name) }}">next</a>
   {% endif %}
+
+  <a href="{{ url_for('views.parcel_delete', name=parcel.name) }}"
+     class="delete-parcel">delete</a>
 </p>
 
 <h2>Existing files</h2>

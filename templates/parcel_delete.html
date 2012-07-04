@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h2>Existing files</h2>
+
+<p>Delete parcel <em>{{ name }}</em>?</p>
+
+<form method="post">
+  <button type="submit">Yes, delete</button>
+</form>
+
+{% endblock %}

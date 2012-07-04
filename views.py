@@ -196,6 +196,13 @@ def parcel_download(name, filename):
                            attachment_filename=filename)
 
 
+@views.route('/parcel/<string:name>/delete', methods=['GET', 'POST'])
+def parcel_delete(name):
+    if flask.request.method == 'POST':
+        raise NotImplementedError
+    return flask.render_template('parcel_delete.html', name=name)
+
+
 def register_on(app):
     app.register_blueprint(views)
     app.context_processor(lambda: metadata_template_context)
