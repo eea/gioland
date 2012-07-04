@@ -159,6 +159,15 @@ def index():
     return flask.render_template('index.html')
 
 
+@views.route('/overview')
+def overview():
+    with warehouse() as wh:
+        all_parcels = [p for p in chain_tails(wh)]
+        return flask.render_template('overview.html', **{
+            'all_parcels': all_parcels,
+        })
+
+
 @views.route('/country/<string:code>')
 def country(code):
     with warehouse() as wh:

@@ -6,6 +6,8 @@
 
 {% block content %}
 
+  <p><a href="{{ url_for('views.overview') }}">overview</a></p>
+
   <h2>EEA Member countries</h2>
 
   {% for key, label in COUNTRIES %}
