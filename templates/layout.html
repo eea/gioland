@@ -38,6 +38,8 @@
       </div>
 
       <div id="workarea">
+        {% block page_heading %}{% endblock %}
+        {% include "eionet/flash_messages.html" %}
         {% block content %}{% endblock %}
       </div>
     </div>
