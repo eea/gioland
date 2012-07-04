@@ -13,6 +13,7 @@ def create_app(config={}):
     import warehouse
     app = flask.Flask(__name__, instance_relative_config=True)
     app.config.update(default_config)
+    app.config.update(get_configuration_from_sarge())
     app.config.from_pyfile('settings.py', silent=True)
     app.config.update(config)
     if 'WAREHOUSE_PATH' in app.config:
@@ -74,7 +75,6 @@ def _set_up_logging(app):
             'subject': "Error in %s" % app.config['DEPLOYMENT_NAME'],
             'mailhost': (smtp_host, smtp_port),
         }
-        print mail_handler_cfg
 
         error_mail_handler = SMTPHandler(**mail_handler_cfg)
         error_mail_handler.setLevel(logging.ERROR)
@@ -84,6 +84,9 @@ def _set_up_logging(app):
 def get_configuration_from_sarge():
     import os
     from path import path
+
+    if 'SARGEAPP_CFG' not in os.environ:
+        return {}
 
     config = {}
     with open(os.environ['SARGEAPP_CFG'], 'rb') as f:
@@ -99,6 +102,10 @@ def get_configuration_from_sarge():
     if 'ERROR_MAIL_RECIPIENTS' in monitoring:
         config['ERROR_MAIL_RECIPIENTS'] = monitoring['ERROR_MAIL_RECIPIENTS']
 
+    sessioncfg = sargeapp_cfg['services'][2]
+    if 'SECRET_KEY' in sessioncfg:
+        config['SECRET_KEY'] = str(sessioncfg['SECRET_KEY'])
+
     return config
 
 
@@ -109,12 +116,6 @@ class RunCherryPyCommand(flaskext.script.Command):
     ]
 
     def handle(self, app, port):
-        app.config.update(get_configuration_from_sarge())
-
-        import warehouse
-        app.extensions['warehouse_connector'] = \
-            warehouse.WarehouseConnector(app.config['WAREHOUSE_PATH'])
-
         _set_up_logging(app)
 
         import cherrypy.wsgiserver
