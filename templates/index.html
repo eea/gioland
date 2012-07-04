@@ -27,7 +27,7 @@
     <tr>
       {% set url = url_for('views.parcel', name=parcel.name) %}
       {% set metadata = parcel.metadata %}
-      <td><a href="{{ url }}">{{ parcel.name }}</a></td>
+      <td><a href="{{ url }}"><tt>{{ parcel.name }}</tt></a></td>
       <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
       <td>{{ THEME_MAP[metadata['theme']] }}</td>
       <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>

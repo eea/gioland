@@ -1,4 +1,4 @@
-{% macro metadata_table(metadata) %}
+{% macro metadata_table(metadata, show_stage=True) %}
 
   <table class="datatable">
 
@@ -27,10 +27,12 @@
       <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
     </tr>
 
+    {% if show_stage %}
     <tr>
       <th>Processing stage</th>
       <td>{{ STAGE_MAP[metadata['stage']] }}</td>
     </tr>
+    {% endif %}
 
   </table>
 

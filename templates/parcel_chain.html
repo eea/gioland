@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block page_heading %}
+  <h1>High Resolution Layers &mdash; workflow overview</h1>
+{% endblock %}
+
+{% block content %}
+
+  {% from 'bits.html' import metadata_table with context %}
+  {% set metadata = first_parcel.metadata %}
+  {{ metadata_table(metadata, show_stage=False) }}
+
+  <table class="datatable">
+
+    <thead>
+      <th>id</th>
+      <th>Stage</th>
+      <th>Time</th>
+    </thead>
+
+    <tbody>
+
+    {% for parcel in workflow_parcels %}
+      <tr>
+
+        <td>
+          {% set parcel_url = url_for('views.parcel', name=parcel.name) %}
+          <a href="{{ parcel_url }}"><tt>{{ parcel.name }}</tt></a>
+        </td>
+
+        <td>{{ STAGE_MAP[parcel.metadata['stage']] }}</td>
+
+        <td>
+          {% if parcel.uploading %}
+            <em>in progress</em>
+          {% else %}
+            {{ parcel.metadata['upload_time'] }}
+          {% endif %}
+        </td>
+
+      </tr>
+    {% endfor %}
+
+    </tbody>
+  </table>
+
+{% endblock %}

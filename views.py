@@ -123,8 +123,9 @@ def crash():
 @views.route('/')
 def index():
     with warehouse() as wh:
-        return flask.render_template('index.html',
-                                     all_parcels=wh.get_all_parcels())
+        all_parcels = list(wh.get_all_parcels())
+        all_parcels.sort(key=lambda p: p.metadata.get('upload_time', 'Z'))
+        return flask.render_template('index.html', all_parcels=all_parcels)
 
 
 @views.route('/parcel/new', methods=['GET', 'POST'])
@@ -207,6 +208,33 @@ def parcel_delete(name):
             return flask.redirect(flask.url_for('views.index'))
         else:
             return flask.render_template('parcel_delete.html', name=name)
+
+
+def walk_parcels(wh, name, metadata_key='next_parcel'):
+    while True:
+        parcel = wh.get_parcel(name)
+        yield parcel
+        name = parcel.metadata.get(metadata_key)
+        if name is None:
+            return
+
+
+@views.route('/parcel/<string:name>/chain')
+def parcel_chain(name):
+    with warehouse() as wh:
+        first_parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+
+        previous_parcels = list(walk_parcels(wh, name, 'prev_parcel'))
+        if len(previous_parcels) > 1:
+            first_parcel = previous_parcels[-1]
+            url = flask.url_for('views.parcel_chain', name=first_parcel.name)
+            return flask.redirect(url)
+
+        workflow_parcels = list(walk_parcels(wh, name))
+        return flask.render_template('parcel_chain.html', **{
+            'first_parcel': first_parcel,
+            'workflow_parcels': workflow_parcels,
+        })
 
 
 def register_on(app):
