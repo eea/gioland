@@ -12,10 +12,9 @@
       <td><label for="upload-meta-country">Country</label></td>
       <td>
         <select id="upload-meta-country" name="country">
-          <option>Austria</option>
-          <option>Belgium</option>
-          <option>Bulgaria</option>
-          <option>Cyprus</option>
+        {% for key, label in COUNTRIES %}
+          <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
         </select>
       </td>
     </tr>
@@ -24,16 +23,9 @@
       <td><label for="upload-meta-theme">Theme</label></td>
       <td>
         <select id="upload-meta-theme" name="theme">
-          <option value="imp-deg">Imperviousness Degree</option>
-          <option value="imp-chg">Imperviousness Change</option>
-          <option value="tcd">Tree Cover Density</option>
-          <option value="fty">Forest Type</option>
-          <option value="tnt">Tree / Non-tree</option>
-          <option value="tty">Tree Type</option>
-          <option value="grc">Grassland Cover</option>
-          <option value="grd">Grassland Density</option>
-          <option value="wet">Wetlands</option>
-          <option value="pwb">Permanent Water Bodies</option>
+        {% for key, label in THEMES %}
+          <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
         </select>
       </td>
     </tr>
@@ -42,8 +34,9 @@
       <td><label for="upload-meta-projection">Projection</label></td>
       <td>
         <select id="upload-meta-projection" name="projection">
-          <option name="ntl">National</option>
-          <option name="eur">European</option>
+        {% for key, label in PROJECTIONS %}
+          <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
         </select>
       </td>
     </tr>
@@ -52,9 +45,9 @@
       <td><label for="upload-meta-resolution">Spatial resolution</label></td>
       <td>
         <select id="upload-meta-resolution" name="resolution">
-          <option>20m</option>
-          <option>25m</option>
-          <option>100m</option>
+        {% for key, label in RESOLUTIONS %}
+          <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
         </select>
       </td>
     </tr>
@@ -63,8 +56,9 @@
       <td><label for="upload-meta-extent">Extent</label></td>
       <td>
         <select id="upload-meta-extent" name="extent">
-          <option>Full</option>
-          <option>Partial</option>
+        {% for key, label in EXTENTS %}
+          <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
         </select>
       </td>
     </tr>

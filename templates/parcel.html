@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% from 'bits.html' import metadata_table, files_table %}
+{% from 'bits.html' import metadata_table, files_table with context %}
 
 <h1>Parcel "{{ parcel.name }}"</h1>
 

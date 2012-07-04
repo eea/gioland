@@ -11,6 +11,7 @@ METADATA_FIELDS = [
     'extent',
 ]
 
+
 STAGES = [
     ('int', "Intermediate"),
     ('sch', "Semantic Check"),
@@ -21,11 +22,63 @@ STAGES = [
     ('fin', "Final Integrated"),
     ('fva', "Final Validated"),
 ]
-
-STAGE_MAP = dict(STAGES)
 STAGE_ORDER = [s[0] for s in STAGES]
-
 INITIAL_STAGE = STAGE_ORDER[0]
+
+
+COUNTRIES = [
+    ('at', "Austria"),
+    ('be', "Belgium"),
+    ('bg', "Bulgaria"),
+    ('cy', "Cyprus"),
+]
+
+
+THEMES = [
+    ('imp-deg', "Imperviousness Degree"),
+    ('imp-chg', "Imperviousness Change"),
+    ('tcd',     "Tree Cover Density"),
+    ('fty',     "Forest Type"),
+    ('tnt',     "Tree / Non-tree"),
+    ('tty',     "Tree Type"),
+    ('grc',     "Grassland Cover"),
+    ('grd',     "Grassland Density"),
+    ('wet',     "Wetlands"),
+    ('pwb',     "Permanent Water Bodies"),
+]
+
+PROJECTIONS = [
+    ('ntl', "National"),
+    ('eur', "European"),
+]
+
+RESOLUTIONS = [
+    ('20m', "20m"),
+    ('25m', "25m"),
+    ('100m', "100m"),
+]
+
+
+EXTENTS = [
+    ('full', "Full"),
+    ('partial', "Partial"),
+]
+
+
+metadata_template_context = {
+    'STAGES': STAGES,
+    'STAGE_MAP': dict(STAGES),
+    'COUNTRIES': COUNTRIES,
+    'COUNTRY_MAP': dict(COUNTRIES),
+    'THEMES': THEMES,
+    'THEME_MAP': dict(THEMES),
+    'RESOLUTIONS': RESOLUTIONS,
+    'RESOLUTION_MAP': dict(RESOLUTIONS),
+    'PROJECTIONS': PROJECTIONS,
+    'PROJECTION_MAP': dict(PROJECTIONS),
+    'EXTENTS': EXTENTS,
+    'EXTENT_MAP': dict(EXTENTS),
+}
 
 
 views = flask.Blueprint('views', __name__)
@@ -145,3 +198,4 @@ def parcel_download(name, filename):
 
 def register_on(app):
     app.register_blueprint(views)
+    app.context_processor(lambda: metadata_template_context)

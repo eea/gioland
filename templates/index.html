@@ -7,7 +7,7 @@
 </p>
 
 
-<h2>Parcels</h2>
+<h2>High Resolution Layers</h2>
 
 <table class="datatable">
 
@@ -29,12 +29,12 @@
       {% set url = url_for('views.parcel', name=parcel.name) %}
       {% set metadata = parcel.metadata %}
       <td><a href="{{ url }}">{{ parcel.name }}</a></td>
-      <td>{{ metadata['country'] }}</td>
-      <td>{{ metadata['theme'] }}</td>
-      <td>{{ metadata['projection'] }}</td>
-      <td>{{ metadata['resolution'] }}</td>
-      <td>{{ metadata['extent'] }}</td>
-      <td>{{ metadata['stage'] }}</td>
+      <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+      <td>{{ THEME_MAP[metadata['theme']] }}</td>
+      <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
+      <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
+      <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
+      <td>{{ STAGE_MAP[metadata['stage']] }}</td>
       <td>
         {% if parcel.uploading %}
           <em>in progress</em>
