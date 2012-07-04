@@ -120,11 +120,16 @@ def crash():
     raise ValueError("Crashing as requested")
 
 
+def chain_tails(wh):
+    for parcel in wh.get_all_parcels():
+        if 'next_parcel' not in parcel.metadata:
+            yield parcel
+
+
 @views.route('/')
 def index():
     with warehouse() as wh:
-        all_parcels = list(wh.get_all_parcels())
-        all_parcels.sort(key=lambda p: p.metadata.get('upload_time', 'Z'))
+        all_parcels = list(chain_tails(wh))
         return flask.render_template('index.html', all_parcels=all_parcels)
 
 

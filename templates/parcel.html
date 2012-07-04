@@ -11,6 +11,9 @@
 {{ metadata_table(metadata) }}
 
 <p>
+  {% set overview_url = url_for('views.parcel_chain', name=parcel.name) %}
+  <a href="{{ overview_url }}">workflow overview</a>
+
   {% set prev_parcel_name = metadata['prev_parcel'] %}
   {% if prev_parcel_name %}
     <a href="{{ url_for('views.parcel', name=prev_parcel_name) }}">previous</a>

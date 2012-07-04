@@ -11,15 +11,12 @@
 <table class="datatable">
 
   <thead>
-    <th>id</th>
     <th>Country</th>
     <th>Theme</th>
     <th>Projection</th>
     <th>Resolution</th>
     <th>Extent</th>
     <th>Stage</th>
-    <th>Upload time</th>
-    <th>User</th>
   </thead>
 
   <tbody>
@@ -27,21 +24,12 @@
     <tr>
       {% set url = url_for('views.parcel', name=parcel.name) %}
       {% set metadata = parcel.metadata %}
-      <td><a href="{{ url }}"><tt>{{ parcel.name }}</tt></a></td>
       <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
       <td>{{ THEME_MAP[metadata['theme']] }}</td>
       <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
       <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
       <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
-      <td>{{ STAGE_MAP[metadata['stage']] }}</td>
-      <td>
-        {% if parcel.uploading %}
-          <em>in progress</em>
-        {% else %}
-          {{ metadata['upload_time'] }}
-        {% endif %}
-      </td>
-      <td>{{ metadata['user'] }}</td>
+      <td><a href="{{ url }}">{{ STAGE_MAP[metadata['stage']] }}</a></td>
     </tr>
   {% endfor %}
   </tbody>
