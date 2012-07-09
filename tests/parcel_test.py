@@ -1,9 +1,6 @@
 import unittest
 import tempfile
 from datetime import datetime
-from StringIO import StringIO
-from contextlib import contextmanager
-import flask
 from path import path
 import transaction
 from mock import patch

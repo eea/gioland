@@ -73,7 +73,7 @@ class UploadTest(unittest.TestCase):
         parcel_name = resp.location.rsplit('/', 1)[-1]
         parcel_path = self.parcels_path/parcel_name
 
-        resp2 = client.post('/parcel/' + parcel_name + '/file', data={
+        client.post('/parcel/' + parcel_name + '/file', data={
             'file': (StringIO("teh file contents"), 'data.gml'),
         })
         self.assertEqual(parcel_path.listdir(), [parcel_path/'data.gml'])

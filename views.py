@@ -121,7 +121,7 @@ def get_or_404(func, *args, **kwargs):
     exc = kwargs.pop('_exc')
     try:
         return func(*args, **kwargs)
-    except KeyError:
+    except exc:
         flask.abort(404)
 
 
@@ -140,7 +140,7 @@ def login():
 
 @views.route('/ping')
 def ping():
-    with warehouse() as wh:
+    with warehouse():
         return 'gioland is ok'
 
 
