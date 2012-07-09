@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import code
 import flask
 import flaskext.script
 
@@ -129,6 +130,23 @@ class RunCherryPyCommand(flaskext.script.Command):
 
 
 manager.add_command('runcherrypy', RunCherryPyCommand())
+
+
+@manager.command
+def shell(warehouse=False):
+    def run():
+        code.interact('', local=context)
+
+    app = flask._request_ctx_stack.top.app
+    context = {'app': app}
+    if warehouse:
+        import views, transaction
+        with views.warehouse() as wh:
+            context['wh'] = wh
+            context['transaction'] = transaction
+            run()
+    else:
+        run()
 
 
 if __name__ == '__main__':
