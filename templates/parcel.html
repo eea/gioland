@@ -51,4 +51,20 @@
 
 {% endif %}
 
+
+<h2>History</h2>
+
+<ul class="history-list">
+{% for item in parcel.history %}
+
+  <li class="history-item">
+    <h3>{{ item.title }} on {{ item.time }} by {{ item.actor }}</h3>
+    <div class="history-item-description">
+      {{ item.description_html|safe }}
+    </div>
+  </li>
+
+{% endfor %}
+</ul>
+
 {% endblock %}

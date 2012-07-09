@@ -7,3 +7,29 @@ a.delete-parcel {
    float: left;
    width: 14em;
 }
+
+#workarea .history-list {
+    padding: 0 0 0 20px;
+    margin: 0;
+}
+
+#workarea .history-item {
+    list-style: none;
+    margin: 10px 0 20px;
+}
+
+#workarea .history-item > h3 {
+    padding: 0;
+    margin: 0 0 5px;
+    border-top: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: normal;
+    color: #666;
+    background-color: inherit;
+}
+
+#workarea .history-item .history-item-description {
+    margin: 0 0 10px 20px;
+}

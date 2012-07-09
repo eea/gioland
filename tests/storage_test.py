@@ -2,6 +2,7 @@ import unittest
 import tempfile
 from datetime import datetime
 from path import path
+import transaction
 
 
 BAD_METADATA_VALUES = [
@@ -12,10 +13,13 @@ BAD_METADATA_VALUES = [
 ]
 
 
+def setUpModule(self):
+    import warehouse; self.warehouse = warehouse
+
+
 class ParcelTest(unittest.TestCase):
 
     def setUp(self):
-        import warehouse
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
@@ -66,7 +70,6 @@ class ParcelTest(unittest.TestCase):
 class ZodbPersistenceTest(unittest.TestCase):
 
     def setUp(self):
-        import warehouse
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
@@ -80,7 +83,7 @@ class ZodbPersistenceTest(unittest.TestCase):
             [parcel_1] = wh1.get_all_parcels()
             parcel_path_1 = parcel_1.get_path()
             (parcel_path_1/'one').write_text("hello world")
-            import transaction; transaction.commit()
+            transaction.commit()
 
         with self.wh_connector.warehouse() as wh2:
             self.assertEqual(len(list(wh2.get_all_parcels())), 1)
@@ -95,7 +98,6 @@ class ZodbPersistenceTest(unittest.TestCase):
             parcel = wh1.new_parcel()
             parcel.save_metadata({'hello': 'world'})
             self.assertEqual(len(list(wh1.get_all_parcels())), 1)
-            import transaction
             transaction.commit()
 
         with self.wh_connector.warehouse() as wh2:
@@ -106,7 +108,6 @@ class ZodbPersistenceTest(unittest.TestCase):
 class UploadTest(unittest.TestCase):
 
     def setUp(self):
-        import warehouse
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
@@ -150,7 +151,6 @@ class UploadTest(unittest.TestCase):
 class UploadFinalizationTest(unittest.TestCase):
 
     def setUp(self):
-        import warehouse
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
@@ -204,7 +204,6 @@ class UploadFinalizationTest(unittest.TestCase):
 class DeleteParcelTest(unittest.TestCase):
 
     def setUp(self):
-        import warehouse
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
@@ -224,3 +223,20 @@ class DeleteParcelTest(unittest.TestCase):
         parcel_path = parcel.get_path()
         self.wh.delete_parcel(parcel.name)
         self.assertFalse(parcel_path.isdir())
+
+
+class ParcelHistoryTest(unittest.TestCase):
+
+    def test_history_initially_empty(self):
+        parcel = warehouse.Parcel(None, 'asdf')
+        self.assertEqual(parcel.history, [])
+
+    def test_add_item_to_history(self):
+        parcel = warehouse.Parcel(None, 'asdf')
+        utcnow = datetime.utcnow()
+        parcel.add_history_item("Big bang", utcnow, 'somebody', "first thing")
+        self.assertEqual(len(parcel.history), 1)
+        self.assertEqual(parcel.history[0].title, "Big bang")
+        self.assertEqual(parcel.history[0].time, utcnow)
+        self.assertEqual(parcel.history[0].actor, 'somebody')
+        self.assertEqual(parcel.history[0].description_html, "first thing")

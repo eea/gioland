@@ -45,6 +45,7 @@ class Parcel(Persistent):
         self._warehouse = warehouse
         self.name = name
         self.metadata = PersistentMapping()
+        self.history = PersistentList()
 
     def save_metadata(self, new_metadata):
         self._warehouse.logger.info("Metadata update for %r: %r",
@@ -61,6 +62,18 @@ class Parcel(Persistent):
     def finalize(self):
         self._warehouse.logger.info("Finalizing %r", self.name)
         self.save_metadata({'upload_time': datetime.utcnow().isoformat()})
+
+    def add_history_item(self, *args, **kwargs):
+        self.history.append(ParcelHistoryItem(*args, **kwargs))
+
+
+class ParcelHistoryItem(Persistent):
+
+    def __init__(self, title, time, actor, description_html):
+        self.title = title
+        self.time = time
+        self.actor = actor
+        self.description_html = description_html
 
 
 class Warehouse(Persistent):
