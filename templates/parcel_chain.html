@@ -13,7 +13,6 @@
   <table class="datatable">
 
     <thead>
-      <th>id</th>
       <th>Stage</th>
       <th>Time</th>
     </thead>
@@ -25,10 +24,9 @@
 
         <td>
           {% set parcel_url = url_for('views.parcel', name=parcel.name) %}
-          <a href="{{ parcel_url }}"><tt>{{ parcel.name }}</tt></a>
+          {% set stage = STAGE_MAP[parcel.metadata['stage']]  %}
+          <a href="{{ parcel_url }}">{{stage }}</a>
         </td>
-
-        <td>{{ STAGE_MAP[parcel.metadata['stage']] }}</td>
 
         <td>
           {% if parcel.uploading %}

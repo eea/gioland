@@ -1,34 +1,26 @@
 {% extends "layout.html" %}
 
+{% block page_heading %}
+  <h1>High Resolution Layers</h1>
+{% endblock %}
+
 {% block content %}
 
 {% from 'bits.html' import metadata_table, files_table with context %}
-
-<h1>Parcel "{{ parcel.name }}"</h1>
-
-<h2>Metadata</h2>
-{% set metadata = parcel.metadata %}
-{{ metadata_table(metadata) }}
 
 <p>
   {% set overview_url = url_for('views.parcel_chain', name=parcel.name) %}
   <a href="{{ overview_url }}">workflow overview</a>
 
-  {% set prev_parcel_name = metadata['prev_parcel'] %}
-  {% if prev_parcel_name %}
-    <a href="{{ url_for('views.parcel', name=prev_parcel_name) }}">previous</a>
-  {% endif %}
-
-  {% set next_parcel_name = metadata['next_parcel'] %}
-  {% if next_parcel_name %}
-    <a href="{{ url_for('views.parcel', name=next_parcel_name) }}">next</a>
-  {% endif %}
-
   <a href="{{ url_for('views.parcel_delete', name=parcel.name) }}"
      class="delete-parcel">delete</a>
 </p>
 
-<h2>Existing files</h2>
+<h2>Metadata</h2>
+{% set metadata = parcel.metadata %}
+{{ metadata_table(metadata) }}
+
+<h2>Files</h2>
 {{ files_table(parcel.get_path(), parcel=parcel) }}
 
 {% if parcel.uploading %}
