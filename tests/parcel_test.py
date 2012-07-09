@@ -1,10 +1,12 @@
 import unittest
 import tempfile
+from datetime import datetime
 from StringIO import StringIO
 from contextlib import contextmanager
 import flask
 from path import path
 import transaction
+from mock import patch
 from common import create_mock_app, get_warehouse
 
 
@@ -76,3 +78,76 @@ class ParcelTest(unittest.TestCase):
 
         resp2 = client.get('/parcel/%s' % parcel_name)
         self.assertEqual(resp2.status_code, 404)
+
+
+class ParcelHistoryTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = path(tempfile.mkdtemp())
+        self.addCleanup(self.tmp.rmtree)
+        self.wh_path = self.tmp/'warehouse'
+        self.app = create_mock_app(self.wh_path)
+        datetime_patch = patch('views.datetime')
+        self.mock_datetime = datetime_patch.start()
+        self.addCleanup(datetime_patch.stop)
+        self.client = self.app.test_client()
+        self.client.post('/login', data={'username': 'somebody'})
+
+    def check_history_item(self, item, ok_item):
+        for name in ok_item:
+            self.assertEqual(getattr(item, name, None), ok_item[name])
+
+    def test_parcel_creation_is_logged_in_history(self):
+        utcnow = datetime.utcnow()
+        self.mock_datetime.utcnow.return_value = utcnow
+
+        resp = self.client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.get_parcel(parcel_name)
+            self.check_history_item(parcel.history[0], {
+                'time': utcnow,
+                'title': "New upload",
+                'actor': 'somebody',
+            })
+
+    def test_parcel_finalization_is_logged_in_history(self):
+        utcnow = datetime.utcnow()
+        self.mock_datetime.utcnow.return_value = utcnow
+
+        resp = self.client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        self.client.post('/parcel/%s/finalize' % parcel_name)
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.get_parcel(parcel_name)
+            item = parcel.history[-1]
+            self.check_history_item(item, {
+                'time': utcnow,
+                'title': "Finalized",
+                'actor': 'somebody',
+            })
+            self.assertIn(parcel.metadata['next_parcel'],
+                          item.description_html)
+            self.assertIn("Semantic check", item.description_html)
+
+    def test_parcel_finalization_generates_message_on_next_parcel(self):
+        utcnow = datetime.utcnow()
+        self.mock_datetime.utcnow.return_value = utcnow
+
+        resp = self.client.post('/parcel/new')
+        parcel1_name = resp.location.rsplit('/', 1)[-1]
+        self.client.post('/parcel/%s/finalize' % parcel1_name)
+
+        with get_warehouse(self.app) as wh:
+            parcel1 = wh.get_parcel(parcel1_name)
+            parcel2 = wh.get_parcel(parcel1.metadata['next_parcel'])
+            item = parcel2.history[0]
+            self.check_history_item(item, {
+                'time': utcnow,
+                'title': "Next stage",
+                'actor': 'somebody',
+            })
+            self.assertIn(parcel1_name, item.description_html)
+            self.assertIn("Intermediate", item.description_html)

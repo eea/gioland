@@ -1,3 +1,4 @@
+from datetime import datetime
 import flask
 import transaction
 from path import path
@@ -14,13 +15,13 @@ METADATA_FIELDS = [
 
 STAGES = [
     ('int', "Intermediate"),
-    ('sch', "Semantic Check"),
+    ('sch', "Semantic check"),
     ('ver', "Verification"),
-    ('vch', "Verification Check"),
+    ('vch', "Verification check"),
     ('enh', "Enhancement"),
     ('ech', "Enhancement check"),
-    ('fin', "Final Integrated"),
-    ('fva', "Final Validated"),
+    ('fin', "Final integrated"),
+    ('fva', "Final validated"),
 ]
 STAGE_ORDER = [s[0] for s in STAGES]
 INITIAL_STAGE = STAGE_ORDER[0]
@@ -189,6 +190,8 @@ def parcel_new():
             metadata['user'] = flask.g.username or ''
             parcel = wh.new_parcel()
             parcel.save_metadata(metadata)
+            parcel.add_history_item("New upload", datetime.utcnow(),
+                                    flask.g.username, "")
             transaction.commit()
             url = flask.url_for('views.parcel', name=parcel.name)
             return flask.redirect(url)
@@ -224,6 +227,19 @@ def parcel_finalize(name):
         next_parcel.save_metadata({k: parcel.metadata.get(k, '')
                                    for k in METADATA_FIELDS})
         parcel.save_metadata({'next_parcel': next_parcel.name})
+
+        next_url = flask.url_for('views.parcel', name=next_parcel.name)
+        description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
+            next_url, dict(STAGES)[next_parcel.metadata['stage']])
+        parcel.add_history_item("Finalized", datetime.utcnow(),
+                                flask.g.username, description_html)
+
+        prev_url = flask.url_for('views.parcel', name=parcel.name)
+        next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
+            prev_url, dict(STAGES)[parcel.metadata['stage']])
+        next_parcel.add_history_item("Next stage", datetime.utcnow(),
+                                     flask.g.username, next_description_html)
+
         transaction.commit()
         return flask.redirect(flask.url_for('views.parcel', name=parcel.name))
 
