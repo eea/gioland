@@ -110,9 +110,9 @@ def get_configuration_from_sarge():
     with open(os.environ['SARGEAPP_CFG'], 'rb') as f:
         sargeapp_cfg = flask.json.load(f)
 
-    serivces = sargeapp_cfg['services']
+    services = sargeapp_cfg['services']
 
-    config['WAREHOUSE_PATH'] = path(serivces[0]['path'])
+    config['WAREHOUSE_PATH'] = path(services[0]['path'])
     config['DEPLOYMENT_NAME'] = services[1]['DEPLOYMENT_NAME']
     config['DEFAULT_MAIL_SENDER'] = services[1]['DEFAULT_MAIL_SENDER']
     config['ERROR_MAIL_RECIPIENTS'] = services[1]['ERROR_MAIL_RECIPIENTS']
