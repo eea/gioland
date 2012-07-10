@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 from StringIO import StringIO
+import transaction
 from path import path
 from mock import patch
 from common import create_mock_app
@@ -33,11 +34,19 @@ class UploadTest(unittest.TestCase):
     def add_to_role(self, username, role_name):
         self.app.config.setdefault(role_name, []).append(username)
 
-    def create_parcel(self):
+    def create_parcel(self, stage=None):
         with patch('parcel.authorize'):
             post_resp = self.client.post('/parcel/new')
             self.assertEqual(post_resp.status_code, 302)
-            return post_resp.location.rsplit('/', 1)[-1]
+            parcel_name = post_resp.location.rsplit('/', 1)[-1]
+
+        if stage is not None:
+            with self.app.test_request_context():
+                with parcel.warehouse() as wh:
+                    wh.get_parcel(parcel_name).metadata['stage'] = stage
+                    transaction.commit()
+
+        return parcel_name
 
     def try_new_parcel(self):
         new_parcels = SenderCollector(parcel.parcel_created)
@@ -103,4 +112,49 @@ class UploadTest(unittest.TestCase):
     def test_service_provider_allowed_to_finalize_at_intermediate_state(self):
         self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
         name = self.create_parcel()
+        self.assertTrue(self.try_finalize(name))
+
+
+    def test_random_user_not_allowed_to_upload_at_semantic_check_stage(self):
+        name = self.create_parcel(stage='sch')
+        self.assertFalse(self.try_upload(name))
+
+    def test_etc_user_allowed_to_upload_at_semantic_check_stage(self):
+        self.add_to_role('somebody', 'ROLE_ETC')
+        name = self.create_parcel(stage='sch')
+        self.assertTrue(self.try_upload(name))
+
+
+    def test_random_user_not_allowed_to_finalize_at_semantic_check_stage(self):
+        name = self.create_parcel(stage='sch')
+        self.assertFalse(self.try_finalize(name))
+
+    def test_service_provider_not_allowed_to_finalize_at_semantic_check(self):
+        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        name = self.create_parcel(stage='sch')
+        self.assertFalse(self.try_finalize(name))
+
+    def test_etc_user_allowed_to_finalize_at_semantic_check_stage(self):
+        self.add_to_role('somebody', 'ROLE_ETC')
+        name = self.create_parcel(stage='sch')
+        self.assertTrue(self.try_finalize(name))
+
+
+    def test_random_user_not_allowed_to_upload_at_enhancement_stage(self):
+        name = self.create_parcel(stage='enh')
+        self.assertFalse(self.try_upload(name))
+
+    def test_nrc_user_allowed_to_upload_at_enhancement_stage(self):
+        self.add_to_role('somebody', 'ROLE_NRC')
+        name = self.create_parcel(stage='enh')
+        self.assertTrue(self.try_upload(name))
+
+
+    def test_random_user_not_allowed_to_finalize_at_enhancement_stage(self):
+        name = self.create_parcel(stage='enh')
+        self.assertFalse(self.try_finalize(name))
+
+    def test_nrc_user_allowed_to_finalize_at_enhancement_stage(self):
+        self.add_to_role('somebody', 'ROLE_NRC')
+        name = self.create_parcel(stage='enh')
         self.assertTrue(self.try_finalize(name))

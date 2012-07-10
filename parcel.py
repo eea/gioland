@@ -41,7 +41,7 @@ def country(code):
 @parcel_views.route('/parcel/new', methods=['GET', 'POST'])
 def new():
     if flask.request.method == 'POST':
-        if not authorize():
+        if not authorize_for_parcel(None):
             return flask.abort(403)
 
         with warehouse() as wh:
@@ -64,11 +64,11 @@ def new():
 
 @parcel_views.route('/parcel/<string:name>/file', methods=['POST'])
 def upload(name):
-    if not authorize():
-        return flask.abort(403)
     posted_file = flask.request.files['file']
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+        if not authorize_for_parcel(parcel):
+            return flask.abort(403)
         if not parcel.uploading:
             flask.abort(403)
         # TODO make sure filename is safe and within the folder
@@ -80,10 +80,10 @@ def upload(name):
 
 @parcel_views.route('/parcel/<string:name>/finalize', methods=['POST'])
 def finalize(name):
-    if not authorize():
-        return flask.abort(403)
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+        if not authorize_for_parcel(parcel):
+            return flask.abort(403)
         parcel.finalize()
         stage = parcel.metadata['stage']
         next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
@@ -192,15 +192,23 @@ def chain_tails(wh):
             yield parcel
 
 
-def authorize(role_name='ROLE_SERVICE_PROVIDER'):
-    role_user_ids = flask.current_app.config.get(role_name, [])
-    return bool(flask.g.username in role_user_ids)
+def authorize(role_names):
+    config = flask.current_app.config
+    return any(flask.g.username in config.get(role_name, [])
+               for role_name in role_names)
+
+
+def authorize_for_parcel(parcel):
+    stage = INITIAL_STAGE if parcel is None else parcel.metadata['stage']
+    return authorize(STAGE_ROLES[stage])
 
 
 def register_on(app):
     app.register_blueprint(parcel_views)
     app.context_processor(lambda: metadata_template_context)
-    app.context_processor(lambda: {'authorize': authorize})
+    app.context_processor(lambda: {
+        'authorize_for_parcel': authorize_for_parcel,
+    })
 
 
 METADATA_FIELDS = [
@@ -224,6 +232,18 @@ STAGES = [
 ]
 STAGE_ORDER = [s[0] for s in STAGES]
 INITIAL_STAGE = STAGE_ORDER[0]
+
+
+STAGE_ROLES = {
+    'int': ['ROLE_SERVICE_PROVIDER'],
+    'sch': ['ROLE_ETC'],
+    'ver': ['ROLE_NRC'],
+    'vch': ['ROLE_ETC'],
+    'enh': ['ROLE_NRC'],
+    'ech': ['ROLE_ETC'],
+    'fin': [],
+    'fva': [],
+}
 
 
 COUNTRIES = [

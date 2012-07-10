@@ -25,21 +25,25 @@
 
 {% if parcel.uploading %}
 
-  <form method="post" enctype="multipart/form-data"
-        action="{{ url_for('parcel.upload', name=parcel.name) }}">
-    <label for="form-upload-file">Add file</label>
-    <input id="form-upload-file" type="file" name="file">
-    <input type="submit" value="Upload">
-  </form>
+  {% if authorize_for_parcel(parcel) %}
 
-  <form method="post"
-        action="{{ url_for('parcel.finalize', name=parcel.name) }}">
-    <p>
-      When all files are ready, finalize the parcel, which will trigger
-      the next workflow step.
-    </p>
-    <input type="submit" value="Finalize">
-  </form>
+    <form method="post" enctype="multipart/form-data"
+          action="{{ url_for('parcel.upload', name=parcel.name) }}">
+      <label for="form-upload-file">Add file</label>
+      <input id="form-upload-file" type="file" name="file">
+      <input type="submit" value="Upload">
+    </form>
+
+    <form method="post"
+          action="{{ url_for('parcel.finalize', name=parcel.name) }}">
+      <p>
+        When all files are ready, finalize the parcel, which will trigger
+        the next workflow step.
+      </p>
+      <input type="submit" value="Finalize">
+    </form>
+
+  {% endif %}
 
 {% endif %}
 
