@@ -84,7 +84,7 @@ class ParcelHistoryTest(unittest.TestCase):
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
         self.app = create_mock_app(self.wh_path)
-        datetime_patch = patch('views.datetime')
+        datetime_patch = patch('parcel.datetime')
         self.mock_datetime = datetime_patch.start()
         self.addCleanup(datetime_patch.stop)
         self.client = self.app.test_client()

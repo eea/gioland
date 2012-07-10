@@ -49,7 +49,7 @@
     {% for file_path in files %}
       <li>
       {% if parcel %}
-        {% set url = url_for('views.parcel_download',
+        {% set url = url_for('parcel.download',
                              name=parcel.name, filename=file_path.name) %}
         <a href="{{ url }}">{{ file_path.name }}</a>
       {% else %}
@@ -84,7 +84,7 @@
     <tbody>
     {% for parcel in parcels_list %}
       <tr>
-        {% set url = url_for('views.parcel', name=parcel.name) %}
+        {% set url = url_for('parcel.view', name=parcel.name) %}
         {% set metadata = parcel.metadata %}
         <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
         <td>{{ THEME_MAP[metadata['theme']] }}</td>

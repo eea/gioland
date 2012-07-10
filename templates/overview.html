@@ -10,7 +10,7 @@
 
   {% from 'bits.html' import parcels_table with context %}
 
-  <p><a href="{{ url_for('views.parcel_new') }}">Begin a new upload</a></p>
+  <p><a href="{{ url_for('parcel.new') }}">Begin a new upload</a></p>
 
   {{ parcels_table(all_parcels) }}
 

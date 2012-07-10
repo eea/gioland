@@ -23,7 +23,7 @@
       <tr>
 
         <td>
-          {% set parcel_url = url_for('views.parcel', name=parcel.name) %}
+          {% set parcel_url = url_for('parcel.view', name=parcel.name) %}
           {% set stage = STAGE_MAP[parcel.metadata['stage']]  %}
           <a href="{{ parcel_url }}">{{stage }}</a>
         </td>

@@ -12,7 +12,7 @@ def create_mock_app(warehouse_path):
 
 @contextmanager
 def get_warehouse(app):
-    import views
+    import parcel
     with app.test_request_context():
-        with views.warehouse() as wh:
+        with parcel.warehouse() as wh:
             yield wh

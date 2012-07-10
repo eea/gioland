@@ -6,13 +6,13 @@
 
 {% block content %}
 
-  <p><a href="{{ url_for('views.overview') }}">overview</a></p>
+  <p><a href="{{ url_for('parcel.overview') }}">overview</a></p>
 
   <h2>EEA Member countries</h2>
 
   {% for key, label in COUNTRIES %}
   <div class="countrybox">
-    <a href="{{ url_for('views.country', code=key) }}">{{ label }}</a>
+    <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
   </div>
   {% endfor %}
 

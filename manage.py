@@ -9,8 +9,20 @@ default_config = {
 }
 
 
+def register_monitoring_views(app):
+    @app.route('/ping')
+    def ping():
+        with flask.current_app.extensions['warehouse_connector'].warehouse():
+            return 'gioland is ok'
+
+    @app.route('/crash')
+    def crash():
+        raise ValueError("Crashing as requested")
+
+
 def create_app(config={}):
-    import views
+    import auth
+    import parcel
     import warehouse
     app = flask.Flask(__name__, instance_relative_config=True)
     app.config.update(default_config)
@@ -20,7 +32,9 @@ def create_app(config={}):
     if 'WAREHOUSE_PATH' in app.config:
         app.extensions['warehouse_connector'] = \
             warehouse.WarehouseConnector(app.config['WAREHOUSE_PATH'])
-    views.register_on(app)
+    auth.register_on(app)
+    parcel.register_on(app)
+    register_monitoring_views(app)
     return app
 
 
@@ -140,8 +154,9 @@ def shell(warehouse=False):
     app = flask._request_ctx_stack.top.app
     context = {'app': app}
     if warehouse:
-        import views, transaction
-        with views.warehouse() as wh:
+        import parcel
+        import transaction
+        with parcel.warehouse() as wh:
             context['wh'] = wh
             context['transaction'] = transaction
             run()

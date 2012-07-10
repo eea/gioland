@@ -9,10 +9,10 @@
 {% from 'bits.html' import metadata_table, files_table with context %}
 
 <p>
-  {% set overview_url = url_for('views.parcel_chain', name=parcel.name) %}
+  {% set overview_url = url_for('parcel.chain', name=parcel.name) %}
   <a href="{{ overview_url }}">workflow overview</a>
 
-  <a href="{{ url_for('views.parcel_delete', name=parcel.name) }}"
+  <a href="{{ url_for('parcel.delete', name=parcel.name) }}"
      class="delete-parcel">delete</a>
 </p>
 
@@ -26,14 +26,14 @@
 {% if parcel.uploading %}
 
   <form method="post" enctype="multipart/form-data"
-        action="{{ url_for('views.parcel_file', name=parcel.name) }}">
+        action="{{ url_for('parcel.upload', name=parcel.name) }}">
     <label for="form-upload-file">Add file</label>
     <input id="form-upload-file" type="file" name="file">
     <input type="submit" value="Upload">
   </form>
 
   <form method="post"
-        action="{{ url_for('views.parcel_finalize', name=parcel.name) }}">
+        action="{{ url_for('parcel.finalize', name=parcel.name) }}">
     <p>
       When all files are ready, finalize the parcel, which will trigger
       the next workflow step.
