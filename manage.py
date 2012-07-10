@@ -6,6 +6,9 @@ import flaskext.script
 
 
 default_config = {
+    'LDAP_TIMEOUT': 10,
+    'LDAP_SERVER': 'ldap://ldap3.eionet.europa.eu',
+    'LDAP_USER_DN_PATTERN': "uid={user_id},ou=Users,o=EIONET,l=Europe",
 }
 
 

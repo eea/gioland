@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; login</h1>
+{% endblock %}
+
+{% block content %}
+
+  {% if g.username %}
+
+    <p>You are logged in as <tt>{{ g.username }}</tt>.</p>
+
+    <form method="post">
+      <button type="submit" name="action" value="logout">Log out</button>
+    </form>
+
+  {% else %}
+
+    <form method="post">
+      <label>Username: <input name="username"></label><br>
+      <label>Password: <input name="password" type="password"></label><br>
+      <button type="submit" name="action" value="login">Log in</button>
+    </form>
+
+  {% endif %}
+
+{% endblock %}
