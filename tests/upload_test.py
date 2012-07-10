@@ -25,7 +25,7 @@ class UploadTest(unittest.TestCase):
 
     def test_login(self):
         client = self.app.test_client()
-        client.post('/login', data={'username': 'tester'})
+        client.post('/test_login', data={'username': 'tester'})
 
         client.preserve_context = True
         client.get('/')
@@ -49,7 +49,7 @@ class UploadTest(unittest.TestCase):
 
     def test_begin_parcel_saves_default_metadata(self):
         client = self.app.test_client()
-        client.post('/login', data={'username': 'somebody'})
+        client.post('/test_login', data={'username': 'somebody'})
         resp = client.post('/parcel/new', data=self.metadata)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with get_warehouse(self.app) as wh:

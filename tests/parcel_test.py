@@ -18,7 +18,7 @@ class ParcelTest(unittest.TestCase):
     def test_download_file(self):
         map_data = 'teh map data'
         client = self.app.test_client()
-        client.post('/login', data={'username': 'somebody'})
+        client.post('/test_login', data={'username': 'somebody'})
 
         with get_warehouse(self.app) as wh:
             parcel = wh.new_parcel()
@@ -88,7 +88,7 @@ class ParcelHistoryTest(unittest.TestCase):
         self.mock_datetime = datetime_patch.start()
         self.addCleanup(datetime_patch.stop)
         self.client = self.app.test_client()
-        self.client.post('/login', data={'username': 'somebody'})
+        self.client.post('/test_login', data={'username': 'somebody'})
 
     def check_history_item(self, item, ok_item):
         for name in ok_item:
