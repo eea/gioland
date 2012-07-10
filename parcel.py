@@ -1,10 +1,16 @@
 import flask
+import blinker
 from datetime import datetime
 import transaction
 from path import path
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
+
+parcel_signals = blinker.Namespace()
+parcel_created = parcel_signals.signal('parcel-created')
+file_uploaded = parcel_signals.signal('file-uploaded')
+parcel_finalized = parcel_signals.signal('parcel-finalized')
 
 
 @parcel_views.route('/')
@@ -35,6 +41,9 @@ def country(code):
 @parcel_views.route('/parcel/new', methods=['GET', 'POST'])
 def new():
     if flask.request.method == 'POST':
+        if not authorize():
+            return flask.abort(403)
+
         with warehouse() as wh:
             form = flask.request.form.to_dict()
             metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
@@ -44,6 +53,7 @@ def new():
             parcel.save_metadata(metadata)
             parcel.add_history_item("New upload", datetime.utcnow(),
                                     flask.g.username, "")
+            parcel_created.send(parcel)
             transaction.commit()
             url = flask.url_for('parcel.view', name=parcel.name)
             return flask.redirect(url)
@@ -54,6 +64,8 @@ def new():
 
 @parcel_views.route('/parcel/<string:name>/file', methods=['POST'])
 def upload(name):
+    if not authorize():
+        return flask.abort(403)
     posted_file = flask.request.files['file']
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
@@ -62,11 +74,14 @@ def upload(name):
         # TODO make sure filename is safe and within the folder
         filename = posted_file.filename.rsplit('/', 1)[-1]
         posted_file.save(parcel.get_path() / filename)
+        file_uploaded.send(parcel, filename=filename)
         return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
 @parcel_views.route('/parcel/<string:name>/finalize', methods=['POST'])
 def finalize(name):
+    if not authorize():
+        return flask.abort(403)
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         parcel.finalize()
@@ -92,6 +107,8 @@ def finalize(name):
             prev_url, dict(STAGES)[parcel.metadata['stage']])
         next_parcel.add_history_item("Next stage", datetime.utcnow(),
                                      flask.g.username, next_description_html)
+
+        parcel_finalized.send(parcel, next_parcel=next_parcel)
 
         transaction.commit()
         return flask.redirect(flask.url_for('parcel.view', name=parcel.name))
@@ -175,9 +192,15 @@ def chain_tails(wh):
             yield parcel
 
 
+def authorize(role_name='ROLE_SERVICE_PROVIDER'):
+    role_user_ids = flask.current_app.config.get(role_name, [])
+    return bool(flask.g.username in role_user_ids)
+
+
 def register_on(app):
     app.register_blueprint(parcel_views)
     app.context_processor(lambda: metadata_template_context)
+    app.context_processor(lambda: {'authorize': authorize})
 
 
 METADATA_FIELDS = [

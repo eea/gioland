@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import flask
+from mock import patch
 
 
 def create_mock_app(warehouse_path):
@@ -24,3 +25,9 @@ def get_warehouse(app):
     with app.test_request_context():
         with parcel.warehouse() as wh:
             yield wh
+
+
+def authorization_patch():
+    authorize_patch = patch('parcel.authorize')
+    authorize_patch.start()
+    return authorize_patch

@@ -4,7 +4,7 @@ from datetime import datetime
 from path import path
 import transaction
 from mock import patch
-from common import create_mock_app, get_warehouse
+from common import create_mock_app, get_warehouse, authorization_patch
 
 
 class ParcelTest(unittest.TestCase):
@@ -14,6 +14,7 @@ class ParcelTest(unittest.TestCase):
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
         self.app = create_mock_app(self.wh_path)
+        self.addCleanup(authorization_patch().stop)
 
     def test_download_file(self):
         map_data = 'teh map data'
@@ -87,6 +88,7 @@ class ParcelHistoryTest(unittest.TestCase):
         datetime_patch = patch('parcel.datetime')
         self.mock_datetime = datetime_patch.start()
         self.addCleanup(datetime_patch.stop)
+        self.addCleanup(authorization_patch().stop)
         self.client = self.app.test_client()
         self.client.post('/test_login', data={'username': 'somebody'})
 

@@ -3,7 +3,7 @@ import tempfile
 from StringIO import StringIO
 import flask
 from path import path
-from common import create_mock_app, get_warehouse
+from common import create_mock_app, get_warehouse, authorization_patch
 
 
 class UploadTest(unittest.TestCase):
@@ -22,6 +22,7 @@ class UploadTest(unittest.TestCase):
         self.wh_path = self.tmp/'warehouse'
         self.parcels_path = self.wh_path/'parcels'
         self.app = create_mock_app(self.wh_path)
+        self.addCleanup(authorization_patch().stop)
 
     def test_login(self):
         client = self.app.test_client()

@@ -1,9 +1,11 @@
 {% extends "layout.html" %}
 
+{% block page_heading %}
+  <h1>New upload</h1>
+{% endblock %}
+
+
 {% block content %}
-
-<h1>New upload</h1>
-
 <form method="post">
 
   <table>
@@ -68,5 +70,4 @@
   <input type="submit" value="Begin upload">
 
 </form>
-
 {% endblock %}

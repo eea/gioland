@@ -10,7 +10,9 @@
 
   {% from 'bits.html' import parcels_table with context %}
 
-  <p><a href="{{ url_for('parcel.new') }}">Begin a new upload</a></p>
+  {% if authorize() %}
+    <p><a href="{{ url_for('parcel.new') }}">Begin a new upload</a></p>
+  {% endif %}
 
   {{ parcels_table(all_parcels) }}
 
