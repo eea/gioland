@@ -11,6 +11,7 @@ parcel_signals = blinker.Namespace()
 parcel_created = parcel_signals.signal('parcel-created')
 file_uploaded = parcel_signals.signal('file-uploaded')
 parcel_finalized = parcel_signals.signal('parcel-finalized')
+parcel_deleted = parcel_signals.signal('parcel-deleted')
 
 
 @parcel_views.route('/')
@@ -137,9 +138,12 @@ def download(name, filename):
 @parcel_views.route('/parcel/<string:name>/delete', methods=['GET', 'POST'])
 def delete(name):
     with warehouse() as wh:
-        get_or_404(wh.get_parcel, name, _exc=KeyError)
+        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+        if not authorize(['ROLE_ADMIN']):
+            return flask.abort(403)
         if flask.request.method == 'POST':
             wh.delete_parcel(name)
+            parcel_deleted.send(parcel)
             transaction.commit()
             flask.flash("Parcel %s was deleted." % name, 'system')
             return flask.redirect(flask.url_for('parcel.index'))
@@ -200,13 +204,14 @@ def authorize(role_names):
 
 def authorize_for_parcel(parcel):
     stage = INITIAL_STAGE if parcel is None else parcel.metadata['stage']
-    return authorize(STAGE_ROLES[stage])
+    return authorize(STAGE_ROLES[stage] + ['ROLE_ADMIN'])
 
 
 def register_on(app):
     app.register_blueprint(parcel_views)
     app.context_processor(lambda: metadata_template_context)
     app.context_processor(lambda: {
+        'authorize': authorize,
         'authorize_for_parcel': authorize_for_parcel,
     })
 

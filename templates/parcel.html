@@ -12,8 +12,10 @@
   {% set overview_url = url_for('parcel.chain', name=parcel.name) %}
   <a href="{{ overview_url }}">workflow overview</a>
 
-  <a href="{{ url_for('parcel.delete', name=parcel.name) }}"
-     class="delete-parcel">delete</a>
+  {% if authorize(['ROLE_ADMIN']) %}
+    <a href="{{ url_for('parcel.delete', name=parcel.name) }}"
+       class="delete-parcel">delete</a>
+  {% endif %}
 </p>
 
 <h2>Metadata</h2>

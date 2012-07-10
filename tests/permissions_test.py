@@ -87,6 +87,19 @@ class UploadTest(unittest.TestCase):
             self.fail('unexpected http status code')
 
 
+    def try_delete(self, parcel_name):
+        deleted_parcels = SenderCollector(parcel.parcel_deleted)
+        post_resp = self.client.post('/parcel/%s/delete' % parcel_name)
+        if post_resp.status_code == 403:
+            self.assertEqual(len(deleted_parcels), 0)
+            return False
+        elif post_resp.status_code == 302:
+            self.assertEqual(len(deleted_parcels), 1)
+            return True
+        else:
+            self.fail('unexpected http status code')
+
+
     def test_random_user_not_allowed_to_begin_upload(self):
         self.assertFalse(self.try_new_parcel())
 
@@ -114,6 +127,11 @@ class UploadTest(unittest.TestCase):
         name = self.create_parcel()
         self.assertTrue(self.try_finalize(name))
 
+    def test_admin_allowed_to_finalize_at_intermediate_state(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel()
+        self.assertTrue(self.try_finalize(name))
+
 
     def test_random_user_not_allowed_to_upload_at_semantic_check_stage(self):
         name = self.create_parcel(stage='sch')
@@ -121,6 +139,11 @@ class UploadTest(unittest.TestCase):
 
     def test_etc_user_allowed_to_upload_at_semantic_check_stage(self):
         self.add_to_role('somebody', 'ROLE_ETC')
+        name = self.create_parcel(stage='sch')
+        self.assertTrue(self.try_upload(name))
+
+    def test_admin_user_allowed_to_upload_at_semantic_check_stage(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_upload(name))
 
@@ -139,6 +162,11 @@ class UploadTest(unittest.TestCase):
         name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_finalize(name))
 
+    def test_admin_user_allowed_to_finalize_at_semantic_check_stage(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel(stage='sch')
+        self.assertTrue(self.try_finalize(name))
+
 
     def test_random_user_not_allowed_to_upload_at_enhancement_stage(self):
         name = self.create_parcel(stage='enh')
@@ -146,6 +174,11 @@ class UploadTest(unittest.TestCase):
 
     def test_nrc_user_allowed_to_upload_at_enhancement_stage(self):
         self.add_to_role('somebody', 'ROLE_NRC')
+        name = self.create_parcel(stage='enh')
+        self.assertTrue(self.try_upload(name))
+
+    def test_admin_user_allowed_to_upload_at_enhancement_stage(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel(stage='enh')
         self.assertTrue(self.try_upload(name))
 
@@ -158,3 +191,18 @@ class UploadTest(unittest.TestCase):
         self.add_to_role('somebody', 'ROLE_NRC')
         name = self.create_parcel(stage='enh')
         self.assertTrue(self.try_finalize(name))
+
+    def test_admin_user_allowed_to_finalize_at_enhancement_stage(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel(stage='enh')
+        self.assertTrue(self.try_finalize(name))
+
+
+    def test_random_user_not_allowed_to_delete_parcel(self):
+        name = self.create_parcel()
+        self.assertFalse(self.try_delete(name))
+
+    def test_admin_user_not_allowed_to_delete_parcel(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel()
+        self.assertTrue(self.try_delete(name))

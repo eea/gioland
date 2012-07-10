@@ -110,19 +110,17 @@ def get_configuration_from_sarge():
     with open(os.environ['SARGEAPP_CFG'], 'rb') as f:
         sargeapp_cfg = flask.json.load(f)
 
-    config['WAREHOUSE_PATH'] = path(sargeapp_cfg['services'][0]['path'])
+    serivces = sargeapp_cfg['services']
 
-    monitoring = sargeapp_cfg['services'][1]
-    if 'DEPLOYMENT_NAME' in monitoring:
-        config['DEPLOYMENT_NAME'] = monitoring['DEPLOYMENT_NAME']
-    if 'DEFAULT_MAIL_SENDER' in monitoring:
-        config['DEFAULT_MAIL_SENDER'] = monitoring['DEFAULT_MAIL_SENDER']
-    if 'ERROR_MAIL_RECIPIENTS' in monitoring:
-        config['ERROR_MAIL_RECIPIENTS'] = monitoring['ERROR_MAIL_RECIPIENTS']
-
-    sessioncfg = sargeapp_cfg['services'][2]
-    if 'SECRET_KEY' in sessioncfg:
-        config['SECRET_KEY'] = str(sessioncfg['SECRET_KEY'])
+    config['WAREHOUSE_PATH'] = path(serivces[0]['path'])
+    config['DEPLOYMENT_NAME'] = services[1]['DEPLOYMENT_NAME']
+    config['DEFAULT_MAIL_SENDER'] = services[1]['DEFAULT_MAIL_SENDER']
+    config['ERROR_MAIL_RECIPIENTS'] = services[1]['ERROR_MAIL_RECIPIENTS']
+    config['SECRET_KEY'] = str(services[2]['SECRET_KEY'])
+    config['ROLE_SERVICE_PROVIDER'] = services[3]['sp']
+    config['ROLE_ETC'] = services[3]['etc']
+    config['ROLE_NRC'] = services[3]['nrc']
+    config['ROLE_ADMIN'] = services[3]['admin']
 
     return config
 
