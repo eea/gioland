@@ -49,7 +49,6 @@ def new():
             form = flask.request.form.to_dict()
             metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
             metadata['stage'] = INITIAL_STAGE
-            metadata['user'] = flask.g.username or ''
             parcel = wh.new_parcel()
             parcel.save_metadata(metadata)
             parcel.add_history_item("New upload", datetime.utcnow(),

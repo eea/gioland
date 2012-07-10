@@ -56,7 +56,6 @@ class UploadTest(unittest.TestCase):
         with get_warehouse(self.app) as wh:
             parcel = wh.get_parcel(parcel_name)
             self.assertEqual(parcel.metadata['stage'], 'int')
-            self.assertEqual(parcel.metadata['user'], 'somebody')
 
     def test_show_existing_files_in_parcel(self):
         client = self.app.test_client()
