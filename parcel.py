@@ -3,7 +3,7 @@ import blinker
 from datetime import datetime
 import transaction
 from path import path
-
+from dateutil import tz
 
 parcel_views = flask.Blueprint('parcel', __name__)
 
@@ -206,6 +206,20 @@ def authorize_for_parcel(parcel):
     return authorize(STAGE_ROLES[stage] + ['ROLE_ADMIN'])
 
 
+def date(value, format):
+    """ Formats a date according to the given format. """
+    timezone = flask.current_app.config.get("TIME_ZONE")
+    if timezone:
+        from_zone = tz.gettz("UTC")
+        to_zone = tz.gettz(timezone)
+        # Tell the datetime object that it's in UTC time zone since
+        # datetime objects are 'naive' by default
+        value = value.replace(tzinfo=from_zone)
+        # Convert time zone
+        value = value.astimezone(to_zone)
+    return value.strftime(format)
+
+
 def register_on(app):
     app.register_blueprint(parcel_views)
     app.context_processor(lambda: metadata_template_context)
@@ -213,6 +227,7 @@ def register_on(app):
         'authorize': authorize,
         'authorize_for_parcel': authorize_for_parcel,
     })
+    app.jinja_env.filters["date"] = date
 
 
 METADATA_FIELDS = [
