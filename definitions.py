@@ -98,3 +98,20 @@ EXTENTS = [
     ('full', "Full"),
     ('partial', "Partial"),
 ]
+
+
+GIOLAND_SCHEMA = 'http://gaur.eea.europa.eu/gioland/static/schema.rdf'
+RDF_URI = {
+    'rdf_type': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+    'title': 'http://purl.org/dc/elements/1.1/title',
+    'identifier': 'http://purl.org/dc/elements/1.1/identifier',
+    'date': 'http://purl.org/dc/elements/1.1/date',
+    'parcel_event': GIOLAND_SCHEMA + '#parcelevent',
+    'locality': GIOLAND_SCHEMA + '#locality',
+    'actor': GIOLAND_SCHEMA + '#actor',
+    'stage': GIOLAND_SCHEMA + '#stage',
+    'theme': GIOLAND_SCHEMA + '#theme',
+    'projection': GIOLAND_SCHEMA + '#projection',
+    'resolution': GIOLAND_SCHEMA + '#resolution',
+    'extent': GIOLAND_SCHEMA + '#extent',
+}

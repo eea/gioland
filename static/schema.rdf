@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+    <owl:Ontology rdf:about="">
+        <rdfs:label>GioLand High Resolution Layers schema</rdfs:label>
+        <owl:versionInfo>2012-07-12.1</owl:versionInfo>
+    </owl:Ontology>
+
+    <rdf:Property rdf:ID="locality">
+        <rdfs:label>Locality</rdfs:label>
+    </rdf:Property>
+
+    <rdf:Property rdf:ID="actor">
+        <rdfs:label>Actor</rdfs:label>
+    </rdf:Property>
+
+    <rdf:Property rdf:ID="stage">
+        <rdfs:label>Stage</rdfs:label>
+    </rdf:Property>
+
+    <rdf:Property rdf:ID="theme">
+        <rdfs:label>Theme</rdfs:label>
+    </rdf:Property>
+
+    <rdf:Property rdf:ID="projection">
+        <rdfs:label>Projection</rdfs:label>
+    </rdf:Property>
+
+    <rdf:Property rdf:ID="resolution">
+        <rdfs:label>Resolution</rdfs:label>
+    </rdf:Property>
+
+    <rdf:Property rdf:ID="extent">
+        <rdfs:label>Extent</rdfs:label>
+    </rdf:Property>
+
+</rdf:RDF>

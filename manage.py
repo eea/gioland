@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import logging
 import code
 import flask
 import flaskext.script
@@ -71,7 +72,6 @@ manager = flaskext.script.Manager(create_app)
 
 
 def _set_up_logging(app):
-    import logging
     root_logger = logging.getLogger()
 
     stderr_handler = logging.StreamHandler()
@@ -80,6 +80,7 @@ def _set_up_logging(app):
                                 "%(levelname)s %(message)s")
     stderr_handler.setFormatter(log_fmt)
     app.logger.addHandler(stderr_handler)
+    root_logger.setLevel(logging.INFO)
     root_logger.addHandler(stderr_handler)
 
     recipients = app.config.get('ERROR_MAIL_RECIPIENTS', [])
@@ -122,6 +123,11 @@ def get_configuration_from_sarge():
     config['ROLE_ETC'] = services[3]['etc']
     config['ROLE_NRC'] = services[3]['nrc']
     config['ROLE_ADMIN'] = services[3]['admin']
+    config['BASE_URL'] = services[4]['base_url']
+    config['UNS_CHANNEL_ID'] = services[5]['channel_id']
+    config['UNS_LOGIN_USERNAME'] = services[5]['login_username']
+    config['UNS_LOGIN_PASSWORD'] = services[5]['login_password']
+    config['UNS_SUPPRESS_NOTIFICATIONS'] = bool(services[5].get('suppress'))
 
     return config
 
@@ -164,6 +170,17 @@ def shell(warehouse=False):
             run()
     else:
         run()
+
+
+@manager.command
+def runserver():
+    app = flask.current_app
+    stderr_handler = logging.StreamHandler()
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(stderr_handler)
+    app.logger.addHandler(stderr_handler)
+    app.run()
 
 
 if __name__ == '__main__':
