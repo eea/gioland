@@ -4,23 +4,14 @@ from StringIO import StringIO
 import transaction
 from path import path
 from mock import patch
-from common import create_mock_app
+from common import create_mock_app, record_events
 
 
 def setUpModule(self):
     import parcel; self.parcel = parcel
 
 
-class SenderCollector(list):
-
-    def __init__(self, signal):
-        signal.connect(self.event)
-
-    def event(self, sender, **extra):
-        self.append(sender)
-
-
-class UploadTest(unittest.TestCase):
+class PermisionsTest(unittest.TestCase):
 
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
@@ -49,8 +40,8 @@ class UploadTest(unittest.TestCase):
         return parcel_name
 
     def try_new_parcel(self):
-        new_parcels = SenderCollector(parcel.parcel_created)
-        post_resp = self.client.post('/parcel/new')
+        with record_events(parcel.parcel_created) as new_parcels:
+            post_resp = self.client.post('/parcel/new')
         if post_resp.status_code == 403:
             self.assertEqual(len(new_parcels), 0)
             return False
@@ -61,10 +52,10 @@ class UploadTest(unittest.TestCase):
             self.fail('unexpected http status code')
 
     def try_upload(self, parcel_name):
-        uploaded_files = SenderCollector(parcel.file_uploaded)
         url = '/parcel/' + parcel_name + '/file'
         post_data = {'file': (StringIO("xx"), 'y.txt')}
-        post_resp = self.client.post(url, data=post_data)
+        with record_events(parcel.file_uploaded) as uploaded_files:
+            post_resp = self.client.post(url, data=post_data)
         if post_resp.status_code == 403:
             self.assertEqual(len(uploaded_files), 0)
             return False
@@ -75,8 +66,8 @@ class UploadTest(unittest.TestCase):
             self.fail('unexpected http status code')
 
     def try_finalize(self, parcel_name):
-        finalized_parcels = SenderCollector(parcel.parcel_finalized)
-        post_resp = self.client.post('/parcel/%s/finalize' % parcel_name)
+        with record_events(parcel.parcel_finalized) as finalized_parcels:
+            post_resp = self.client.post('/parcel/%s/finalize' % parcel_name)
         if post_resp.status_code == 403:
             self.assertEqual(len(finalized_parcels), 0)
             return False
@@ -88,8 +79,8 @@ class UploadTest(unittest.TestCase):
 
 
     def try_delete(self, parcel_name):
-        deleted_parcels = SenderCollector(parcel.parcel_deleted)
-        post_resp = self.client.post('/parcel/%s/delete' % parcel_name)
+        with record_events(parcel.parcel_deleted) as deleted_parcels:
+            post_resp = self.client.post('/parcel/%s/delete' % parcel_name)
         if post_resp.status_code == 403:
             self.assertEqual(len(deleted_parcels), 0)
             return False
