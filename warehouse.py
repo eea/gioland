@@ -1,4 +1,5 @@
 import tempfile
+import hashlib
 from contextlib import contextmanager
 from datetime import datetime
 import logging, logging.handlers
@@ -13,6 +14,7 @@ from path import path
 log = logging.getLogger(__name__)
 
 LOGGING_FORMAT = '[%(asctime)s] %(levelname)s %(message)s'
+BLOCK_SIZE = 8192
 log_number = 1
 
 
@@ -33,6 +35,20 @@ def _ensure_dir(dir_path):
         dir_path.makedirs()
     return dir_path
 
+
+def checksum(path):
+    files = []
+    for p in path.listdir():
+        if not p.isfile():
+            continue
+        md5 = hashlib.md5()
+        with open(p, 'rb') as f:
+            while True:
+                data = f.read(BLOCK_SIZE)
+                if not data: break
+                md5.update(data)
+            files.append((p.name, md5.hexdigest()))
+    return files
 
 
 class Parcel(Persistent):
@@ -61,6 +77,7 @@ class Parcel(Persistent):
 
     def finalize(self):
         self._warehouse.logger.info("Finalizing %r", self.name)
+        self.checksum = checksum(self.get_path())
         self.save_metadata({'upload_time': datetime.utcnow().isoformat()})
 
     def add_history_item(self, *args, **kwargs):

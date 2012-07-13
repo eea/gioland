@@ -200,6 +200,25 @@ class UploadFinalizationTest(unittest.TestCase):
         upload.finalize()
         self.assertFalse(upload.uploading)
 
+    def test_checksum(self):
+        import hashlib
+
+        map_data = 'teh map data'
+        hexdigest = hashlib.md5(map_data).hexdigest()
+
+        path = (self.tmp/'checksum')
+        path.makedirs()
+        (path/'data.gml').write_text(map_data)
+
+        self.assertEqual([(u'data.gml', hexdigest)], warehouse.checksum(path))
+
+    def test_finalize_checksum(self):
+        wh = self.get_warehouse()
+        parcel = wh.new_parcel()
+        parcel.finalize()
+        transaction.commit()
+        self.assertIsInstance(parcel.checksum, list)
+
 
 class DeleteParcelTest(unittest.TestCase):
 
