@@ -64,12 +64,16 @@ class Parcel(Persistent):
         self.save_metadata({'upload_time': datetime.utcnow().isoformat()})
 
     def add_history_item(self, *args, **kwargs):
-        self.history.append(ParcelHistoryItem(*args, **kwargs))
+        item = ParcelHistoryItem(self, *args, **kwargs)
+        item.id_ = len(self.history) + 1
+        self.history.append(item)
+        return item
 
 
 class ParcelHistoryItem(Persistent):
 
-    def __init__(self, title, time, actor, description_html):
+    def __init__(self, parcel, title, time, actor, description_html):
+        self.parcel = parcel
         self.title = title
         self.time = time
         self.actor = actor

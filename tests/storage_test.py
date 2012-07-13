@@ -240,3 +240,26 @@ class ParcelHistoryTest(unittest.TestCase):
         self.assertEqual(parcel.history[0].time, utcnow)
         self.assertEqual(parcel.history[0].actor, 'somebody')
         self.assertEqual(parcel.history[0].description_html, "first thing")
+
+    def test_history_item_links_back_to_parcel(self):
+        parcel = warehouse.Parcel(None, 'asdf')
+        parcel.add_history_item("Big bang", datetime.utcnow(),
+                                'somebody', "first thing")
+        [item] = parcel.history
+        self.assertIs(item.parcel, parcel)
+
+    def test_history_item_receives_incremental_id(self):
+        parcel = warehouse.Parcel(None, 'asdf')
+        parcel.add_history_item("one", datetime.utcnow(), 'somebody', "")
+        parcel.add_history_item("two", datetime.utcnow(), 'somebody', "")
+        [item1, item2] = parcel.history
+        self.assertEqual(item1.title, "one")
+        self.assertEqual(item2.title, "two")
+        self.assertEqual(item1.id_, 1)
+        self.assertEqual(item2.id_, 2)
+
+    def test_history_item_returned(self):
+        parcel = warehouse.Parcel(None, 'asdf')
+        item = parcel.add_history_item("Big bang", datetime.utcnow(),
+                                       'somebody', "first thing")
+        self.assertEqual(parcel.history, [item])
