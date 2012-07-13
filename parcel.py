@@ -7,6 +7,7 @@ from dateutil import tz
 from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER, INITIAL_STAGE,
                          STAGE_ROLES, COUNTRIES, THEMES, PROJECTIONS,
                          RESOLUTIONS, EXTENTS)
+import notification
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -55,8 +56,8 @@ def new():
             metadata['stage'] = INITIAL_STAGE
             parcel = wh.new_parcel()
             parcel.save_metadata(metadata)
-            parcel.add_history_item("New upload", datetime.utcnow(),
-                                    flask.g.username, "")
+            add_history_item_and_notify(
+                parcel, "New upload", datetime.utcnow(), flask.g.username, "")
             parcel_created.send(parcel)
             transaction.commit()
             url = flask.url_for('parcel.view', name=parcel.name)
@@ -103,14 +104,16 @@ def finalize(name):
         next_url = flask.url_for('parcel.view', name=next_parcel.name)
         description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
             next_url, dict(STAGES)[next_parcel.metadata['stage']])
-        parcel.add_history_item("Finalized", datetime.utcnow(),
-                                flask.g.username, description_html)
+        add_history_item_and_notify(
+            parcel, "Finalized", datetime.utcnow(),
+            flask.g.username, description_html)
 
         prev_url = flask.url_for('parcel.view', name=parcel.name)
         next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
             prev_url, dict(STAGES)[parcel.metadata['stage']])
-        next_parcel.add_history_item("Next stage", datetime.utcnow(),
-                                     flask.g.username, next_description_html)
+        add_history_item_and_notify(
+            next_parcel, "Next stage", datetime.utcnow(),
+            flask.g.username, next_description_html)
 
         parcel_finalized.send(parcel, next_parcel=next_parcel)
 
@@ -161,6 +164,11 @@ def walk_parcels(wh, name, metadata_key='next_parcel'):
         name = parcel.metadata.get(metadata_key)
         if name is None:
             return
+
+
+def add_history_item_and_notify(parcel, *args, **kwargs):
+    item = parcel.add_history_item(*args, **kwargs)
+    notification.notify(item)
 
 
 @parcel_views.route('/parcel/<string:name>/chain')

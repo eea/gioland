@@ -9,6 +9,14 @@ from common import create_mock_app, get_warehouse, authorization_patch
 
 class ParcelTest(unittest.TestCase):
 
+    METADATA = {
+        'country': 'be',
+        'theme': 'grc',
+        'projection': 'european',
+        'resolution': '25m',
+        'extent': 'full',
+    }
+
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
@@ -34,6 +42,7 @@ class ParcelTest(unittest.TestCase):
     def test_finalize_triggers_next_step_with_forward_backward_references(self):
         with get_warehouse(self.app) as wh:
             parcel = wh.new_parcel()
+            parcel.save_metadata(self.METADATA)
             parcel.save_metadata({'stage': 'vch'}) # verification check
             transaction.commit()
             parcel_name = parcel.name
@@ -50,23 +59,16 @@ class ParcelTest(unittest.TestCase):
             self.assertEqual(next_parcel.metadata['stage'], 'enh') # enhancement
 
     def test_finalize_preserves_metadata(self):
-        metadata = {
-            'country': 'be',
-            'theme': 'grc',
-            'projection': 'european',
-            'resolution': '25m',
-            'extent': 'full',
-        }
 
         client = self.app.test_client()
-        resp = client.post('/parcel/new', data=metadata)
+        resp = client.post('/parcel/new', data=self.METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         client.post('/parcel/%s/finalize' % parcel_name)
 
         with get_warehouse(self.app) as wh:
             parcel = wh.get_parcel(parcel_name)
             next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
-            self.assertDictContainsSubset(metadata, next_parcel.metadata)
+            self.assertDictContainsSubset(self.METADATA, next_parcel.metadata)
 
     def test_delete_parcel(self):
         client = self.app.test_client()

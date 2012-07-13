@@ -1,8 +1,10 @@
 import unittest
+import tempfile
 from datetime import datetime
 from contextlib import contextmanager
 from mock import Mock, patch
-from common import create_mock_app, record_events
+from common import create_mock_app, record_events, authorization_patch
+from path import path
 
 
 def setUpModule(self):
@@ -91,3 +93,38 @@ class NotificationDeliveryTest(unittest.TestCase):
             finally:
                 self.app.config['TESTING'] = True
         self.assertEqual(len(uns_calls), 1)
+
+
+def event_title(event):
+    item = event[1]['item']
+    return item.title
+
+
+class NotificationTriggerTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = path(tempfile.mkdtemp())
+        self.addCleanup(self.tmp.rmtree)
+        self.wh_path = self.tmp / 'warehouse'
+        self.app = create_mock_app(self.wh_path)
+        self.addCleanup(authorization_patch().stop)
+
+    def test_notification_triggered_on_new_parcel(self):
+        with self.app.test_client() as client:
+            with record_events(notification.uns_notification_sent) as events:
+                resp = client.post('/parcel/new')
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual([event_title(e) for e in events],
+                                 ["New upload"])
+
+    def test_notification_triggered_twice_on_finalize_parcel(self):
+        with self.app.test_client() as client:
+            resp_1 = client.post('/parcel/new')
+            self.assertEqual(resp_1.status_code, 302)
+            parcel_name = resp_1.location.rsplit('/', 1)[-1]
+
+            with record_events(notification.uns_notification_sent) as events:
+                resp_2 = client.post('/parcel/%s/finalize' % parcel_name)
+                self.assertEqual(resp_2.status_code, 302)
+                self.assertEqual([event_title(e) for e in events],
+                                 ["Finalized", "Next stage"])
