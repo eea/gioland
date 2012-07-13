@@ -83,42 +83,18 @@ def upload(name):
         return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
-@parcel_views.route('/parcel/<string:name>/finalize', methods=['POST'])
+@parcel_views.route('/parcel/<string:name>/finalize', methods=['GET', 'POST'])
 def finalize(name):
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         if not authorize_for_parcel(parcel):
             return flask.abort(403)
-        parcel.finalize()
-        stage = parcel.metadata['stage']
-        next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
-        next_parcel = wh.new_parcel()
-        next_parcel.save_metadata({
-            'prev_parcel': parcel.name,
-            'stage': next_stage,
-        })
-        next_parcel.save_metadata({k: parcel.metadata.get(k, '')
-                                   for k in METADATA_FIELDS})
-        parcel.save_metadata({'next_parcel': next_parcel.name})
-
-        next_url = flask.url_for('parcel.view', name=next_parcel.name)
-        description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
-            next_url, dict(STAGES)[next_parcel.metadata['stage']])
-        add_history_item_and_notify(
-            parcel, "Finalized", datetime.utcnow(),
-            flask.g.username, description_html)
-
-        prev_url = flask.url_for('parcel.view', name=parcel.name)
-        next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
-            prev_url, dict(STAGES)[parcel.metadata['stage']])
-        add_history_item_and_notify(
-            next_parcel, "Next stage", datetime.utcnow(),
-            flask.g.username, next_description_html)
-
-        parcel_finalized.send(parcel, next_parcel=next_parcel)
-
-        transaction.commit()
-        return flask.redirect(flask.url_for('parcel.view', name=parcel.name))
+        if flask.request.method == "POST":
+            finalize_parcel(wh, parcel)
+            transaction.commit()
+            return flask.redirect(flask.url_for('parcel.view', name=parcel.name))
+        else:
+            return flask.render_template("parcel_confirm_finalize.html")
 
 
 @parcel_views.route('/parcel/<string:name>')
@@ -230,6 +206,36 @@ def date(value, format):
         # Convert time zone
         value = value.astimezone(to_zone)
     return value.strftime(format)
+
+
+def finalize_parcel(wh, parcel):
+        parcel.finalize()
+        stage = parcel.metadata['stage']
+        next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
+        next_parcel = wh.new_parcel()
+        next_parcel.save_metadata({
+            'prev_parcel': parcel.name,
+            'stage': next_stage,
+        })
+        next_parcel.save_metadata({k: parcel.metadata.get(k, '')
+                                   for k in METADATA_FIELDS})
+        parcel.save_metadata({'next_parcel': next_parcel.name})
+
+        next_url = flask.url_for('parcel.view', name=next_parcel.name)
+        description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
+            next_url, dict(STAGES)[next_parcel.metadata['stage']])
+        add_history_item_and_notify(
+            parcel, "Finalized", datetime.utcnow(),
+            flask.g.username, description_html)
+
+        prev_url = flask.url_for('parcel.view', name=parcel.name)
+        next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
+            prev_url, dict(STAGES)[parcel.metadata['stage']])
+        add_history_item_and_notify(
+            next_parcel, "Next stage", datetime.utcnow(),
+            flask.g.username, next_description_html)
+
+        parcel_finalized.send(parcel, next_parcel=next_parcel)
 
 
 def register_on(app):
