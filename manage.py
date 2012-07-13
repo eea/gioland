@@ -11,6 +11,9 @@ default_config = {
     'LDAP_SERVER': 'ldap://ldap3.eionet.europa.eu',
     'LDAP_USER_DN_PATTERN': "uid={user_id},ou=Users,o=EIONET,l=Europe",
     'TIME_ZONE': 'Europe/Copenhagen',
+    'BASE_URL': "",
+    'UNS_CHANNEL_ID': 0,
+    'UNS_SUPPRESS_NOTIFICATIONS': True,
 }
 
 
