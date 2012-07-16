@@ -42,7 +42,14 @@
         When all files are ready, finalize the parcel, which will trigger
         the next workflow step.
       </p>
-      <input type="submit" value="Finalize">
+
+      <button type="submit">Finalize</button>
+
+      {% if STAGES[parcel.metadata['stage']]['reject'] %}
+        <button type="submit" name="reject" value="on">
+          Finalize and reject</button>
+      {% endif %}
+
     </form>
 
   {% endif %}

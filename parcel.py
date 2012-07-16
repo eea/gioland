@@ -89,14 +89,18 @@ def finalize(name):
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
         if not authorize_for_parcel(parcel):
             return flask.abort(403)
+
+        reject = bool(flask.request.values.get('reject'))
+
         if flask.request.method == "POST":
-            finalize_parcel(wh, parcel)
+            finalize_parcel(wh, parcel, reject)
             transaction.commit()
             url = flask.url_for('parcel.view', name=parcel.name)
             return flask.redirect(url)
 
         else:
-            return flask.render_template("parcel_confirm_finalize.html")
+            return flask.render_template("parcel_confirm_finalize.html",
+                                         reject=reject)
 
 
 @parcel_views.route('/parcel/<string:name>')
@@ -226,10 +230,17 @@ def date(value, format):
     return value.strftime(format)
 
 
-def finalize_parcel(wh, parcel):
+def finalize_parcel(wh, parcel, reject):
     parcel.finalize()
     stage = parcel.metadata['stage']
-    next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
+    if reject and not STAGES[stage].get('reject'):
+        flask.abort(403)
+
+    if reject:
+        next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) - 1]
+    else:
+        next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
+
     next_parcel = wh.new_parcel()
     next_parcel.save_metadata({
         'prev_parcel': parcel.name,
@@ -242,8 +253,10 @@ def finalize_parcel(wh, parcel):
     next_url = flask.url_for('parcel.view', name=next_parcel.name)
     description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
         next_url, STAGES[next_parcel.metadata['stage']]['label'])
+
+    title = "Finalized (rejected)" if reject else "Finalized"
     add_history_item_and_notify(
-        parcel, "Finalized", datetime.utcnow(),
+        parcel, title, datetime.utcnow(),
         flask.g.username, description_html)
 
     prev_url = flask.url_for('parcel.view', name=parcel.name)

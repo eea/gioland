@@ -59,7 +59,6 @@ class ParcelTest(unittest.TestCase):
             self.assertEqual(next_parcel.metadata['stage'], 'enh') # enhancement
 
     def test_finalize_preserves_metadata(self):
-
         client = self.app.test_client()
         resp = client.post('/parcel/new', data=self.METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
@@ -69,6 +68,37 @@ class ParcelTest(unittest.TestCase):
             parcel = wh.get_parcel(parcel_name)
             next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
             self.assertDictContainsSubset(self.METADATA, next_parcel.metadata)
+
+    def create_parcel_at_stage(self, stage):
+        client = self.app.test_client()
+        resp = client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        with get_warehouse(self.app) as wh:
+            parcel = wh.get_parcel(parcel_name)
+            parcel.metadata['stage'] = stage
+            transaction.commit()
+        return parcel_name
+
+    def test_finalize_with_reject_disallowed_for_most_stages(self):
+        client = self.app.test_client()
+        for stage in ['int', 'ver', 'enh', 'fin']:
+            parcel_name = self.create_parcel_at_stage(stage)
+            resp = client.post('/parcel/%s/finalize' % parcel_name,
+                               data={'reject': 'on'})
+            self.assertEqual(resp.status_code, 403)
+
+    def test_finalize_with_reject_triggers_previous_step(self):
+        client = self.app.test_client()
+        for stage, prev_stage in [('sch', 'int'),
+                                  ('vch', 'ver'),
+                                  ('ech', 'enh')]:
+            parcel_name = self.create_parcel_at_stage(stage)
+            resp = client.post('/parcel/%s/finalize' % parcel_name,
+                               data={'reject': 'on'})
+            with get_warehouse(self.app) as wh:
+                parcel = wh.get_parcel(parcel_name)
+                next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
+                self.assertEqual(next_parcel.metadata['stage'], prev_stage)
 
     def test_delete_parcel(self):
         client = self.app.test_client()

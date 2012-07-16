@@ -7,6 +7,9 @@
   <p>After you finalize the parcel, no more uploads are allowed, and the workflow proceeds to the next stage.</p>
 
   <form method="post">
+    {% if reject %}
+      <input type="hidden" name="reject" value="on">
+    {% endif %}
     <button type="submit">Yes, finalize</button>
   </form>
 
