@@ -42,11 +42,23 @@ def can_subscribe(user_id):
     return bool(uns.canSubscribe(channel_id, user_id or ''))
 
 
-def subscribe(user_id):
+def subscribe(user_id, filters):
     app = flask.current_app
+
+    rdf_filters_map = {}
+    for rdf_uri, metadata_name, value_map in metadata_rdf_fields:
+        if metadata_name in filters:
+            rdf_filters_map[rdf_uri] = value_map[filters[metadata_name]]
+
+    rdf_filters = []
+    if rdf_filters_map:
+        rdf_filters.append(rdf_filters_map)
+
+    log.info("Subscribing user %r with filters %r", user_id, rdf_filters)
+
     channel_id = app.config['UNS_CHANNEL_ID']
     uns = get_uns_proxy()
-    uns.makeSubscription(channel_id, user_id, [])
+    uns.makeSubscription(channel_id, user_id, rdf_filters)
 
 
 def prepare_notification_rdf(item):

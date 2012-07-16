@@ -12,6 +12,25 @@
 
   <form method="post">
 
+    <table>
+    {% for name, label, items in [
+            ('country', "Country", COUNTRIES),
+            ('theme', "Theme", THEMES),
+            ('projection', "Projection", PROJECTIONS),
+            ('resolution', "Spatial resolution", RESOLUTIONS),
+            ('extent', "Extent", EXTENTS),
+        ] %}
+
+      <tr>
+        {% set items = [('', 'all')] + items %}
+        {% set field_id = 'subscribe-meta-' + name %}
+        <td><label for="{{ field_id }}">{{ label }}</label></td>
+        <td>{{ pick_from_list(field_id, name, items) }}</td>
+      </tr>
+
+    {% endfor %}
+    </table>
+
     <button type="submit">Subscribe</button>
 
   </form>

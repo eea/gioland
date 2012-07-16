@@ -168,7 +168,13 @@ def chain(name):
 @parcel_views.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
     if flask.request.method == 'POST':
-        notification.subscribe(flask.g.username)
+        filters = {}
+        for name in ['country', 'extent', 'projection',
+                     'resolution', 'theme']:
+            value = flask.request.form.get(name, '')
+            if value:
+                filters[name] = value
+        notification.subscribe(flask.g.username, filters)
         flask.flash("Subscription was successful.", 'system')
         return flask.redirect(flask.url_for('parcel.index'))
 

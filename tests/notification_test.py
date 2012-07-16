@@ -136,14 +136,35 @@ class NotificationSubscriptionTest(unittest.TestCase):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
         self.app = create_mock_app()
+        self.channel_id = '1234'
+        self.app.config['UNS_CHANNEL_ID'] = self.channel_id
+        self.client = self.app.test_client()
+        self.client.post('/test_login', data={'username': 'somebody'})
 
-    def test_subscribe_calls_to_uns(self):
-        channel_id = '1234'
-        self.app.config['UNS_CHANNEL_ID'] = channel_id
-        client = self.app.test_client()
-        client.post('/test_login', data={'username': 'somebody'})
-        with patch('notification.get_uns_proxy') as mock_get_uns_proxy:
-            makeSubscription = mock_get_uns_proxy.return_value.makeSubscription
-            client.post('/subscribe')
-        self.assertEqual(makeSubscription.mock_calls,
-                         [call(channel_id, 'somebody', [])])
+    @patch('notification.get_uns_proxy')
+    def test_subscribe_calls_to_uns(self, mock_proxy):
+        self.client.post('/subscribe')
+        self.assertEqual(mock_proxy.return_value.makeSubscription.mock_calls,
+                         [call(self.channel_id, 'somebody', [])])
+
+    @patch('notification.get_uns_proxy')
+    def test_subscribe_with_filters_passes_filters_to_uns(self, mock_proxy):
+        from definitions import RDF_URI
+
+        self.client.post('/subscribe', data={
+            'country': 'dk',
+            'extent': 'partial',
+            'projection': 'eur',
+            'resolution': '25m',
+            'theme': 'tty',
+        })
+
+        ok_filters = [{
+            RDF_URI['locality']: "Denmark",
+            RDF_URI['extent']: "Partial",
+            RDF_URI['projection']: "European",
+            RDF_URI['resolution']: "25m",
+            RDF_URI['theme']: "Tree Type",
+        }]
+        self.assertEqual(mock_proxy.return_value.makeSubscription.mock_calls,
+                         [call(self.channel_id, 'somebody', ok_filters)])
