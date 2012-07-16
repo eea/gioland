@@ -98,3 +98,12 @@
 
   </table>
 {% endmacro %}
+
+
+{% macro pick_from_list(id, name, items) -%}
+  <select id="{{ id }}" name="{{ name }}">
+  {% for key, label in items %}
+    <option value="{{ key }}">{{ label }}</option>
+  {% endfor %}
+  </select>
+{%- endmacro %}

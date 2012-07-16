@@ -6,68 +6,31 @@
 
 
 {% block content %}
-<form method="post">
 
-  <table>
+  {% from 'bits.html' import pick_from_list %}
 
-    <tr>
-      <td><label for="upload-meta-country">Country</label></td>
-      <td>
-        <select id="upload-meta-country" name="country">
-        {% for key, label in COUNTRIES %}
-          <option value="{{ key }}">{{ label }}</option>
-        {% endfor %}
-        </select>
-      </td>
-    </tr>
+  <form method="post">
 
-    <tr>
-      <td><label for="upload-meta-theme">Theme</label></td>
-      <td>
-        <select id="upload-meta-theme" name="theme">
-        {% for key, label in THEMES %}
-          <option value="{{ key }}">{{ label }}</option>
-        {% endfor %}
-        </select>
-      </td>
-    </tr>
+    <table>
+    {% for name, label, items in [
+            ('country', "Country", COUNTRIES),
+            ('theme', "Theme", THEMES),
+            ('projection', "Projection", PROJECTIONS),
+            ('resolution', "Spatial resolution", RESOLUTIONS),
+            ('extent', "Extent", EXTENTS),
+        ] %}
 
-    <tr>
-      <td><label for="upload-meta-projection">Projection</label></td>
-      <td>
-        <select id="upload-meta-projection" name="projection">
-        {% for key, label in PROJECTIONS %}
-          <option value="{{ key }}">{{ label }}</option>
-        {% endfor %}
-        </select>
-      </td>
-    </tr>
+      <tr>
+        {% set field_id = 'upload-meta-' + name %}
+        <td><label for="{{ field_id }}">{{ label }}</label></td>
+        <td>{{ pick_from_list(field_id, name, items) }}</td>
+      </tr>
 
-    <tr>
-      <td><label for="upload-meta-resolution">Spatial resolution</label></td>
-      <td>
-        <select id="upload-meta-resolution" name="resolution">
-        {% for key, label in RESOLUTIONS %}
-          <option value="{{ key }}">{{ label }}</option>
-        {% endfor %}
-        </select>
-      </td>
-    </tr>
+    {% endfor %}
+    </table>
 
-    <tr>
-      <td><label for="upload-meta-extent">Extent</label></td>
-      <td>
-        <select id="upload-meta-extent" name="extent">
-        {% for key, label in EXTENTS %}
-          <option value="{{ key }}">{{ label }}</option>
-        {% endfor %}
-        </select>
-      </td>
-    </tr>
+    <button type="submit">Begin upload</button>
 
-  </table>
+  </form>
 
-  <input type="submit" value="Begin upload">
-
-</form>
 {% endblock %}
