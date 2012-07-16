@@ -2,7 +2,7 @@ import unittest
 import tempfile
 from datetime import datetime
 from contextlib import contextmanager
-from mock import Mock, patch
+from mock import Mock, patch, call
 from common import create_mock_app, record_events, authorization_patch
 from path import path
 
@@ -128,3 +128,22 @@ class NotificationTriggerTest(unittest.TestCase):
                 self.assertEqual(resp_2.status_code, 302)
                 self.assertEqual([event_title(e) for e in events],
                                  ["Finalized", "Next stage"])
+
+
+class NotificationSubscriptionTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = path(tempfile.mkdtemp())
+        self.addCleanup(self.tmp.rmtree)
+        self.app = create_mock_app()
+
+    def test_subscribe_calls_to_uns(self):
+        channel_id = '1234'
+        self.app.config['UNS_CHANNEL_ID'] = channel_id
+        client = self.app.test_client()
+        client.post('/test_login', data={'username': 'somebody'})
+        with patch('notification.get_uns_proxy') as mock_get_uns_proxy:
+            makeSubscription = mock_get_uns_proxy.return_value.makeSubscription
+            client.post('/subscribe')
+        self.assertEqual(makeSubscription.mock_calls,
+                         [call(channel_id, 'somebody', [])])

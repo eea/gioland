@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; notifications via UNS</h1>
+{% endblock %}
+
+
+{% macro subscribe_form() %}
+
+  {% from 'bits.html' import pick_from_list %}
+
+  <form method="post">
+
+    <button type="submit">Subscribe</button>
+
+  </form>
+
+{% endmacro %}
+
+
+{% block content %}
+  {% if not g.username %}
+    <p>
+      {% set url = url_for('auth.login') %}
+      Please <a href="{{ url }}">log in</a> to subscribe for notifications.
+    </p>
+  {% elif can_subscribe_to_notifications(g.username) %}
+    {{ subscribe_form() }}
+  {% else %}
+    <p>
+      User <tt>{{ g.username or "(anonymous)" }}</tt> is not allowed to
+      subscribe.
+    </p>
+  {% endif %}
+{% endblock %}

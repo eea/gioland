@@ -33,6 +33,20 @@ def create_channel(title="GioLand",
     print uns.createChannel(title, description)
 
 
+def can_subscribe(user_id):
+    app = flask.current_app
+    channel_id = app.config['UNS_CHANNEL_ID']
+    uns = get_uns_proxy()
+    return bool(uns.canSubscribe(channel_id, user_id or ''))
+
+
+def subscribe(user_id):
+    app = flask.current_app
+    channel_id = app.config['UNS_CHANNEL_ID']
+    uns = get_uns_proxy()
+    uns.makeSubscription(channel_id, user_id, [])
+
+
 def prepare_notification_rdf(item):
     app = flask.current_app
 

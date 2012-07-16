@@ -165,6 +165,16 @@ def chain(name):
         })
 
 
+@parcel_views.route('/subscribe', methods=['GET', 'POST'])
+def subscribe():
+    if flask.request.method == 'POST':
+        notification.subscribe(flask.g.username)
+        flask.flash("Subscription was successful.", 'system')
+        return flask.redirect(flask.url_for('parcel.index'))
+
+    return flask.render_template('subscribe.html')
+
+
 def warehouse():
     return flask.current_app.extensions['warehouse_connector'].warehouse()
 
@@ -244,6 +254,7 @@ def register_on(app):
     app.context_processor(lambda: {
         'authorize': authorize,
         'authorize_for_parcel': authorize_for_parcel,
+        'can_subscribe_to_notifications': notification.can_subscribe,
     })
     app.jinja_env.filters["date"] = date
 
