@@ -40,9 +40,7 @@ def create_app(config={}, testing=False):
         app.config.update(get_configuration_from_sarge())
         app.config.from_pyfile("settings.py", silent=True)
     app.config.update(config)
-    if 'WAREHOUSE_PATH' in app.config:
-        app.extensions['warehouse_connector'] = \
-            warehouse.WarehouseConnector(app.config['WAREHOUSE_PATH'])
+    warehouse.initialize_app(app)
     auth.register_on(app)
     parcel.register_on(app)
     register_monitoring_views(app)

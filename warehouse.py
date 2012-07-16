@@ -188,3 +188,27 @@ class WarehouseConnector(object):
             yield warehouse
         finally:
             cleanup()
+
+
+def initialize_app(app):
+    import flask
+    import auth
+
+    if 'WAREHOUSE_PATH' not in app.config:
+        return
+
+    connector = WarehouseConnector(app.config['WAREHOUSE_PATH'])
+    app.extensions['warehouse_connector'] = connector
+
+    @app.route('/zodb_pack', methods=['GET', 'POST'])
+    def zodb_pack():
+        if not auth.authorize(['ROLE_ADMIN']):
+            return flask.abort(403)
+
+        db = connector._get_db()
+
+        if flask.request.method == 'POST':
+            db.pack(days=float(flask.request.form['days']))
+            return flask.redirect(flask.url_for('zodb_pack'))
+
+        return flask.render_template('zodb_pack.html', db=db)

@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+  <p>Size: {{ db.getSize() }} bytes</p>
+
+  <form method="post">
+    keep <input name="days" size="4" value="0"> days and
+    <button type="submit">Pack</button>
+  </form>
+
+{% endblock %}
