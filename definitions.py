@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+
 METADATA_FIELDS = [
     'country',
     'theme',
@@ -7,30 +10,20 @@ METADATA_FIELDS = [
 ]
 
 
-STAGES = [
-    ('int', "Intermediate"),
-    ('sch', "Semantic check"),
-    ('ver', "Verification"),
-    ('vch', "Verification check"),
-    ('enh', "Enhancement"),
-    ('ech', "Enhancement check"),
-    ('fin', "Final integrated"),
-    ('fva', "Final validated"),
-]
-STAGE_ORDER = [s[0] for s in STAGES]
+STAGES = OrderedDict([
+    ('int', dict(label="Intermediate", roles=['ROLE_SERVICE_PROVIDER'])),
+    ('sch', dict(label="Semantic check", roles=['ROLE_ETC'])),
+    ('ver', dict(label="Verification", roles=['ROLE_NRC'])),
+    ('vch', dict(label="Verification check", roles=['ROLE_ETC'])),
+    ('enh', dict(label="Enhancement", roles=['ROLE_NRC'])),
+    ('ech', dict(label="Enhancement check", roles=['ROLE_ETC'])),
+    ('fin', dict(label="Final integrated", roles=[])),
+    ('fva', dict(label="Final validated", roles=[])),
+])
+
+
+STAGE_ORDER = list(STAGES)
 INITIAL_STAGE = STAGE_ORDER[0]
-
-
-STAGE_ROLES = {
-    'int': ['ROLE_SERVICE_PROVIDER'],
-    'sch': ['ROLE_ETC'],
-    'ver': ['ROLE_NRC'],
-    'vch': ['ROLE_ETC'],
-    'enh': ['ROLE_NRC'],
-    'ech': ['ROLE_ETC'],
-    'fin': [],
-    'fva': [],
-}
 
 
 COUNTRIES = [

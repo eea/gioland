@@ -12,7 +12,7 @@ metadata_rdf_fields = [
     (RDF_URI['projection'], 'projection', dict(PROJECTIONS)),
     (RDF_URI['resolution'], 'resolution', dict(RESOLUTIONS)),
     (RDF_URI['theme'], 'theme', dict(THEMES)),
-    (RDF_URI['stage'], 'stage', dict(STAGES)),
+    (RDF_URI['stage'], 'stage', {k: STAGES[k]['label'] for k in STAGES}),
 ]
 
 

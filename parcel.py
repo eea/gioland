@@ -4,9 +4,9 @@ from datetime import datetime
 import transaction
 from path import path
 from dateutil import tz
-from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER, INITIAL_STAGE,
-                         STAGE_ROLES, COUNTRIES, THEMES, PROJECTIONS,
-                         RESOLUTIONS, EXTENTS)
+from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
+                         INITIAL_STAGE, COUNTRIES, THEMES,
+                         PROJECTIONS, RESOLUTIONS, EXTENTS)
 import notification
 
 
@@ -207,7 +207,7 @@ def authorize(role_names):
 
 def authorize_for_parcel(parcel):
     stage = INITIAL_STAGE if parcel is None else parcel.metadata['stage']
-    return authorize(STAGE_ROLES[stage] + ['ROLE_ADMIN'])
+    return authorize(STAGES[stage]['roles'] + ['ROLE_ADMIN'])
 
 
 def date(value, format):
@@ -239,14 +239,14 @@ def finalize_parcel(wh, parcel):
 
         next_url = flask.url_for('parcel.view', name=next_parcel.name)
         description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
-            next_url, dict(STAGES)[next_parcel.metadata['stage']])
+            next_url, STAGES[next_parcel.metadata['stage']]['label'])
         add_history_item_and_notify(
             parcel, "Finalized", datetime.utcnow(),
             flask.g.username, description_html)
 
         prev_url = flask.url_for('parcel.view', name=parcel.name)
         next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
-            prev_url, dict(STAGES)[parcel.metadata['stage']])
+            prev_url, STAGES[parcel.metadata['stage']]['label'])
         add_history_item_and_notify(
             next_parcel, "Next stage", datetime.utcnow(),
             flask.g.username, next_description_html)
@@ -267,7 +267,7 @@ def register_on(app):
 
 metadata_template_context = {
     'STAGES': STAGES,
-    'STAGE_MAP': dict(STAGES),
+    'STAGE_MAP': {k: STAGES[k]['label'] for k in STAGES},
     'COUNTRIES': COUNTRIES,
     'COUNTRY_MAP': dict(COUNTRIES),
     'THEMES': THEMES,
