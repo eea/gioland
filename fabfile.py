@@ -56,8 +56,12 @@ def install():
         run("mkdir -p '%s'" % env['gioland_version_instance'])
 
     put(StringIO("exec %(gioland_venv)s/bin/python "
-                 "manage.py runcherrypy -p 42023\n" % env),
-        str(env['gioland_version_folder']/'start.sh'))
+                 "%(gioland_version_folder)s/manage.py $@\n" % env),
+        str(env['gioland_version_folder']/'manage.sh'), mode=0755)
+
+    put(StringIO("exec %(gioland_version_folder)s/manage.sh "
+                 "runcherrypy -p 42023\n" % env),
+        str(env['gioland_version_folder']/'start.sh'), mode=0755)
 
     put(StringIO("{}"), str(env['gioland_version_folder']/'sargeapp.yaml'))
 
