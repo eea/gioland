@@ -8,6 +8,7 @@ from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES, THEMES,
                          PROJECTIONS, RESOLUTIONS, EXTENTS)
 import notification
+import auth
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -127,7 +128,7 @@ def download(name, filename):
 def delete(name):
     with warehouse() as wh:
         parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        if not authorize(['ROLE_ADMIN']):
+        if not auth.authorize(['ROLE_ADMIN']):
             return flask.abort(403)
         if flask.request.method == 'POST':
             wh.delete_parcel(name)
@@ -205,15 +206,9 @@ def chain_tails(wh):
             yield parcel
 
 
-def authorize(role_names):
-    config = flask.current_app.config
-    return any(flask.g.username in config.get(role_name, [])
-               for role_name in role_names)
-
-
 def authorize_for_parcel(parcel):
     stage = INITIAL_STAGE if parcel is None else parcel.metadata['stage']
-    return authorize(STAGES[stage]['roles'] + ['ROLE_ADMIN'])
+    return auth.authorize(STAGES[stage]['roles'] + ['ROLE_ADMIN'])
 
 
 def date(value, format):
@@ -273,7 +268,7 @@ def register_on(app):
     app.register_blueprint(parcel_views)
     app.context_processor(lambda: metadata_template_context)
     app.context_processor(lambda: {
-        'authorize': authorize,
+        'authorize': auth.authorize,
         'authorize_for_parcel': authorize_for_parcel,
         'can_subscribe_to_notifications': notification.can_subscribe,
     })

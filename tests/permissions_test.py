@@ -26,7 +26,7 @@ class PermisionsTest(unittest.TestCase):
         self.app.config.setdefault(role_name, []).append(username)
 
     def create_parcel(self, stage=None):
-        with patch('parcel.authorize'):
+        with patch('auth.authorize'):
             post_resp = self.client.post('/parcel/new')
             self.assertEqual(post_resp.status_code, 302)
             parcel_name = post_resp.location.rsplit('/', 1)[-1]

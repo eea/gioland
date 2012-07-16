@@ -51,6 +51,12 @@ def ldap_bind(user_id, password):
     return True
 
 
+def authorize(role_names):
+    config = flask.current_app.config
+    return any(flask.g.username in config.get(role_name, [])
+               for role_name in role_names)
+
+
 def register_on(app):
     app.register_blueprint(auth_views)
     app.before_request(set_user)

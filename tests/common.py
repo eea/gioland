@@ -31,7 +31,7 @@ def get_warehouse(app):
 
 
 def authorization_patch():
-    authorize_patch = patch('parcel.authorize')
+    authorize_patch = patch('auth.authorize')
     authorize_patch.start()
     return authorize_patch
 
