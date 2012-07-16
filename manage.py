@@ -28,14 +28,17 @@ def register_monitoring_views(app):
         raise ValueError("Crashing as requested")
 
 
-def create_app(config={}):
+def create_app(config={}, testing=False):
     import auth
     import parcel
     import warehouse
     app = flask.Flask(__name__, instance_relative_config=True)
     app.config.update(default_config)
-    app.config.update(get_configuration_from_sarge())
-    app.config.from_pyfile('settings.py', silent=True)
+    if testing:
+        app.config['TESTING'] = True
+    else:
+        app.config.update(get_configuration_from_sarge())
+        app.config.from_pyfile("settings.py", silent=True)
     app.config.update(config)
     if 'WAREHOUSE_PATH' in app.config:
         app.extensions['warehouse_connector'] = \

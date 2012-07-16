@@ -12,7 +12,7 @@ def create_mock_app(warehouse_path=None):
     }
     if warehouse_path is not None:
         config['WAREHOUSE_PATH'] = str(warehouse_path)
-    app = create_app(config)
+    app = create_app(config, testing=True)
 
     @app.route('/test_login', methods=['POST'])
     def test_login():
