@@ -53,8 +53,8 @@ class NotificationDeliveryTest(unittest.TestCase):
         rdf_data = {p: o for s, p, o in rdf_triples}
         self.assertDictContainsSubset({
             RDF_URI['date']: self.utcnow.strftime('%Y-%b-%d %H:%M:%S'),
-            RDF_URI['locality']: "Italy",
             RDF_URI['actor']: "somewho",
+            RDF_URI['locality']: "Italy",
             RDF_URI['stage']: "Enhancement",
             RDF_URI['title']: "Now hear this (asdf)",
             RDF_URI['identifier']: "http://example.com/parcel/asdf",

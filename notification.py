@@ -6,12 +6,14 @@ from definitions import (COUNTRIES, STAGES, THEMES, PROJECTIONS, RESOLUTIONS,
                          EXTENTS, RDF_URI)
 
 
-COUNTRY_MAP    = dict(COUNTRIES)
-STAGE_MAP      = dict(STAGES)
-THEME_MAP      = dict(THEMES)
-PROJECTION_MAP = dict(PROJECTIONS)
-RESOLUTION_MAP = dict(RESOLUTIONS)
-EXTENT_MAP     = dict(EXTENTS)
+metadata_rdf_fields = [
+    (RDF_URI['locality'], 'country', dict(COUNTRIES)),
+    (RDF_URI['extent'], 'extent', dict(EXTENTS)),
+    (RDF_URI['projection'], 'projection', dict(PROJECTIONS)),
+    (RDF_URI['resolution'], 'resolution', dict(RESOLUTIONS)),
+    (RDF_URI['theme'], 'theme', dict(THEMES)),
+    (RDF_URI['stage'], 'stage', dict(STAGES)),
+]
 
 
 log = logging.getLogger(__name__)
@@ -61,14 +63,12 @@ def prepare_notification_rdf(item):
         (RDF_URI['title'], "%s (%s)" % (item.title, parcel.name)),
         (RDF_URI['identifier'], parcel_url),
         (RDF_URI['date'], item.time.strftime('%Y-%b-%d %H:%M:%S')),
-        (RDF_URI['locality'], COUNTRY_MAP.get(metadata['country'], "")),
         (RDF_URI['actor'], item.actor),
-        (RDF_URI['stage'], STAGE_MAP.get(metadata['stage'], "")),
-        (RDF_URI['theme'], THEME_MAP.get(metadata['theme'], "")),
-        (RDF_URI['projection'], PROJECTION_MAP.get(metadata['projection'], "")),
-        (RDF_URI['resolution'], RESOLUTION_MAP.get(metadata['resolution'], "")),
-        (RDF_URI['extent'], EXTENT_MAP.get(metadata['extent'], "")),
     ]
+
+    for rdf_uri, metadata_name, value_map in metadata_rdf_fields:
+        value = value_map.get(metadata[metadata_name], "")
+        event_data.append((rdf_uri, value))
 
     return [[event_id, pred, obj] for pred, obj in event_data]
 
