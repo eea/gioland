@@ -74,4 +74,11 @@
 {% endfor %}
 </ul>
 
+{% if g.username %}
+  <form method="post" action="{{ url_for('parcel.comment', name=parcel.name) }}"
+  <strong>Comment</strong>
+  <textarea name="comment" class="comment"></textarea>
+  <button>Add comment</button>
+{% endif %}
+
 {% endblock %}

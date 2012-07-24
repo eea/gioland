@@ -1,3 +1,4 @@
+from cgi import escape
 import flask
 import blinker
 from datetime import datetime
@@ -138,6 +139,24 @@ def delete(name):
             return flask.redirect(flask.url_for('parcel.index'))
         else:
             return flask.render_template('parcel_delete.html', name=name)
+
+
+@parcel_views.route('/parcel/<string:name>/comment', methods=['POST'])
+def comment(name):
+    with warehouse() as wh:
+        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+        if not flask.g.username:
+            return flask.abort(403)
+
+        comment = flask.request.form.get("comment", "").strip()
+        comment = escape(comment)
+        if comment:
+            add_history_item_and_notify(
+                parcel, "Comment", datetime.utcnow(),
+                flask.g.username, comment)
+            transaction.commit()
+
+    return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
 def walk_parcels(wh, name, metadata_key='next_parcel'):
