@@ -19,6 +19,14 @@ def create_mock_app(warehouse_path=None):
         flask.session['username'] = flask.request.form['username']
         return "ok"
 
+    @app.route('/test_logout')
+    def test_logout():
+        try:
+            del flask.session['username']
+        except KeyError:
+            pass
+        return "ok"
+
     return app
 
 
