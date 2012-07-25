@@ -6,6 +6,8 @@
     {% include "eionet/headstyles.html" %}
     <link rel="stylesheet" media="screen"
           href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+    {% block scripts %}{% endblock %}
   </head>
 
   <body>

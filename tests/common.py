@@ -54,3 +54,14 @@ def record_events(signal):
         yield events
     finally:
         signal.disconnect(_record)
+
+
+def select(container, selector):
+    """ Select elements using CSS """
+    import lxml.html, lxml.cssselect
+    if isinstance(container, basestring):
+        doc = lxml.html.fromstring(container.decode('utf-8'))
+    else:
+        doc = container
+    xpath = lxml.cssselect.CSSSelector(selector)
+    return xpath(doc)
