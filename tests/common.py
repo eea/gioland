@@ -24,10 +24,9 @@ def create_mock_app(warehouse_path=None):
 
 @contextmanager
 def get_warehouse(app):
-    import parcel
+    import warehouse
     with app.test_request_context():
-        with parcel.warehouse() as wh:
-            yield wh
+        yield warehouse.get_warehouse()
 
 
 def authorization_patch():

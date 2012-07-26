@@ -27,7 +27,7 @@ class ParcelTest(unittest.TestCase):
         self.wh_path = self.tmp/'warehouse'
         self.parcels_path = self.wh_path/'parcels'
         wh_connector = warehouse.WarehouseConnector(self.wh_path)
-        self.wh, warehouse_cleanup = wh_connector.get_warehouse()
+        self.wh, warehouse_cleanup = wh_connector.open_warehouse()
         self.addCleanup(warehouse_cleanup)
 
     def test_warehouse_initially_empty(self):
@@ -117,7 +117,7 @@ class UploadTest(unittest.TestCase):
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
 
     def get_warehouse(self):
-        wh, warehouse_cleanup = self.wh_connector.get_warehouse()
+        wh, warehouse_cleanup = self.wh_connector.open_warehouse()
         self.addCleanup(warehouse_cleanup)
         return wh
 
@@ -160,7 +160,7 @@ class UploadFinalizationTest(unittest.TestCase):
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
 
     def get_warehouse(self):
-        wh, warehouse_cleanup = self.wh_connector.get_warehouse()
+        wh, warehouse_cleanup = self.wh_connector.open_warehouse()
         self.addCleanup(warehouse_cleanup)
         return wh
 
@@ -229,7 +229,7 @@ class DeleteParcelTest(unittest.TestCase):
         self.addCleanup(self.tmp.rmtree)
         self.wh_path = self.tmp/'warehouse'
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
-        self.wh, warehouse_cleanup = self.wh_connector.get_warehouse()
+        self.wh, warehouse_cleanup = self.wh_connector.open_warehouse()
         self.addCleanup(warehouse_cleanup)
 
     def test_delete_removes_parcel_from_list(self):
@@ -299,26 +299,26 @@ class RequesetTransactionTest(unittest.TestCase):
         import parcel
         @self.app.route('/change_something', methods=['POST'])
         def change_something():
-            wh = parcel.get_warehouse()
+            wh = warehouse.get_warehouse()
             wh.test_value = 'asdf'
             return 'ok'
 
         self.client.post('/change_something')
 
         with self.app.test_request_context():
-            wh = parcel.get_warehouse()
+            wh = warehouse.get_warehouse()
             self.assertEqual(wh.test_value, 'asdf')
 
     def test_rollback_on_error(self):
         import parcel
         @self.app.route('/change_something', methods=['POST'])
         def change_something():
-            wh = parcel.get_warehouse()
+            wh = warehouse.get_warehouse()
             wh.test_value = 'asdf'
             raise ValueError
 
         self.assertRaises(ValueError, self.client.post, '/change_something')
 
         with self.app.test_request_context():
-            wh = parcel.get_warehouse()
+            wh = warehouse.get_warehouse()
             self.assertFalse(hasattr(wh, 'test_value'))

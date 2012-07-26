@@ -150,7 +150,7 @@ class WarehouseConnector(object):
             self._db = DB(storage)
         return self._db
 
-    def get_warehouse(self):
+    def open_warehouse(self):
         global log_number
 
         conn = self._get_db().open()
@@ -183,7 +183,7 @@ class WarehouseConnector(object):
 
     @contextmanager
     def warehouse(self):
-        warehouse, cleanup = self.get_warehouse()
+        warehouse, cleanup = self.open_warehouse()
         try:
             yield warehouse
         finally:
@@ -194,7 +194,7 @@ def get_warehouse():
     import flask
     if not hasattr(flask.g, 'warehouse'):
         wc = flask.current_app.extensions['warehouse_connector']
-        warehouse, cleanup = wc.get_warehouse()
+        warehouse, cleanup = wc.open_warehouse()
         flask.g.warehouse = warehouse
         flask.g.warehouse_cleanup = cleanup
     return flask.g.warehouse
