@@ -1,7 +1,6 @@
 import flask
 import blinker
 from datetime import datetime
-from contextlib import contextmanager
 import transaction
 from path import path
 from dateutil import tz
@@ -29,22 +28,22 @@ def index():
 
 @parcel_views.route('/overview')
 def overview():
-    with warehouse() as wh:
-        all_parcels = [p for p in chain_tails(wh)]
-        return flask.render_template('overview.html', **{
-            'all_parcels': all_parcels,
-        })
+    wh = get_warehouse()
+    all_parcels = [p for p in chain_tails(wh)]
+    return flask.render_template('overview.html', **{
+        'all_parcels': all_parcels,
+    })
 
 
 @parcel_views.route('/country/<string:code>')
 def country(code):
-    with warehouse() as wh:
-        all_parcels = [p for p in chain_tails(wh)
-                       if p.metadata['country'] == code]
-        return flask.render_template('country.html', **{
-            'code': code,
-            'all_parcels': all_parcels,
-        })
+    wh = get_warehouse()
+    all_parcels = [p for p in chain_tails(wh)
+                   if p.metadata['country'] == code]
+    return flask.render_template('country.html', **{
+        'code': code,
+        'all_parcels': all_parcels,
+    })
 
 
 @parcel_views.route('/parcel/new', methods=['GET', 'POST'])
@@ -53,18 +52,17 @@ def new():
         if not authorize_for_parcel(None):
             return flask.abort(403)
 
-        with warehouse() as wh:
-            form = flask.request.form.to_dict()
-            metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
-            metadata['stage'] = INITIAL_STAGE
-            parcel = wh.new_parcel()
-            parcel.save_metadata(metadata)
-            add_history_item_and_notify(
-                parcel, "New upload", datetime.utcnow(), flask.g.username, "")
-            parcel_created.send(parcel)
-            transaction.commit()
-            url = flask.url_for('parcel.view', name=parcel.name)
-            return flask.redirect(url)
+        wh = get_warehouse()
+        form = flask.request.form.to_dict()
+        metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
+        metadata['stage'] = INITIAL_STAGE
+        parcel = wh.new_parcel()
+        parcel.save_metadata(metadata)
+        add_history_item_and_notify(
+            parcel, "New upload", datetime.utcnow(), flask.g.username, "")
+        parcel_created.send(parcel)
+        url = flask.url_for('parcel.view', name=parcel.name)
+        return flask.redirect(url)
 
     else:
         return flask.render_template('parcel_new.html')
@@ -73,54 +71,53 @@ def new():
 @parcel_views.route('/parcel/<string:name>/file', methods=['POST'])
 def upload(name):
     posted_file = flask.request.files['file']
-    with warehouse() as wh:
-        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        if not authorize_for_parcel(parcel):
-            return flask.abort(403)
-        if not parcel.uploading:
-            flask.abort(403)
-        # TODO make sure filename is safe and within the folder
-        filename = posted_file.filename.rsplit('/', 1)[-1]
-        posted_file.save(parcel.get_path() / filename)
-        file_uploaded.send(parcel, filename=filename)
-        return flask.redirect(flask.url_for('parcel.view', name=name))
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    if not authorize_for_parcel(parcel):
+        return flask.abort(403)
+    if not parcel.uploading:
+        flask.abort(403)
+    # TODO make sure filename is safe and within the folder
+    filename = posted_file.filename.rsplit('/', 1)[-1]
+    posted_file.save(parcel.get_path() / filename)
+    file_uploaded.send(parcel, filename=filename)
+    return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
 @parcel_views.route('/parcel/<string:name>/finalize', methods=['GET', 'POST'])
 def finalize(name):
-    with warehouse() as wh:
-        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        if not authorize_for_parcel(parcel):
-            return flask.abort(403)
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    if not authorize_for_parcel(parcel):
+        return flask.abort(403)
 
-        reject = bool(flask.request.values.get('reject'))
+    reject = bool(flask.request.values.get('reject'))
 
-        if flask.request.method == "POST":
-            finalize_parcel(wh, parcel, reject)
-            transaction.commit()
-            url = flask.url_for('parcel.view', name=parcel.name)
-            return flask.redirect(url)
+    if flask.request.method == "POST":
+        finalize_parcel(wh, parcel, reject)
+        url = flask.url_for('parcel.view', name=parcel.name)
+        return flask.redirect(url)
 
-        else:
-            return flask.render_template("parcel_confirm_finalize.html",
-                                         reject=reject)
+    else:
+        return flask.render_template("parcel_confirm_finalize.html",
+                                     reject=reject)
 
 
 @parcel_views.route('/parcel/<string:name>')
 def view(name):
-    with warehouse() as wh:
-        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        return flask.render_template('parcel.html', parcel=parcel)
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    return flask.render_template('parcel.html', parcel=parcel)
 
 
 @parcel_views.route('/parcel/<string:name>/download/<string:filename>')
 def download(name, filename):
     from werkzeug.security import safe_join
-    with warehouse() as wh:
-        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        file_path = safe_join(parcel.get_path(), filename)
-        if not path(file_path).isfile():
-            flask.abort(404)
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    file_path = safe_join(parcel.get_path(), filename)
+    if not path(file_path).isfile():
+        flask.abort(404)
     return flask.send_file(file_path,
                            as_attachment=True,
                            attachment_filename=filename)
@@ -128,18 +125,17 @@ def download(name, filename):
 
 @parcel_views.route('/parcel/<string:name>/delete', methods=['GET', 'POST'])
 def delete(name):
-    with warehouse() as wh:
-        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        if not auth.authorize(['ROLE_ADMIN']):
-            return flask.abort(403)
-        if flask.request.method == 'POST':
-            wh.delete_parcel(name)
-            parcel_deleted.send(parcel)
-            transaction.commit()
-            flask.flash("Parcel %s was deleted." % name, 'system')
-            return flask.redirect(flask.url_for('parcel.index'))
-        else:
-            return flask.render_template('parcel_delete.html', name=name)
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    if not auth.authorize(['ROLE_ADMIN']):
+        return flask.abort(403)
+    if flask.request.method == 'POST':
+        wh.delete_parcel(name)
+        parcel_deleted.send(parcel)
+        flask.flash("Parcel %s was deleted." % name, 'system')
+        return flask.redirect(flask.url_for('parcel.index'))
+    else:
+        return flask.render_template('parcel_delete.html', name=name)
 
 
 def walk_parcels(wh, name, metadata_key='next_parcel'):
@@ -158,20 +154,20 @@ def add_history_item_and_notify(parcel, *args, **kwargs):
 
 @parcel_views.route('/parcel/<string:name>/chain')
 def chain(name):
-    with warehouse() as wh:
-        first_parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    wh = get_warehouse()
+    first_parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
 
-        previous_parcels = list(walk_parcels(wh, name, 'prev_parcel'))
-        if len(previous_parcels) > 1:
-            first_parcel = previous_parcels[-1]
-            url = flask.url_for('parcel.chain', name=first_parcel.name)
-            return flask.redirect(url)
+    previous_parcels = list(walk_parcels(wh, name, 'prev_parcel'))
+    if len(previous_parcels) > 1:
+        first_parcel = previous_parcels[-1]
+        url = flask.url_for('parcel.chain', name=first_parcel.name)
+        return flask.redirect(url)
 
-        workflow_parcels = list(walk_parcels(wh, name))
-        return flask.render_template('parcel_chain.html', **{
-            'first_parcel': first_parcel,
-            'workflow_parcels': workflow_parcels,
-        })
+    workflow_parcels = list(walk_parcels(wh, name))
+    return flask.render_template('parcel_chain.html', **{
+        'first_parcel': first_parcel,
+        'workflow_parcels': workflow_parcels,
+    })
 
 
 @parcel_views.route('/subscribe', methods=['GET', 'POST'])
@@ -188,11 +184,6 @@ def subscribe():
         return flask.redirect(flask.url_for('parcel.index'))
 
     return flask.render_template('subscribe.html')
-
-
-@contextmanager
-def warehouse():
-    yield get_warehouse()
 
 
 def get_or_404(func, *args, **kwargs):

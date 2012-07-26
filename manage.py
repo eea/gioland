@@ -20,10 +20,12 @@ default_config = {
 
 
 def register_monitoring_views(app):
+    import warehouse
+
     @app.route('/ping')
     def ping():
-        with flask.current_app.extensions['warehouse_connector'].warehouse():
-            return 'gioland is ok'
+        wh = warehouse.get_warehouse()
+        return 'gioland is ok'
 
     @app.route('/crash')
     def crash():
@@ -167,15 +169,18 @@ def shell(warehouse=False):
 
     app = flask._request_ctx_stack.top.app
     context = {'app': app}
+
     if warehouse:
-        import parcel
+        import warehouse
         import transaction
-        with parcel.warehouse() as wh:
-            context['wh'] = wh
-            context['transaction'] = transaction
-            run()
-    else:
+        context['wh'] = warehouse.get_warehouse()
+        context['transaction'] = transaction
+
+    try:
         run()
+
+    finally:
+        transaction.abort()
 
 
 @manager.command

@@ -1,6 +1,5 @@
 import tempfile
 import hashlib
-from contextlib import contextmanager
 from datetime import datetime
 import logging, logging.handlers
 from persistent.list import PersistentList
@@ -180,14 +179,6 @@ class WarehouseConnector(object):
         _ensure_dir(warehouse.parcels_path)
 
         return warehouse, cleanup
-
-    @contextmanager
-    def warehouse(self):
-        warehouse, cleanup = self.open_warehouse()
-        try:
-            yield warehouse
-        finally:
-            cleanup()
 
 
 def get_warehouse():

@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 from datetime import datetime
+from contextlib import contextmanager
 from path import path
 import transaction
 import flask
@@ -78,8 +79,16 @@ class ZodbPersistenceTest(unittest.TestCase):
         self.parcels_path = self.wh_path/'parcels'
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
 
+    @contextmanager
+    def warehouse(self):
+        warehouse, cleanup = self.wh_connector.open_warehouse()
+        try:
+            yield warehouse
+        finally:
+            cleanup()
+
     def test_saved_parcel_files_are_persisted(self):
-        with self.wh_connector.warehouse() as wh1:
+        with self.warehouse() as wh1:
             wh1.new_parcel()
             self.assertEqual(len(list(wh1.get_all_parcels())), 1)
             [parcel_1] = wh1.get_all_parcels()
@@ -87,7 +96,7 @@ class ZodbPersistenceTest(unittest.TestCase):
             (parcel_path_1/'one').write_text("hello world")
             transaction.commit()
 
-        with self.wh_connector.warehouse() as wh2:
+        with self.warehouse() as wh2:
             self.assertEqual(len(list(wh2.get_all_parcels())), 1)
             [parcel] = wh2.get_all_parcels()
             parcel_path = parcel.get_path()
@@ -96,13 +105,13 @@ class ZodbPersistenceTest(unittest.TestCase):
             self.assertEqual((parcel_path/'one').text(), "hello world")
 
     def test_saved_parcel_metadata_is_persisted(self):
-        with self.wh_connector.warehouse() as wh1:
+        with self.warehouse() as wh1:
             parcel = wh1.new_parcel()
             parcel.save_metadata({'hello': 'world'})
             self.assertEqual(len(list(wh1.get_all_parcels())), 1)
             transaction.commit()
 
-        with self.wh_connector.warehouse() as wh2:
+        with self.warehouse() as wh2:
             [parcel] = wh2.get_all_parcels()
             self.assertEqual(parcel.metadata, {'hello': 'world'})
 

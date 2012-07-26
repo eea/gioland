@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 from StringIO import StringIO
-import transaction
 from path import path
 from mock import patch, call
 import flask
@@ -10,6 +9,7 @@ from common import create_mock_app, record_events
 
 def setUpModule(self):
     import parcel; self.parcel = parcel
+    import warehouse; self.warehouse = warehouse
 
 
 class PermisionsTest(unittest.TestCase):
@@ -34,9 +34,8 @@ class PermisionsTest(unittest.TestCase):
 
         if stage is not None:
             with self.app.test_request_context():
-                with parcel.warehouse() as wh:
-                    wh.get_parcel(parcel_name).metadata['stage'] = stage
-                    transaction.commit()
+                wh = warehouse.get_warehouse()
+                wh.get_parcel(parcel_name).metadata['stage'] = stage
 
         return parcel_name
 
