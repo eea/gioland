@@ -4,6 +4,7 @@ from StringIO import StringIO
 import transaction
 from path import path
 from mock import patch, call
+import flask
 from common import create_mock_app, record_events
 
 
@@ -23,7 +24,7 @@ class PermisionsTest(unittest.TestCase):
         self.client.post('/test_login', data={'username': 'somebody'})
 
     def add_to_role(self, username, role_name):
-        self.app.config.setdefault(role_name, []).append(username)
+        self.app.config.setdefault(role_name, []).append('user_id:' + username)
 
     def create_parcel(self, stage=None):
         with patch('auth.authorize'):
@@ -232,3 +233,14 @@ class RolesTest(unittest.TestCase):
         self.assertEqual(roles, ['eionet', 'eionet-nfp', 'eionet-nfp-dk'])
         self.assertEqual(mock_udb.member_roles_info.mock_calls,
                          [call('user', 'somebody')])
+
+    def test_authorize_looks_into_ldap_groups(self):
+        import auth
+        mock_udb = self.mock_UsersDB.return_value
+        mock_udb.member_roles_info.return_value = [('eionet-nrc', None)]
+        self.app.config['ROLE_NRC'] = ['ldap_group:eionet-nrc']
+
+        with self.app.test_request_context():
+            flask.g.username = 'somebody'
+            self.assertFalse(auth.authorize(['ROLE_ETC']))
+            self.assertTrue(auth.authorize(['ROLE_NRC']))

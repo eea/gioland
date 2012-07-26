@@ -2,6 +2,7 @@
 
 import logging
 import code
+import copy
 import flask
 import flaskext.script
 
@@ -14,6 +15,7 @@ default_config = {
     'BASE_URL': "",
     'UNS_CHANNEL_ID': 0,
     'UNS_SUPPRESS_NOTIFICATIONS': True,
+    'ROLE_ADMIN': [],
 }
 
 
@@ -33,7 +35,7 @@ def create_app(config={}, testing=False):
     import parcel
     import warehouse
     app = flask.Flask(__name__, instance_relative_config=True)
-    app.config.update(default_config)
+    app.config.update(copy.deepcopy(default_config))
     if testing:
         app.config['TESTING'] = True
     else:

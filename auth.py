@@ -54,9 +54,23 @@ def ldap_bind(user_id, password):
 
 
 def authorize(role_names):
+    user_id = flask.g.username
     config = flask.current_app.config
-    return any(flask.g.username in config.get(role_name, [])
-               for role_name in role_names)
+
+    def has_role(role_name):
+        for principal in config.get(role_name, []):
+            if principal == 'user_id:' + user_id:
+                return True
+
+            elif principal.startswith('ldap_group:'):
+                group_name = principal[len('ldap_group:'):]
+                if group_name in get_ldap_groups(user_id):
+                    return True
+
+        else:
+            return False
+
+    return any(has_role(role_name) for role_name in role_names)
 
 
 def register_on(app):
