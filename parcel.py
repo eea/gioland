@@ -1,6 +1,7 @@
 import flask
 import blinker
 from datetime import datetime
+from contextlib import contextmanager
 import transaction
 from path import path
 from dateutil import tz
@@ -9,6 +10,7 @@ from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
                          PROJECTIONS, RESOLUTIONS, EXTENTS)
 import notification
 import auth
+from warehouse import get_warehouse
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -188,8 +190,9 @@ def subscribe():
     return flask.render_template('subscribe.html')
 
 
+@contextmanager
 def warehouse():
-    return flask.current_app.extensions['warehouse_connector'].warehouse()
+    yield get_warehouse()
 
 
 def get_or_404(func, *args, **kwargs):

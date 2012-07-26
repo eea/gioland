@@ -3,6 +3,8 @@ import tempfile
 from datetime import datetime
 from path import path
 import transaction
+import flask
+from common import create_mock_app
 
 
 BAD_METADATA_VALUES = [
@@ -282,3 +284,41 @@ class ParcelHistoryTest(unittest.TestCase):
         item = parcel.add_history_item("Big bang", datetime.utcnow(),
                                        'somebody', "first thing")
         self.assertEqual(parcel.history, [item])
+
+
+class RequesetTransactionTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = path(tempfile.mkdtemp())
+        self.addCleanup(self.tmp.rmtree)
+        self.wh_path = self.tmp / 'warehouse'
+        self.app = create_mock_app(self.wh_path)
+        self.client = self.app.test_client()
+
+    def test_commit_on_success(self):
+        import parcel
+        @self.app.route('/change_something', methods=['POST'])
+        def change_something():
+            wh = parcel.get_warehouse()
+            wh.test_value = 'asdf'
+            return 'ok'
+
+        self.client.post('/change_something')
+
+        with self.app.test_request_context():
+            wh = parcel.get_warehouse()
+            self.assertEqual(wh.test_value, 'asdf')
+
+    def test_rollback_on_error(self):
+        import parcel
+        @self.app.route('/change_something', methods=['POST'])
+        def change_something():
+            wh = parcel.get_warehouse()
+            wh.test_value = 'asdf'
+            raise ValueError
+
+        self.assertRaises(ValueError, self.client.post, '/change_something')
+
+        with self.app.test_request_context():
+            wh = parcel.get_warehouse()
+            self.assertFalse(hasattr(wh, 'test_value'))

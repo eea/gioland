@@ -190,6 +190,28 @@ class WarehouseConnector(object):
             cleanup()
 
 
+def get_warehouse():
+    import flask
+    if not hasattr(flask.g, 'warehouse'):
+        wc = flask.current_app.extensions['warehouse_connector']
+        warehouse, cleanup = wc.get_warehouse()
+        flask.g.warehouse = warehouse
+        flask.g.warehouse_cleanup = cleanup
+    return flask.g.warehouse
+
+
+def _cleanup_warehouse(err=None):
+    import flask
+    if hasattr(flask.g, 'warehouse'):
+        if err is None:
+            transaction.commit()
+        else:
+            transaction.abort()
+        flask.g.warehouse_cleanup()
+        del flask.g.warehouse
+        del flask.g.warehouse_cleanup
+
+
 def initialize_app(app):
     import flask
     import auth
@@ -199,6 +221,7 @@ def initialize_app(app):
 
     connector = WarehouseConnector(app.config['WAREHOUSE_PATH'])
     app.extensions['warehouse_connector'] = connector
+    app.teardown_request(_cleanup_warehouse)
 
     @app.route('/zodb_pack', methods=['GET', 'POST'])
     def zodb_pack():
