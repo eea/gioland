@@ -3,7 +3,7 @@ import tempfile
 from StringIO import StringIO
 import transaction
 from path import path
-from mock import patch
+from mock import patch, call
 from common import create_mock_app, record_events
 
 
@@ -197,3 +197,38 @@ class PermisionsTest(unittest.TestCase):
         self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel()
         self.assertTrue(self.try_delete(name))
+
+
+class RolesTest(unittest.TestCase):
+
+    def setUp(self):
+        self.app = create_mock_app()
+        self.app.config['LDAP_SERVER'] = 'ldap://some.ldap.server'
+        UsersDB_patch = patch('auth.UsersDB')
+        self.mock_UsersDB = UsersDB_patch.start()
+        self.addCleanup(UsersDB_patch.stop)
+
+    def test_users_db_connection(self):
+        import auth
+        mock_udb = self.mock_UsersDB.return_value
+        mock_udb.member_roles_info.return_value = []
+        with self.app.test_request_context():
+            auth.get_ldap_groups('somebody')
+        self.assertEqual(self.mock_UsersDB.mock_calls[0],
+                         call(ldap_server='some.ldap.server'))
+
+    def test_role_list_fetched_from_ldap(self):
+        import auth
+        mock_udb = self.mock_UsersDB.return_value
+        mock_udb.member_roles_info.return_value = [
+            ('eionet', None),
+            ('eionet-nfp', None),
+            ('eionet-nfp-dk', None),
+        ]
+
+        with self.app.test_request_context():
+            roles = auth.get_ldap_groups('somebody')
+
+        self.assertEqual(roles, ['eionet', 'eionet-nfp', 'eionet-nfp-dk'])
+        self.assertEqual(mock_udb.member_roles_info.mock_calls,
+                         [call('user', 'somebody')])

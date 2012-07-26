@@ -1,5 +1,7 @@
+import urlparse
 import flask
 import ldap
+from eea.usersdb import UsersDB
 
 
 auth_views = flask.Blueprint('auth', __name__)
@@ -60,3 +62,10 @@ def authorize(role_names):
 def register_on(app):
     app.register_blueprint(auth_views)
     app.before_request(set_user)
+
+
+def get_ldap_groups(user_id):
+    app = flask.current_app
+    ldap_server = urlparse.urlsplit(app.config['LDAP_SERVER']).netloc
+    udb = UsersDB(ldap_server=ldap_server)
+    return [r for r, _info in udb.member_roles_info('user', user_id)]
