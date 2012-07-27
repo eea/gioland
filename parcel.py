@@ -1,6 +1,8 @@
+import os
 from cgi import escape
 import flask
 import blinker
+from werkzeug.utils import secure_filename
 from datetime import datetime
 import transaction
 from path import path
@@ -80,10 +82,18 @@ def upload(name):
         return flask.abort(403)
     if not parcel.uploading:
         flask.abort(403)
-    # TODO make sure filename is safe and within the folder
-    filename = posted_file.filename.rsplit('/', 1)[-1]
-    posted_file.save(parcel.get_path() / filename)
-    file_uploaded.send(parcel, filename=filename)
+
+    filename = secure_filename(posted_file.filename)
+    file_path = flask.safe_join(parcel.get_path(), filename)
+    try:
+        with open(file_path) as f: pass
+        flask.flash("File %s already exists." % filename, 'system')
+    except IOError:
+        if posted_file:
+            posted_file.save(file_path)
+            file_uploaded.send(parcel, filename=filename)
+        else:
+            flask.flash("Please upload a valid file", 'system')
     return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
@@ -139,6 +149,31 @@ def delete(name):
         return flask.redirect(flask.url_for('parcel.index'))
     else:
         return flask.render_template('parcel_delete.html', name=name)
+
+
+@parcel_views.route('/parcel/<string:name>/file/<string:filename>',
+                    methods=['GET', 'POST'])
+def delete_file(name, filename):
+    with warehouse() as wh:
+        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+        if not authorize_for_parcel(parcel):
+            return flask.abort(403)
+        if not parcel.uploading:
+            flask.abort(403)
+
+        if flask.request.method == 'POST':
+            filename = secure_filename(filename)
+            file_path = flask.safe_join(parcel.get_path(), filename)
+            try:
+                os.unlink(file_path)
+                flask.flash("File %s was deleted." % name, 'system')
+            except OSError:
+                flask.flash("File %s was not deleted." % name, 'system')
+            return flask.redirect(flask.url_for('parcel.view', name=name))
+        else:
+            return flask.render_template('parcel_file_delete.html',
+                                         name=name,
+                                         filename=filename)
 
 
 @parcel_views.route('/parcel/<string:name>/comment', methods=['POST'])

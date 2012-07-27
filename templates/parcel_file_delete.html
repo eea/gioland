@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h2>Existing files</h2>
+
+<p>Delete file <em>{{ filename }}</em> from parcel <em>{{ name }}</em>?</p>
+
+<form method="post">
+  <button type="submit">Yes, delete</button>
+  <a href="{{ url_for('parcel.view', name=name) }}">Cancel</a>
+</form>
+
+{% endblock %}
