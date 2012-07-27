@@ -48,6 +48,9 @@ def create_app(config={}, testing=False):
     auth.register_on(app)
     parcel.register_on(app)
     register_monitoring_views(app)
+    if app.config.get('SENTRY_DSN'):
+        from raven.contrib.flask import Sentry
+        app.extensions['_sentry_instance'] = Sentry(app)
     return app
 
 
@@ -126,6 +129,7 @@ def get_configuration_from_sarge():
     config['DEPLOYMENT_NAME'] = services[1]['DEPLOYMENT_NAME']
     config['DEFAULT_MAIL_SENDER'] = services[1]['DEFAULT_MAIL_SENDER']
     config['ERROR_MAIL_RECIPIENTS'] = services[1]['ERROR_MAIL_RECIPIENTS']
+    config['SENTRY_DSN'] = services[1]['SENTRY_DSN']
     config['SECRET_KEY'] = str(services[2]['SECRET_KEY'])
     config['ROLE_SERVICE_PROVIDER'] = services[3]['sp']
     config['ROLE_ETC'] = services[3]['etc']

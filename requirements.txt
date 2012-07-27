@@ -19,3 +19,5 @@ python-dateutil==2.0
 eea.usersdb==1.1.0
 colander==0.9.8
 translationstring==1.1
+raven==2.0.3
+simplejson==2.4.0
