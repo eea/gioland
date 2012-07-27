@@ -45,7 +45,7 @@
 
   {% if files %}
 
-    <ul>
+    <ul id="files-table">
     {% for file_path in files %}
       <li>
       {% if parcel %}
@@ -56,6 +56,11 @@
         {{ file_path.name }}
       {% endif %}
       ({{ file_path.getsize() }} bytes)
+      {% if parcel.uploading and authorize_for_parcel(parcel) %}
+        <a href="{{ url_for('parcel.delete_file', name=parcel.name,
+                            filename=file_path.name ) }}"
+           class="delete-file">Delete</a>
+      {% endif %}
       </li>
     {% endfor %}
     </ul>

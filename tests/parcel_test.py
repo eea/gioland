@@ -40,6 +40,38 @@ class ParcelTest(unittest.TestCase):
         resp = client.get('/parcel/%s/download/data.gml' % parcel_name)
         self.assertEqual(resp.data, map_data)
 
+    def test_delete_file(self):
+        map_data = 'teh map data'
+        client = self.app.test_client()
+        client.post('/test_login', data={'username': 'somebody'})
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.new_parcel()
+            parcel.save_metadata({'stage': 'vch'}) # verification check
+
+            (parcel.get_path()/'data.gml').write_text(map_data)
+            transaction.commit()
+
+            resp = client.post('/parcel/%s/file/%s' % (parcel.name, 'data.gml'))
+            self.assertEqual(302, resp.status_code)
+            parcel.finalize()
+            transaction.commit()
+
+    def test_delete_file_forbidden(self):
+        map_data = 'teh map data'
+        client = self.app.test_client()
+        client.post('/test_login', data={'username': 'somebody'})
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.new_parcel()
+            parcel.save_metadata({'stage': 'vch'}) # verification check
+            (parcel.get_path()/'data.gml').write_text(map_data)
+            parcel.finalize()
+            transaction.commit()
+
+            resp = client.post('/parcel/%s/file/%s' % (parcel.name, 'data.gml'))
+            self.assertEqual(403, resp.status_code)
+
     def test_finalize_triggers_next_step_with_forward_backward_references(self):
         with get_warehouse(self.app) as wh:
             parcel = wh.new_parcel()
