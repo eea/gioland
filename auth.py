@@ -55,6 +55,8 @@ def ldap_bind(user_id, password):
 
 def authorize(role_names):
     user_id = flask.g.username
+    if user_id is None:
+        return False
     config = flask.current_app.config
 
     def has_role(role_name):

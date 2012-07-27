@@ -243,3 +243,10 @@ class RolesTest(unittest.TestCase):
             flask.g.username = 'somebody'
             self.assertFalse(auth.authorize(['ROLE_ETC']))
             self.assertTrue(auth.authorize(['ROLE_NRC']))
+
+    def test_authorize_for_anonymous_returns_false(self):
+        import auth
+        self.app.config['ROLE_ETC'] = ['user_id:somebody']
+        with self.app.test_request_context():
+            self.app.preprocess_request()
+            self.assertFalse(auth.authorize(['ROLE_ETC']))
