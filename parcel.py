@@ -154,43 +154,42 @@ def delete(name):
 @parcel_views.route('/parcel/<string:name>/file/<string:filename>',
                     methods=['GET', 'POST'])
 def delete_file(name, filename):
-    with warehouse() as wh:
-        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        if not authorize_for_parcel(parcel):
-            return flask.abort(403)
-        if not parcel.uploading:
-            flask.abort(403)
+    wh = get_warehouse()
 
-        if flask.request.method == 'POST':
-            filename = secure_filename(filename)
-            file_path = flask.safe_join(parcel.get_path(), filename)
-            try:
-                os.unlink(file_path)
-                flask.flash("File %s was deleted." % name, 'system')
-            except OSError:
-                flask.flash("File %s was not deleted." % name, 'system')
-            return flask.redirect(flask.url_for('parcel.view', name=name))
-        else:
-            return flask.render_template('parcel_file_delete.html',
-                                         name=name,
-                                         filename=filename)
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    if not authorize_for_parcel(parcel):
+        return flask.abort(403)
+    if not parcel.uploading:
+        flask.abort(403)
+
+    if flask.request.method == 'POST':
+        filename = secure_filename(filename)
+        file_path = flask.safe_join(parcel.get_path(), filename)
+        try:
+            os.unlink(file_path)
+            flask.flash("File %s was deleted." % name, 'system')
+        except OSError:
+            flask.flash("File %s was not deleted." % name, 'system')
+        return flask.redirect(flask.url_for('parcel.view', name=name))
+    else:
+        return flask.render_template('parcel_file_delete.html',
+                                     name=name,
+                                     filename=filename)
 
 
 @parcel_views.route('/parcel/<string:name>/comment', methods=['POST'])
 def comment(name):
-    with warehouse() as wh:
-        parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-        if not flask.g.username:
-            return flask.abort(403)
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    if not flask.g.username:
+        return flask.abort(403)
 
-        comment = flask.request.form.get("comment", "").strip()
-        comment = escape(comment)
-        if comment:
-            add_history_item_and_notify(
-                parcel, "Comment", datetime.utcnow(),
-                flask.g.username, comment)
-            transaction.commit()
-
+    comment = flask.request.form.get("comment", "").strip()
+    comment = escape(comment)
+    if comment:
+        add_history_item_and_notify(
+            parcel, "Comment", datetime.utcnow(),
+            flask.g.username, comment)
     return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
