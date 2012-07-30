@@ -2,9 +2,17 @@ import urlparse
 import flask
 import ldap
 from eea.usersdb import UsersDB
+from beaker.cache import CacheManager
+from beaker.util import parse_cache_config_options
 
 
 auth_views = flask.Blueprint('auth', __name__)
+
+
+cache = CacheManager(**parse_cache_config_options({
+    'cache.type': 'memory',
+    'cache.expire': '300',
+}))
 
 
 def set_user():
@@ -92,6 +100,7 @@ def register_on(app):
     app.before_request(set_user)
 
 
+@cache.cache('get_ldap_groups')
 def get_ldap_groups(user_id):
     app = flask.current_app
     ldap_server = urlparse.urlsplit(app.config['LDAP_SERVER']).netloc
