@@ -23,11 +23,17 @@
 {{ metadata_table(metadata) }}
 
 <h2>Files</h2>
-{{ files_table(parcel.get_path(), parcel=parcel) }}
 
-{% if parcel.uploading %}
+{% if parcel.uploading and authorize_for_parcel(parcel) %}
+  {% set file_authorize = True %}
+{% else %}
+  {% set file_authorize = False %}
+{% endif %}
 
-  {% if authorize_for_parcel(parcel) %}
+{{ files_table(parcel.get_path(), parcel=parcel,
+               delete_buttons=file_authorize) }}
+
+{% if file_authorize %}
 
     <form method="post" enctype="multipart/form-data"
           action="{{ url_for('parcel.upload', name=parcel.name) }}">
@@ -51,8 +57,6 @@
       {% endif %}
 
     </form>
-
-  {% endif %}
 
 {% endif %}
 

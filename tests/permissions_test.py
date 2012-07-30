@@ -90,6 +90,18 @@ class PermisionsTest(unittest.TestCase):
         else:
             self.fail('unexpected http status code')
 
+    def try_delete_file(self, parcel_name, filename):
+        with record_events(parcel.parcel_file_deleted) as deleted_parcel_files:
+            post_resp = self.client.post('/parcel/%s/file/%s/delete' %
+                                        (parcel_name, filename))
+        if post_resp.status_code == 403:
+            self.assertEqual(len(deleted_parcel_files), 0)
+            return False
+        elif post_resp.status_code == 302:
+            self.assertEqual(len(deleted_parcel_files), 1)
+            return True
+        else:
+            self.fail('unexpected http status code')
 
     def test_random_user_not_allowed_to_begin_upload(self):
         self.assertFalse(self.try_new_parcel())
@@ -193,10 +205,24 @@ class PermisionsTest(unittest.TestCase):
         name = self.create_parcel()
         self.assertFalse(self.try_delete(name))
 
-    def test_admin_user_not_allowed_to_delete_parcel(self):
+    def test_admin_user_allowed_to_delete_parcel(self):
         self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel()
         self.assertTrue(self.try_delete(name))
+
+
+    def test_random_user_not_allowed_to_delete_file_from_parcel(self):
+        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        name = self.create_parcel()
+        self.try_upload(name)
+        self.app.config["ROLE_SERVICE_PROVIDER"] = []
+        self.assertFalse(self.try_delete_file(name, 'y.txt'))
+
+    def test_admin_user_allowed_to_delete_file_from_parcel(self):
+        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        name = self.create_parcel()
+        self.try_upload(name)
+        self.assertTrue(self.try_delete_file(name, 'y.txt'))
 
 
 class RolesTest(unittest.TestCase):

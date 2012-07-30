@@ -39,7 +39,7 @@
 {% endmacro %}
 
 
-{% macro files_table(folder_path, parcel=None) %}
+{% macro files_table(folder_path, parcel=None, delete_buttons=False) %}
 
   {% set files = folder_path.listdir() %}
 
@@ -56,6 +56,11 @@
         {{ file_path.name }}
       {% endif %}
       ({{ file_path.getsize() }} bytes)
+      {% if delete_buttons %}
+        <a href="{{ url_for('parcel.delete_file', name=parcel.name,
+                            filename=file_path.name ) }}"
+           class="delete-file">Delete</a>
+      {% endif %}
       </li>
     {% endfor %}
     </ul>
