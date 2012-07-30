@@ -1,5 +1,14 @@
 {% extends "layout.html" %}
 
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+  ]) }}
+{% endblock %}
+
+
 {% block page_heading %}
   <h1>High Resolution Layers</h1>
 {% endblock %}

@@ -1,5 +1,18 @@
 {% extends "layout.html" %}
 
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.view', name=first_parcel.name),
+             THEME_MAP[first_parcel.metadata["theme"]]),
+    (url_for('parcel.chain', name=first_parcel.name),
+             "High Resolution Layers - workflow overview")
+  ]) }}
+{% endblock %}
+
+
 {% block page_heading %}
   <h1>High Resolution Layers &mdash; workflow overview</h1>
 {% endblock %}

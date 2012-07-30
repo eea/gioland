@@ -1,14 +1,28 @@
 {% extends "layout.html" %}
 
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.view', name=parcel.name),
+             THEME_MAP[parcel.metadata["theme"]]),
+    (url_for('parcel.delete_file', name=parcel.name,
+    		 filename=filename), 'Delete file'),
+  ]) }}
+{% endblock %}
+
+
 {% block content %}
 
 <h2>Existing files</h2>
 
-<p>Delete file <em>{{ filename }}</em> from parcel <em>{{ name }}</em>?</p>
+<p>Delete file <em>{{ filename }}</em> from parcel
+	<em>{{ parcel.name }}</em>?</p>
 
 <form method="post">
   <button type="submit">Yes, delete</button>
-  <a href="{{ url_for('parcel.view', name=name) }}">Cancel</a>
+  <a href="{{ url_for('parcel.view', name=parcel.name) }}">Cancel</a>
 </form>
 
 {% endblock %}

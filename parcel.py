@@ -147,7 +147,7 @@ def delete(name):
         flask.flash("Parcel %s was deleted." % name, 'system')
         return flask.redirect(flask.url_for('parcel.index'))
     else:
-        return flask.render_template('parcel_delete.html', name=name)
+        return flask.render_template('parcel_delete.html', parcel=parcel)
 
 
 @parcel_views.route('/parcel/<string:name>/file/<string:filename>/delete',
@@ -173,7 +173,7 @@ def delete_file(name, filename):
         return flask.redirect(flask.url_for('parcel.view', name=name))
     else:
         return flask.render_template('parcel_file_delete.html',
-                                     name=name,
+                                     parcel=parcel,
                                      filename=filename)
 
 

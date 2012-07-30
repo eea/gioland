@@ -1,5 +1,15 @@
 {% extends "layout.html" %}
 
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.new'), 'New upload'),
+  ]) }}
+{% endblock %}
+
+
 {% block page_heading %}
   <h1>New upload</h1>
 {% endblock %}

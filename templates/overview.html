@@ -1,5 +1,15 @@
 {% extends "layout.html" %}
 
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.overview'), 'High Resolution Layers - overview'),
+  ]) }}
+{% endblock %}
+
+
 {% block scripts %}
     <script src="{{ url_for('static', filename='uri.js') }}"></script>
     <script>

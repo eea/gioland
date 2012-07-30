@@ -1,10 +1,22 @@
 {% extends "layout.html" %}
 
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.view', name=parcel.name),
+             THEME_MAP[parcel.metadata["theme"]]),
+    (url_for('parcel.delete', name=parcel.name), 'Delete parcel'),
+  ]) }}
+{% endblock %}
+
+
 {% block content %}
 
 <h2>Existing files</h2>
 
-<p>Delete parcel <em>{{ name }}</em>?</p>
+<p>Delete parcel <em>{{ parcel.name }}</em>?</p>
 
 <form method="post">
   <button type="submit">Yes, delete</button>

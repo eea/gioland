@@ -1,12 +1,20 @@
 {% extends "layout.html" %}
+{% from 'bits.html' import metadata_table, files_table with context %}
+{% from 'bits.html' import breadcrumb_items %}
 
 {% block page_heading %}
   <h1>High Resolution Layers</h1>
 {% endblock %}
 
-{% block content %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.view', name=parcel.name),
+             THEME_MAP[parcel.metadata["theme"]],)
+  ]) }}
+{% endblock %}
 
-{% from 'bits.html' import metadata_table, files_table with context %}
+{% block content %}
 
 <p>
   {% set overview_url = url_for('parcel.chain', name=parcel.name) %}

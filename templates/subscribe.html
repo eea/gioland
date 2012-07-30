@@ -1,6 +1,16 @@
 {% extends "layout.html" %}
 
 
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.subscribe'),
+             "High Resolution Layers - notifications via UNS"),
+  ]) }}
+{% endblock %}
+
+
 {% block page_heading %}
   <h1>High Resolution Layers &ndash; notifications via UNS</h1>
 {% endblock %}
