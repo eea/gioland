@@ -83,7 +83,7 @@ manager = flaskext.script.Manager(create_app)
 
 
 def _set_up_logging(app):
-    root_logger = logging.getLogger()
+    import notification
 
     stderr_handler = logging.StreamHandler()
     stderr_handler.level = logging.INFO
@@ -91,8 +91,9 @@ def _set_up_logging(app):
                                 "%(levelname)s %(message)s")
     stderr_handler.setFormatter(log_fmt)
     app.logger.addHandler(stderr_handler)
-    root_logger.setLevel(logging.INFO)
-    root_logger.addHandler(stderr_handler)
+
+    notification.log.setLevel(logging.INFO)
+    notification.log.addHandler(stderr_handler)
 
     recipients = app.config.get('ERROR_MAIL_RECIPIENTS', [])
     if recipients:
