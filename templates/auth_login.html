@@ -24,4 +24,20 @@
 
   {% endif %}
 
+  {% if request.args.get('debug') == 'on' %}
+    <p>
+      Roles:
+      {% for role in ['ROLE_SERVICE_PROVIDER', 'ROLE_ETC',
+                      'ROLE_NRC', 'ROLE_ADMIN'] %}
+        {% if authorize([role]) %}<tt>{{ role }}</tt>{% endif %}
+      {% endfor %}
+    </p>
+    {% if authorize(['ROLE_ADMIN']) %}
+      <form action="{{ url_for('auth.impersonate') }}" method="post">
+        <input name="user_id">
+        <button type="submit">impersonate</button>
+      </form>
+    {% endif %}
+  {% endif %}
+
 {% endblock %}

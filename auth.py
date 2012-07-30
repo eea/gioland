@@ -38,6 +38,18 @@ def login():
     return flask.render_template('auth_login.html')
 
 
+@auth_views.route('/login/impersonate', methods=['POST'])
+def impersonate():
+    if not authorize(['ROLE_ADMIN']):
+        flask.abort(403)
+    user_id = flask.request.form['user_id']
+    flask.current_app.logger.warn("User %r impersonating %r",
+                                  flask.g.username, user_id)
+    flask.session['username'] = user_id
+    flask.flash("Login successful as %s" % user_id, 'system')
+    return flask.redirect(flask.url_for('auth.login'))
+
+
 def ldap_bind(user_id, password):
     app = flask.current_app
     conn = ldap.initialize(app.config['LDAP_SERVER'])
