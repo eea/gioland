@@ -182,3 +182,55 @@ class ParcelHistoryTest(unittest.TestCase):
             })
             self.assertIn(parcel1_name, item.description_html)
             self.assertIn("Intermediate", item.description_html)
+
+    def test_parcel_comment(self):
+        utcnow = datetime.utcnow()
+        self.mock_datetime.utcnow.return_value = utcnow
+
+        resp = self.client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+
+        comment = "test comment"
+        self.client.post('/parcel/%s/comment' % parcel_name,
+                         data={"comment": comment})
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.get_parcel(parcel_name)
+            self.check_history_item(parcel.history[1], {
+                'time': utcnow,
+                'title': "Comment",
+                'actor': "somebody",
+                'description_html': comment,
+            })
+
+    def test_parcel_comment_by_anonymous_forbidden(self):
+        utcnow = datetime.utcnow()
+        self.mock_datetime.utcnow.return_value = utcnow
+
+        resp = self.client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+
+        self.client.get('/test_logout')
+        comment = "test comment"
+        resp = self.client.post('/parcel/%s/comment' % parcel_name,
+                                data={"comment": comment})
+        self.assertEqual(403, resp.status_code)
+
+    def test_parcel_comment_html_entities_escaped(self):
+        utcnow = datetime.utcnow()
+        self.mock_datetime.utcnow.return_value = utcnow
+
+        resp = self.client.post('/parcel/new')
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+
+        comment = "<html>"
+        self.client.post('/parcel/%s/comment' % parcel_name,
+                         data={"comment": comment})
+
+        with get_warehouse(self.app) as wh:
+            parcel = wh.get_parcel(parcel_name)
+            self.check_history_item(parcel.history[1], {
+                'time': utcnow,
+                'description_html': "&lt;html&gt;",
+            })
+

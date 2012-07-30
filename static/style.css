@@ -33,3 +33,9 @@ a.delete-parcel {
 #workarea .history-item .history-item-description {
     margin: 0 0 10px 20px;
 }
+
+#workarea .comment {
+    margin: 5px 0;
+    width: 100%;
+    height: 60px;
+}
