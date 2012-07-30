@@ -16,6 +16,7 @@ default_config = {
     'UNS_CHANNEL_ID': 0,
     'UNS_SUPPRESS_NOTIFICATIONS': True,
     'ROLE_ADMIN': [],
+    'CACHING': False,
 }
 
 
@@ -36,6 +37,7 @@ def create_app(config={}, testing=False):
     import auth
     import parcel
     import warehouse
+    import utils
     app = flask.Flask(__name__, instance_relative_config=True)
     app.config.update(copy.deepcopy(default_config))
     if testing:
@@ -48,6 +50,7 @@ def create_app(config={}, testing=False):
     auth.register_on(app)
     parcel.register_on(app)
     register_monitoring_views(app)
+    utils.initialize_app(app)
     if app.config.get('SENTRY_DSN'):
         from raven.contrib.flask import Sentry
         app.extensions['_sentry_instance'] = Sentry(app)

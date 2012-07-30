@@ -2,6 +2,7 @@ import urlparse
 import flask
 import ldap
 from eea.usersdb import UsersDB
+from utils import cached
 
 
 auth_views = flask.Blueprint('auth', __name__)
@@ -92,6 +93,7 @@ def register_on(app):
     app.before_request(set_user)
 
 
+@cached(timeout=5*60)
 def get_ldap_groups(user_id):
     app = flask.current_app
     ldap_server = urlparse.urlsplit(app.config['LDAP_SERVER']).netloc
