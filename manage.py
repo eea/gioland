@@ -188,7 +188,8 @@ def shell(warehouse=False):
         run()
 
     finally:
-        transaction.abort()
+        if warehouse:
+            transaction.abort()
 
 
 @manager.command
