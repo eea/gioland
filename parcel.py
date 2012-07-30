@@ -30,9 +30,11 @@ def index():
 @parcel_views.route('/overview')
 def overview():
     wh = get_warehouse()
-    all_parcels = [p for p in chain_tails(wh)]
+    filter_arguments = {k:v for k,v in flask.request.args.items() \
+                        if k in METADATA_FIELDS and v }
+    parcels = filter_parcels(chain_tails(wh), **filter_arguments)
     return flask.render_template('overview.html', **{
-        'all_parcels': all_parcels,
+        'parcels': parcels,
     })
 
 
@@ -215,6 +217,12 @@ def chain_tails(wh):
     for parcel in wh.get_all_parcels():
         if 'next_parcel' not in parcel.metadata:
             yield parcel
+
+
+def filter_parcels(parcels, **kwargs):
+    for p in parcels:
+        if all(p.metadata.get(k) == v for k, v in kwargs.items()):
+            yield p
 
 
 def authorize_for_parcel(parcel):

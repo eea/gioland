@@ -4,7 +4,8 @@ from datetime import datetime
 from path import path
 import transaction
 from mock import patch
-from common import create_mock_app, get_warehouse, authorization_patch
+from common import (create_mock_app, get_warehouse, authorization_patch,
+                    select)
 
 
 class ParcelTest(unittest.TestCase):
@@ -109,6 +110,32 @@ class ParcelTest(unittest.TestCase):
         resp2 = client.get('/parcel/%s' % parcel_name)
         self.assertEqual(resp2.status_code, 404)
 
+    def test_filter_parcel(self):
+        with get_warehouse(self.app) as wh:
+            parcel1 = wh.new_parcel()
+            parcel2 = wh.new_parcel()
+
+            parcel1.metadata['country'] = 'ro'
+            parcel1.metadata['extent'] = 'partial'
+
+            parcel2.metadata['country'] = 'at'
+            transaction.commit()
+
+        client = self.app.test_client()
+        resp = client.get('/overview?country=ro&extent=partial')
+        rows = select(resp.data, ".datatable tbody tr")
+        self.assertEqual(1, len(rows))
+
+    def test_filter_parcel_empty(self):
+        with get_warehouse(self.app) as wh:
+            parcel1 = wh.new_parcel()
+            parcel1.metadata['country'] = 'ro'
+            transaction.commit()
+
+        client = self.app.test_client()
+        resp = client.get('/overview?country=ro&extent=partial')
+        data = select(resp.data, ".datatable tbody tr")
+        self.assertEqual(0, len(data))
 
 class ParcelHistoryTest(unittest.TestCase):
 

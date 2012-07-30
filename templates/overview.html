@@ -1,5 +1,33 @@
 {% extends "layout.html" %}
 
+{% block scripts %}
+    <script src="{{ url_for('static', filename='uri.js') }}"></script>
+    <script>
+      function filter() {
+    			var uri = URI(document.location.href);
+    			var name = $(this).attr("name");
+    			var val = $(this).val();
+
+    			uri.removeSearch(name);
+    			if(val) { uri.addSearch(name, val); }
+    			document.location = uri.href();
+      }
+
+      function default_select_filters() {
+      	var uri = URI(document.location.href);
+      	var query = URI.parseQuery(uri.query());
+      	$.each(query, function (k, v) {
+      		$("#filter-" + k).find("option[value=" + v + "]")
+      									   .attr("selected", "selected");
+      	});
+      }
+
+    	$(document).ready(function () {
+    		$(".filters").on("change", "select", filter);
+    		default_select_filters();
+    	});
+    </script>
+{% endblock %}
 
 {% block page_heading %}
   <h1>High Resolution Layers &ndash; overview</h1>
@@ -14,6 +42,8 @@
     <p><a href="{{ url_for('parcel.new') }}">Begin a new upload</a></p>
   {% endif %}
 
-  {{ parcels_table(all_parcels) }}
+  {% include "overview_filter.html" %}
+
+  {{ parcels_table(parcels) }}
 
 {% endblock %}

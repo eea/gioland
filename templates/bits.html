@@ -100,8 +100,11 @@
 {% endmacro %}
 
 
-{% macro pick_from_list(id, name, items) -%}
+{% macro pick_from_list(id, name, items, any=False) -%}
   <select id="{{ id }}" name="{{ name }}">
+  {% if any %}
+    <option value="">Any {{ name|title }}</option>
+  {% endif %}
   {% for key, label in items %}
     <option value="{{ key }}">{{ label }}</option>
   {% endfor %}
