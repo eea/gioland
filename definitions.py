@@ -18,7 +18,7 @@ STAGES = OrderedDict([
     ('enh', dict(label="Enhancement", roles=['ROLE_NRC'])),
     ('ech', dict(label="Enhancement check", roles=['ROLE_ETC'], reject=True)),
     ('fin', dict(label="Final integrated", roles=[])),
-    ('fva', dict(label="Final validated", roles=[])),
+    ('fva', dict(label="Final validated", roles=[], last=True)),
 ])
 
 

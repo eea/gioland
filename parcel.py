@@ -78,10 +78,13 @@ def upload(name):
     posted_file = flask.request.files['file']
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    stage = STAGES[parcel.metadata['stage']]
     if not authorize_for_parcel(parcel):
         return flask.abort(403)
     if not parcel.uploading:
         flask.abort(403)
+    if stage.get('last'):
+        return flask.abort(403)
 
     filename = secure_filename(posted_file.filename)
     file_path = flask.safe_join(parcel.get_path(), filename)
@@ -100,7 +103,10 @@ def upload(name):
 def finalize(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    stage = STAGES[parcel.metadata['stage']]
     if not authorize_for_parcel(parcel):
+        return flask.abort(403)
+    if stage.get('last'):
         return flask.abort(403)
 
     reject = bool(flask.request.values.get('reject'))

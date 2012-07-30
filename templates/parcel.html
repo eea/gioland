@@ -30,6 +30,8 @@
 {% set metadata = parcel.metadata %}
 {{ metadata_table(metadata) }}
 
+{% if not STAGES[parcel.metadata['stage']]['last'] %}
+
 <h2>Files</h2>
 
 {% if parcel.uploading and authorize_for_parcel(parcel) %}
@@ -42,9 +44,8 @@
                delete_buttons=file_authorize) }}
 
 {% if file_authorize %}
-
-    <form method="post" enctype="multipart/form-data"
-          action="{{ url_for('parcel.upload', name=parcel.name) }}">
+  <form method="post" enctype="multipart/form-data"
+        action="{{ url_for('parcel.upload', name=parcel.name) }}">
       <label for="form-upload-file">Add file</label>
       <input id="form-upload-file" type="file" name="file">
       <input type="submit" value="Upload">
@@ -65,6 +66,7 @@
       {% endif %}
 
     </form>
+{% endif %}
 
 {% endif %}
 

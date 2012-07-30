@@ -64,6 +64,13 @@ class ParcelTest(unittest.TestCase):
             resp = self.try_upload(parcel.name)
             self.assertEqual(1, len(select(resp.data, '.system-msg')))
 
+    def test_upload_file_on_final_stage_forbidden(self):
+        client = self.app.test_client()
+        parcel_name = self.create_parcel_at_stage('fva')
+        with self.app.test_request_context():
+            resp = self.try_upload(parcel_name)
+            self.assertEqual(403, resp.status_code)
+
     def test_delete_file(self):
         map_data = 'teh map data'
         client = self.app.test_client()
@@ -154,6 +161,12 @@ class ParcelTest(unittest.TestCase):
                 parcel = wh.get_parcel(parcel_name)
                 next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
                 self.assertEqual(next_parcel.metadata['stage'], prev_stage)
+
+    def test_finalize_last_parcel_forbidden(self):
+        client = self.app.test_client()
+        parcel_name = self.create_parcel_at_stage('fva')
+        resp = client.post('/parcel/%s/finalize' % parcel_name)
+        self.assertEqual(403, resp.status_code)
 
     def test_delete_parcel(self):
         client = self.app.test_client()
