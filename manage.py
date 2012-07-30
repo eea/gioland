@@ -193,6 +193,22 @@ def shell(warehouse=False):
 
 
 @manager.command
+def fsck():
+    from warehouse import get_warehouse, checksum
+    from parcel import chain_tails
+
+    wh = get_warehouse()
+    parcels = wh.get_all_parcels()
+
+    for parcel in parcels:
+        folder_path = parcel.get_path()
+        files_checksum = checksum(folder_path)
+        if not files_checksum == getattr(parcel, 'checksum', []):
+            print "Checksum for parcel %r is wrong" % parcel.name
+    print "Finished checking for parcel checksums"
+
+
+@manager.command
 def runserver():
     app = flask.current_app
     stderr_handler = logging.StreamHandler()
