@@ -148,8 +148,14 @@ def delete(name):
     if not auth.authorize(['ROLE_ADMIN']):
         return flask.abort(403)
     if flask.request.method == 'POST':
-        wh.delete_parcel(name)
-        parcel_deleted.send(parcel)
+        parcels = set()
+        for p in walk_parcels(wh, parcel.name):
+            parcels.add(p)
+        for p in walk_parcels(wh, parcel.name, metadata_key='prev_parcel'):
+            parcels.add(p)
+        for p in parcels:
+            wh.delete_parcel(p.name)
+            parcel_deleted.send(p)
         flask.flash("Parcel %s was deleted." % name, 'system')
         return flask.redirect(flask.url_for('parcel.index'))
     else:

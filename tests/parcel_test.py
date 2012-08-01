@@ -169,13 +169,26 @@ class ParcelTest(unittest.TestCase):
         self.assertEqual(403, resp.status_code)
 
     def test_delete_parcel(self):
-        client = self.app.test_client()
-        resp = client.post('/parcel/new')
-        parcel_name = resp.location.rsplit('/', 1)[-1]
-        client.post('/parcel/%s/delete' % parcel_name)
+        parcel_name_1 = self.create_parcel_at_stage('ver')
+        parcel_name_2 = self.create_parcel_at_stage('vch')
 
-        resp2 = client.get('/parcel/%s' % parcel_name)
-        self.assertEqual(resp2.status_code, 404)
+        with get_warehouse(self.app) as wh:
+            parcel_1 = wh.get_parcel(parcel_name_1)
+            parcel_2 = wh.get_parcel(parcel_name_2)
+
+            parcel_1.save_metadata({'next_parcel': parcel_name_2})
+            parcel_1.finalize()
+            parcel_2.save_metadata({'prev_parcel': parcel_name_1})
+            transaction.commit()
+
+        client = self.app.test_client()
+        client.post('/parcel/%s/delete' % parcel_name_2)
+
+        resp = client.get('/parcel/%s' % parcel_name_2)
+        self.assertEqual(resp.status_code, 404)
+
+        resp = client.get('/parcel/%s' % parcel_name_1)
+        self.assertEqual(resp.status_code, 404)
 
     def test_filter_parcel(self):
         with get_warehouse(self.app) as wh:
