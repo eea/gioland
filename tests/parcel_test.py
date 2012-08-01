@@ -161,12 +161,24 @@ class ParcelTest(AppTestCase):
         self.assertEqual(403, resp.status_code)
 
     def test_delete_parcel(self):
-        client = self.app.test_client()
-        resp = client.post('/parcel/new')
-        parcel_name = resp.location.rsplit('/', 1)[-1]
-        client.post('/parcel/%s/delete' % parcel_name)
+        parcel_name_1 = self.create_parcel_at_stage('ver')
+        parcel_name_2 = self.create_parcel_at_stage('vch')
 
-        resp = client.get('/parcel/%s' % parcel_name)
+        with self.app.test_request_context():
+            parcel_1 = self.wh.get_parcel(parcel_name_1)
+            parcel_2 = self.wh.get_parcel(parcel_name_2)
+
+            parcel_1.save_metadata({'next_parcel': parcel_name_2})
+            parcel_1.finalize()
+            parcel_2.save_metadata({'prev_parcel': parcel_name_1})
+
+        client = self.app.test_client()
+        client.post('/parcel/%s/delete' % parcel_name_2)
+
+        resp = client.get('/parcel/%s' % parcel_name_2)
+        self.assertEqual(resp.status_code, 404)
+
+        resp = client.get('/parcel/%s' % parcel_name_1)
         self.assertEqual(resp.status_code, 404)
 
     def test_filter_parcel(self):

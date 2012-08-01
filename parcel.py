@@ -4,7 +4,6 @@ import flask
 import blinker
 from werkzeug.utils import secure_filename
 from datetime import datetime
-import transaction
 from path import path
 from dateutil import tz
 from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
@@ -148,8 +147,7 @@ def delete(name):
     if not auth.authorize(['ROLE_ADMIN']):
         return flask.abort(403)
     if flask.request.method == 'POST':
-        wh.delete_parcel(name)
-        parcel_deleted.send(parcel)
+        delete_parcel_chain(wh, parcel.name)
         flask.flash("Parcel %s was deleted." % name, 'system')
         return flask.redirect(flask.url_for('parcel.index'))
     else:
@@ -196,6 +194,17 @@ def comment(name):
             parcel, "Comment", datetime.utcnow(),
             flask.g.username, escape(comment))
     return flask.redirect(flask.url_for('parcel.view', name=name))
+
+
+def delete_parcel_chain(wh, name):
+    parcels = set()
+    for p in walk_parcels(wh, name):
+        parcels.add(p)
+    for p in walk_parcels(wh, name, metadata_key='prev_parcel'):
+        parcels.add(p)
+    for p in parcels:
+        wh.delete_parcel(p.name)
+        parcel_deleted.send(p)
 
 
 def walk_parcels(wh, name, metadata_key='next_parcel'):
