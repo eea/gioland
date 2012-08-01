@@ -180,6 +180,11 @@ class WarehouseConnector(object):
 
         return warehouse, cleanup
 
+    def close(self):
+        if self._db is not None:
+            self._db.close()
+            self._db = None
+
 
 def get_warehouse():
     import flask

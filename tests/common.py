@@ -78,6 +78,11 @@ class AppTestCase(unittest.TestCase):
         if self.CREATE_WAREHOUSE:
             self.wh_path = self.tmp / 'warehouse'
 
+            @self.addCleanup
+            def close_warehouse():
+                connector = self.app.extensions['warehouse_connector']
+                connector.close()
+
         self.app = create_mock_app(self.wh_path)
 
     def __call__(self, result=None):
