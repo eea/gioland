@@ -1,15 +1,14 @@
-import unittest
-import tempfile
 from datetime import datetime
 from StringIO import StringIO
-from path import path
 import transaction
 from mock import patch
-from common import (create_mock_app, get_warehouse, authorization_patch,
+from common import (AppTestCase, get_warehouse, authorization_patch,
                     select)
 
 
-class ParcelTest(unittest.TestCase):
+class ParcelTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
 
     METADATA = {
         'country': 'be',
@@ -20,10 +19,6 @@ class ParcelTest(unittest.TestCase):
     }
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
-        self.app = create_mock_app(self.wh_path)
         self.addCleanup(authorization_patch().stop)
 
     def test_download_file(self):
@@ -204,13 +199,11 @@ class ParcelTest(unittest.TestCase):
         data = select(resp.data, ".datatable tbody tr")
         self.assertEqual(0, len(data))
 
-class ParcelHistoryTest(unittest.TestCase):
+class ParcelHistoryTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
-        self.app = create_mock_app(self.wh_path)
         datetime_patch = patch('parcel.datetime')
         self.mock_datetime = datetime_patch.start()
         self.addCleanup(datetime_patch.stop)

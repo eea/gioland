@@ -1,10 +1,7 @@
-import unittest
-import tempfile
 from StringIO import StringIO
-from path import path
 from mock import patch, call
 import flask
-from common import create_mock_app, record_events
+from common import AppTestCase, record_events
 
 
 def setUpModule(self):
@@ -12,14 +9,11 @@ def setUpModule(self):
     import warehouse; self.warehouse = warehouse
 
 
-class PermisionsTest(unittest.TestCase):
+class PermisionsTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp / 'warehouse'
-        self.parcels_path = self.wh_path / 'parcels'
-        self.app = create_mock_app(self.wh_path)
         self.client = self.app.test_client()
         self.client.post('/test_login', data={'username': 'somebody'})
 
@@ -225,10 +219,9 @@ class PermisionsTest(unittest.TestCase):
         self.assertTrue(self.try_delete_file(name, 'y.txt'))
 
 
-class RolesTest(unittest.TestCase):
+class RolesTest(AppTestCase):
 
     def setUp(self):
-        self.app = create_mock_app()
         self.app.config['LDAP_SERVER'] = 'ldap://some.ldap.server'
         UsersDB_patch = patch('auth.UsersDB')
         self.mock_UsersDB = UsersDB_patch.start()

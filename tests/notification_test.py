@@ -1,22 +1,18 @@
-import unittest
-import tempfile
 from datetime import datetime
 from contextlib import contextmanager
 from mock import Mock, patch, call
-from common import create_mock_app, record_events, authorization_patch
-from path import path
+from common import AppTestCase, record_events, authorization_patch
 
 
 def setUpModule(self):
     import notification; self.notification = notification
 
 
-class NotificationDeliveryTest(unittest.TestCase):
+class NotificationDeliveryTest(AppTestCase):
 
     def setUp(self):
         import warehouse
 
-        self.app = create_mock_app()
         self.app.config['BASE_URL'] = 'http://example.com'
 
         self.utcnow = datetime.utcnow()
@@ -100,13 +96,11 @@ def event_title(event):
     return item.title
 
 
-class NotificationTriggerTest(unittest.TestCase):
+class NotificationTriggerTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp / 'warehouse'
-        self.app = create_mock_app(self.wh_path)
         self.addCleanup(authorization_patch().stop)
 
     def test_notification_triggered_on_new_parcel(self):
@@ -130,12 +124,9 @@ class NotificationTriggerTest(unittest.TestCase):
                                  ["Finalized", "Next stage"])
 
 
-class NotificationSubscriptionTest(unittest.TestCase):
+class NotificationSubscriptionTest(AppTestCase):
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.app = create_mock_app()
         self.channel_id = '1234'
         self.app.config['UNS_CHANNEL_ID'] = self.channel_id
         self.client = self.app.test_client()

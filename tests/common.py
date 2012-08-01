@@ -1,6 +1,9 @@
+import unittest
 from contextlib import contextmanager
+import tempfile
 import flask
 from mock import patch
+from path import path
 
 
 def create_mock_app(warehouse_path=None):
@@ -61,3 +64,22 @@ def select(container, selector):
         doc = container
     xpath = lxml.cssselect.CSSSelector(selector)
     return xpath(doc)
+
+
+class AppTestCase(unittest.TestCase):
+
+    CREATE_WAREHOUSE = False
+
+    def _pre_setup(self):
+        self.tmp = path(tempfile.mkdtemp())
+        self.addCleanup(self.tmp.rmtree)
+        self.wh_path = None
+
+        if self.CREATE_WAREHOUSE:
+            self.wh_path = self.tmp / 'warehouse'
+
+        self.app = create_mock_app(self.wh_path)
+
+    def __call__(self, result=None):
+        self._pre_setup()
+        super(AppTestCase, self).__call__(result)

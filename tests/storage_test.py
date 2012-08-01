@@ -4,8 +4,7 @@ from datetime import datetime
 from contextlib import contextmanager
 from path import path
 import transaction
-import flask
-from common import create_mock_app
+from common import AppTestCase
 
 
 BAD_METADATA_VALUES = [
@@ -295,13 +294,11 @@ class ParcelHistoryTest(unittest.TestCase):
         self.assertEqual(parcel.history, [item])
 
 
-class RequesetTransactionTest(unittest.TestCase):
+class RequesetTransactionTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp / 'warehouse'
-        self.app = create_mock_app(self.wh_path)
         self.client = self.app.test_client()
 
     def test_commit_on_success(self):

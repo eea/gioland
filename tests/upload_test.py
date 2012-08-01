@@ -1,12 +1,11 @@
-import unittest
-import tempfile
 from StringIO import StringIO
 import flask
-from path import path
-from common import create_mock_app, get_warehouse, authorization_patch
+from common import AppTestCase, get_warehouse, authorization_patch
 
 
-class UploadTest(unittest.TestCase):
+class UploadTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
 
     metadata = {
         'country': 'be',
@@ -17,11 +16,7 @@ class UploadTest(unittest.TestCase):
     }
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
         self.parcels_path = self.wh_path/'parcels'
-        self.app = create_mock_app(self.wh_path)
         self.addCleanup(authorization_patch().stop)
 
     def test_login(self):
