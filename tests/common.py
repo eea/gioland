@@ -30,13 +30,6 @@ def create_mock_app(warehouse_path=None):
     return app
 
 
-@contextmanager
-def get_warehouse(app):
-    import warehouse
-    with app.test_request_context():
-        yield warehouse.get_warehouse()
-
-
 def authorization_patch():
     authorize_patch = patch('auth.authorize')
     authorize_patch.start()
@@ -84,6 +77,11 @@ class AppTestCase(unittest.TestCase):
                 connector.close()
 
         self.app = create_mock_app(self.wh_path)
+
+    @property
+    def wh(self):
+        import warehouse
+        return warehouse.get_warehouse()
 
     def __call__(self, result=None):
         self._pre_setup()

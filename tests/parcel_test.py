@@ -1,9 +1,10 @@
+import unittest
+import tempfile
 from datetime import datetime
 from StringIO import StringIO
-import transaction
+from path import path
 from mock import patch
-from common import (AppTestCase, get_warehouse, authorization_patch,
-                    select)
+from common import (AppTestCase, create_mock_app, authorization_patch, select)
 
 
 class ParcelTest(AppTestCase):
@@ -26,11 +27,10 @@ class ParcelTest(AppTestCase):
         client = self.app.test_client()
         client.post('/test_login', data={'username': 'somebody'})
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel = self.wh.new_parcel()
             (parcel.get_path()/'data.gml').write_text(map_data)
             parcel.finalize()
-            transaction.commit()
             parcel_name = parcel.name
 
         resp = client.get('/parcel/%s/download/data.gml' % parcel_name)
@@ -44,16 +44,17 @@ class ParcelTest(AppTestCase):
         return resp
 
     def test_upload_file(self):
-        with get_warehouse(self.app) as wh:
-            parcel = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel = self.wh.new_parcel()
             parcel.save_metadata({'stage': 'sch'})
         resp = self.try_upload(parcel.name)
         self.assertEqual(200, resp.status_code)
 
     def test_reupload_file_generates_message_error(self):
-        with get_warehouse(self.app) as wh:
-            parcel = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel = self.wh.new_parcel()
             parcel.save_metadata({'stage': 'sch'})
+
         with self.app.test_request_context():
             self.try_upload(parcel.name)
             resp = self.try_upload(parcel.name)
@@ -71,12 +72,11 @@ class ParcelTest(AppTestCase):
         client = self.app.test_client()
         client.post('/test_login', data={'username': 'somebody'})
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel = self.wh.new_parcel()
             parcel.save_metadata({'stage': 'vch'}) # verification check
 
             (parcel.get_path()/'data.gml').write_text(map_data)
-            transaction.commit()
 
         resp = client.post('/parcel/%s/file/%s/delete' % (parcel.name, 'data.gml'))
         self.assertEqual(302, resp.status_code)
@@ -86,32 +86,30 @@ class ParcelTest(AppTestCase):
         client = self.app.test_client()
         client.post('/test_login', data={'username': 'somebody'})
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel = self.wh.new_parcel()
             parcel.save_metadata({'stage': 'vch'}) # verification check
             (parcel.get_path()/'data.gml').write_text(map_data)
             parcel.finalize()
-            transaction.commit()
 
-            resp = client.post('/parcel/%s/file/%s/delete' % (parcel.name, 'data.gml'))
-            self.assertEqual(403, resp.status_code)
+        resp = client.post('/parcel/%s/file/%s/delete' % (parcel.name, 'data.gml'))
+        self.assertEqual(403, resp.status_code)
 
     def test_finalize_triggers_next_step_with_forward_backward_references(self):
-        with get_warehouse(self.app) as wh:
-            parcel = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel = self.wh.new_parcel()
             parcel.save_metadata(self.METADATA)
             parcel.save_metadata({'stage': 'vch'}) # verification check
-            transaction.commit()
             parcel_name = parcel.name
 
         client = self.app.test_client()
         client.post('/parcel/%s/finalize' % parcel_name)
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.assertIn('next_parcel', parcel.metadata)
             next_parcel_name = parcel.metadata['next_parcel']
-            next_parcel = wh.get_parcel(next_parcel_name)
+            next_parcel = self.wh.get_parcel(next_parcel_name)
             self.assertEqual(next_parcel.metadata['prev_parcel'], parcel.name)
             self.assertEqual(next_parcel.metadata['stage'], 'enh') # enhancement
 
@@ -121,19 +119,18 @@ class ParcelTest(AppTestCase):
         parcel_name = resp.location.rsplit('/', 1)[-1]
         client.post('/parcel/%s/finalize' % parcel_name)
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
-            next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
             self.assertDictContainsSubset(self.METADATA, next_parcel.metadata)
 
     def create_parcel_at_stage(self, stage):
         client = self.app.test_client()
         resp = client.post('/parcel/new')
         parcel_name = resp.location.rsplit('/', 1)[-1]
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             parcel.metadata['stage'] = stage
-            transaction.commit()
         return parcel_name
 
     def test_finalize_with_reject_disallowed_for_most_stages(self):
@@ -152,9 +149,9 @@ class ParcelTest(AppTestCase):
             parcel_name = self.create_parcel_at_stage(stage)
             resp = client.post('/parcel/%s/finalize' % parcel_name,
                                data={'reject': 'on'})
-            with get_warehouse(self.app) as wh:
-                parcel = wh.get_parcel(parcel_name)
-                next_parcel = wh.get_parcel(parcel.metadata['next_parcel'])
+            with self.app.test_request_context():
+                parcel = self.wh.get_parcel(parcel_name)
+                next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
                 self.assertEqual(next_parcel.metadata['stage'], prev_stage)
 
     def test_finalize_last_parcel_forbidden(self):
@@ -169,19 +166,18 @@ class ParcelTest(AppTestCase):
         parcel_name = resp.location.rsplit('/', 1)[-1]
         client.post('/parcel/%s/delete' % parcel_name)
 
-        resp2 = client.get('/parcel/%s' % parcel_name)
-        self.assertEqual(resp2.status_code, 404)
+        resp = client.get('/parcel/%s' % parcel_name)
+        self.assertEqual(resp.status_code, 404)
 
     def test_filter_parcel(self):
-        with get_warehouse(self.app) as wh:
-            parcel1 = wh.new_parcel()
-            parcel2 = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel1 = self.wh.new_parcel()
+            parcel2 = self.wh.new_parcel()
 
             parcel1.metadata['country'] = 'ro'
             parcel1.metadata['extent'] = 'partial'
 
             parcel2.metadata['country'] = 'at'
-            transaction.commit()
 
         client = self.app.test_client()
         resp = client.get('/overview?country=ro&extent=partial')
@@ -189,10 +185,9 @@ class ParcelTest(AppTestCase):
         self.assertEqual(1, len(rows))
 
     def test_filter_parcel_empty(self):
-        with get_warehouse(self.app) as wh:
-            parcel1 = wh.new_parcel()
+        with self.app.test_request_context():
+            parcel1 = self.wh.new_parcel()
             parcel1.metadata['country'] = 'ro'
-            transaction.commit()
 
         client = self.app.test_client()
         resp = client.get('/overview?country=ro&extent=partial')
@@ -222,8 +217,8 @@ class ParcelHistoryTest(AppTestCase):
         resp = self.client.post('/parcel/new')
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.check_history_item(parcel.history[0], {
                 'time': utcnow,
                 'title': "New upload",
@@ -238,8 +233,8 @@ class ParcelHistoryTest(AppTestCase):
         parcel_name = resp.location.rsplit('/', 1)[-1]
         self.client.post('/parcel/%s/finalize' % parcel_name)
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             item = parcel.history[-1]
             self.check_history_item(item, {
                 'time': utcnow,
@@ -258,9 +253,9 @@ class ParcelHistoryTest(AppTestCase):
         parcel1_name = resp.location.rsplit('/', 1)[-1]
         self.client.post('/parcel/%s/finalize' % parcel1_name)
 
-        with get_warehouse(self.app) as wh:
-            parcel1 = wh.get_parcel(parcel1_name)
-            parcel2 = wh.get_parcel(parcel1.metadata['next_parcel'])
+        with self.app.test_request_context():
+            parcel1 = self.wh.get_parcel(parcel1_name)
+            parcel2 = self.wh.get_parcel(parcel1.metadata['next_parcel'])
             item = parcel2.history[0]
             self.check_history_item(item, {
                 'time': utcnow,
@@ -281,8 +276,8 @@ class ParcelHistoryTest(AppTestCase):
         self.client.post('/parcel/%s/comment' % parcel_name,
                          data={"comment": comment})
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.check_history_item(parcel.history[1], {
                 'time': utcnow,
                 'title': "Comment",
@@ -314,8 +309,8 @@ class ParcelHistoryTest(AppTestCase):
         self.client.post('/parcel/%s/comment' % parcel_name,
                          data={"comment": comment})
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.check_history_item(parcel.history[1], {
                 'time': utcnow,
                 'description_html': "&lt;html&gt;",

@@ -1,6 +1,6 @@
 from StringIO import StringIO
 import flask
-from common import AppTestCase, get_warehouse, authorization_patch
+from common import AppTestCase, authorization_patch
 
 
 class UploadTest(AppTestCase):
@@ -38,8 +38,8 @@ class UploadTest(AppTestCase):
         client = self.app.test_client()
         resp = client.post('/parcel/new', data=dict(self.metadata, bogus='not here'))
         parcel_name = resp.location.rsplit('/', 1)[-1]
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.assertDictContainsSubset(self.metadata, parcel.metadata)
             self.assertNotIn('bogus', parcel.metadata)
 
@@ -48,8 +48,8 @@ class UploadTest(AppTestCase):
         client.post('/test_login', data={'username': 'somebody'})
         resp = client.post('/parcel/new', data=self.metadata)
         parcel_name = resp.location.rsplit('/', 1)[-1]
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.assertEqual(parcel.metadata['stage'], 'int')
 
     def test_show_existing_files_in_parcel(self):
@@ -78,15 +78,15 @@ class UploadTest(AppTestCase):
         resp = client.post('/parcel/new')
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.assertTrue(parcel.uploading)
 
         resp2 = client.post('/parcel/%s/finalize' % parcel_name)
         parcel_name = resp2.location.rsplit('/', 1)[-1]
 
-        with get_warehouse(self.app) as wh:
-            parcel = wh.get_parcel(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
             self.assertFalse(parcel.uploading)
 
     def test_uploading_in_finalized_parcel_is_not_allowed(self):
