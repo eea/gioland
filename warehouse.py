@@ -1,14 +1,16 @@
 import tempfile
 import hashlib
 from datetime import datetime
-import logging, logging.handlers
+import logging
+import logging.handlers
 from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
 from BTrees.OOBTree import OOBTree
 from persistent import Persistent
 import transaction
 from path import path
-
+from definitions import (COUNTRIES, THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS,
+                         STAGES)
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +46,8 @@ def checksum(path):
         with open(p, 'rb') as f:
             while True:
                 data = f.read(BLOCK_SIZE)
-                if not data: break
+                if not data:
+                    break
                 md5.update(data)
             files.append((p.name, md5.hexdigest()))
     return files
@@ -69,7 +72,7 @@ class Parcel(Persistent):
             self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
 
     def get_path(self):
-        return self._warehouse.parcels_path/self.name
+        return self._warehouse.parcels_path / self.name
 
     def get_files(self):
         return self.get_path().listdir()
@@ -113,7 +116,7 @@ class Warehouse(Persistent):
 
     @property
     def parcels_path(self):
-        return self.fs_path/'parcels'
+        return self.fs_path / 'parcels'
 
     def new_parcel(self):
         parcel_path = path(tempfile.mkdtemp(prefix='', dir=self.parcels_path))
@@ -144,8 +147,8 @@ class WarehouseConnector(object):
         if self._db is None:
             from ZODB.DB import DB
             from ZODB.FileStorage import FileStorage
-            filestorage_path = _ensure_dir(self._fs_path/'filestorage')
-            storage = FileStorage(str(filestorage_path/'Data.fs'))
+            filestorage_path = _ensure_dir(self._fs_path / 'filestorage')
+            storage = FileStorage(str(filestorage_path / 'Data.fs'))
             self._db = DB(storage)
         return self._db
 
@@ -154,7 +157,7 @@ class WarehouseConnector(object):
 
         conn = self._get_db().open()
         transaction.begin()
-        handler = logging.handlers.WatchedFileHandler(self._fs_path/'activity.log')
+        handler = logging.handlers.WatchedFileHandler(self._fs_path / 'activity.log')
         handler.setLevel(logging.INFO)
         handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
 
