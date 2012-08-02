@@ -93,6 +93,7 @@ def notify(item):
                               app.config.get('UNS_SUPPRESS_NOTIFICATIONS'))
     if send_notifications:
         log.info("Notification via UNS for %s", rdf_triples[0][0])
+        log.debug("Notification data: %r", rdf_triples)
         uns = get_uns_proxy()
         uns.sendNotification(channel_id, rdf_triples)
     else:

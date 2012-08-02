@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+import os
 import logging
+from logging.handlers import SMTPHandler, WatchedFileHandler
 import code
 import copy
+from path import path
 import flask
 import flaskext.script
 
@@ -95,12 +98,27 @@ def _set_up_logging(app):
     stderr_handler.setFormatter(log_fmt)
     app.logger.addHandler(stderr_handler)
 
-    notification.log.setLevel(logging.INFO)
+    notification.log.setLevel(logging.DEBUG)
     notification.log.addHandler(stderr_handler)
+
+    if app.config.get('LOGGING_FOLDER'):
+        varlog = path(app.config['LOGGING_FOLDER'])
+
+        info_handler = WatchedFileHandler(varlog / 'info.log')
+        info_handler.setFormatter(log_fmt)
+        info_handler.setLevel(logging.INFO)
+        app.logger.addHandler(info_handler)
+        notification.log.addHandler(info_handler)
+
+        if app.config.get('LOGGING_DEBUG_LOG'):
+            debug_handler = WatchedFileHandler(varlog / 'debug.log')
+            debug_handler.setFormatter(log_fmt)
+            debug_handler.setLevel(logging.DEBUG)
+            app.logger.addHandler(debug_handler)
+            notification.log.addHandler(debug_handler)
 
     recipients = app.config.get('ERROR_MAIL_RECIPIENTS', [])
     if recipients:
-        from logging.handlers import SMTPHandler
         smtp_host = app.config.get('MAIL_SERVER', 'localhost')
         smtp_port = int(app.config.get('MAIL_PORT', 25))
 
@@ -117,9 +135,6 @@ def _set_up_logging(app):
 
 
 def get_configuration_from_sarge():
-    import os
-    from path import path
-
     if 'SARGEAPP_CFG' not in os.environ:
         return {}
 
@@ -131,6 +146,8 @@ def get_configuration_from_sarge():
 
     config['WAREHOUSE_PATH'] = path(services[0]['path'])
     config['DEPLOYMENT_NAME'] = services[1]['DEPLOYMENT_NAME']
+    config['LOGGING_FOLDER'] = services[1]['LOGGING_FOLDER']
+    config['LOGGING_DEBUG_LOG'] = services[1].get('LOGGING_DEBUG_LOG', False)
     config['DEFAULT_MAIL_SENDER'] = services[1]['DEFAULT_MAIL_SENDER']
     config['ERROR_MAIL_RECIPIENTS'] = services[1]['ERROR_MAIL_RECIPIENTS']
     config['SENTRY_DSN'] = services[1]['SENTRY_DSN']
