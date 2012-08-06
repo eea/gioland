@@ -23,6 +23,7 @@ parcel_finalized = parcel_signals.signal('parcel-finalized')
 parcel_deleted = parcel_signals.signal('parcel-deleted')
 parcel_file_deleted = parcel_signals.signal('parcel-file-deleted')
 
+
 @parcel_views.route('/')
 def index():
     return flask.render_template('index.html')
@@ -31,8 +32,8 @@ def index():
 @parcel_views.route('/overview')
 def overview():
     wh = get_warehouse()
-    filter_arguments = {k:v for k,v in flask.request.args.items() \
-                        if k in METADATA_FIELDS and v }
+    filter_arguments = {k: v for k, v in flask.request.args.items()
+                        if k in METADATA_FIELDS and v}
     parcels = filter_parcels(chain_tails(wh), **filter_arguments)
     return flask.render_template('overview.html', **{
         'parcels': parcels,
@@ -60,7 +61,11 @@ def new():
         form = flask.request.form.to_dict()
         metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
         metadata['stage'] = INITIAL_STAGE
+
         parcel = wh.new_parcel()
+        if not validate_metadata(metadata):
+            flask.abort(400)
+
         parcel.save_metadata(metadata)
         add_history_item_and_notify(
             parcel, "New upload", datetime.utcnow(), flask.g.username, "")
@@ -336,6 +341,20 @@ def finalize_parcel(wh, parcel, reject):
         flask.g.username, next_description_html)
 
     parcel_finalized.send(parcel, next_parcel=next_parcel)
+
+
+def validate_metadata(metadata):
+    data_map = dict(
+        zip(['country', 'theme', 'projection', 'resolution', 'extent',
+            'stage'],
+            [COUNTRIES, THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS,
+            STAGES])
+    )
+    for key, value in metadata.items():
+        if value and value in dict(data_map[key]).keys():
+            continue
+        return False
+    return True
 
 
 def register_on(app):

@@ -106,14 +106,14 @@ class NotificationTriggerTest(AppTestCase):
     def test_notification_triggered_on_new_parcel(self):
         with self.app.test_client() as client:
             with record_events(notification.uns_notification_sent) as events:
-                resp = client.post('/parcel/new')
+                resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
                 self.assertEqual(resp.status_code, 302)
                 self.assertEqual([event_title(e) for e in events],
                                  ["New upload"])
 
     def test_notification_triggered_twice_on_finalize_parcel(self):
         with self.app.test_client() as client:
-            resp_1 = client.post('/parcel/new')
+            resp_1 = client.post('/parcel/new', data=self.PARCEL_METADATA)
             self.assertEqual(resp_1.status_code, 302)
             parcel_name = resp_1.location.rsplit('/', 1)[-1]
 

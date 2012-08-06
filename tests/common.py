@@ -4,6 +4,7 @@ import tempfile
 import flask
 from mock import patch
 from path import path
+from werkzeug.datastructures import ImmutableDict
 
 
 def create_mock_app(warehouse_path=None):
@@ -63,6 +64,14 @@ def select(container, selector):
 class AppTestCase(unittest.TestCase):
 
     CREATE_WAREHOUSE = False
+
+    PARCEL_METADATA = ImmutableDict({
+        'country': 'be',
+        'theme': 'grc',
+        'projection': 'eur',
+        'resolution': '25m',
+        'extent': 'full',
+    })
 
     def _pre_setup(self):
         self.tmp = path(tempfile.mkdtemp())

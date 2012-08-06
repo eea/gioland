@@ -11,14 +11,6 @@ class ParcelTest(AppTestCase):
 
     CREATE_WAREHOUSE = True
 
-    METADATA = {
-        'country': 'be',
-        'theme': 'grc',
-        'projection': 'european',
-        'resolution': '25m',
-        'extent': 'full',
-    }
-
     def setUp(self):
         self.addCleanup(authorization_patch().stop)
 
@@ -98,7 +90,7 @@ class ParcelTest(AppTestCase):
     def test_finalize_triggers_next_step_with_forward_backward_references(self):
         with self.app.test_request_context():
             parcel = self.wh.new_parcel()
-            parcel.save_metadata(self.METADATA)
+            parcel.save_metadata(self.PARCEL_METADATA)
             parcel.save_metadata({'stage': 'vch'}) # verification check
             parcel_name = parcel.name
 
@@ -115,18 +107,25 @@ class ParcelTest(AppTestCase):
 
     def test_finalize_preserves_metadata(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/new', data=self.METADATA)
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         client.post('/parcel/%s/finalize' % parcel_name)
 
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
             next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
-            self.assertDictContainsSubset(self.METADATA, next_parcel.metadata)
+            self.assertDictContainsSubset(self.PARCEL_METADATA, next_parcel.metadata)
+
+    def test_parcel_with_corrupted_metadata_fails(self):
+        client = self.app.test_client()
+        metadata = dict(self.PARCEL_METADATA)
+        metadata['country'] = 'country'
+        resp = client.post('/parcel/new', data=metadata)
+        self.assertEqual(400, resp.status_code)
 
     def create_parcel_at_stage(self, stage):
         client = self.app.test_client()
-        resp = client.post('/parcel/new')
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
@@ -241,7 +240,7 @@ class ParcelHistoryTest(AppTestCase):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new')
+        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         with self.app.test_request_context():
@@ -256,7 +255,7 @@ class ParcelHistoryTest(AppTestCase):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new')
+        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         self.client.post('/parcel/%s/finalize' % parcel_name)
 
@@ -276,7 +275,7 @@ class ParcelHistoryTest(AppTestCase):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new')
+        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel1_name = resp.location.rsplit('/', 1)[-1]
         self.client.post('/parcel/%s/finalize' % parcel1_name)
 
@@ -296,7 +295,7 @@ class ParcelHistoryTest(AppTestCase):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new')
+        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         comment = "test comment"
@@ -316,7 +315,7 @@ class ParcelHistoryTest(AppTestCase):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new')
+        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         self.client.get('/test_logout')
@@ -329,7 +328,7 @@ class ParcelHistoryTest(AppTestCase):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new')
+        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         comment = "<html>"

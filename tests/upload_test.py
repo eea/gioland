@@ -7,14 +7,6 @@ class UploadTest(AppTestCase):
 
     CREATE_WAREHOUSE = True
 
-    metadata = {
-        'country': 'be',
-        'theme': 'grc',
-        'projection': 'european',
-        'resolution': '25m',
-        'extent': 'full',
-    }
-
     def setUp(self):
         self.parcels_path = self.wh_path/'parcels'
         self.addCleanup(authorization_patch().stop)
@@ -29,24 +21,24 @@ class UploadTest(AppTestCase):
 
     def test_begin_parcel_creates_folder(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/new')
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         self.assertIsNotNone(resp.location)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         self.assertTrue((self.parcels_path/parcel_name).isdir())
 
     def test_begin_parcel_saves_user_selected_metadata(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/new', data=dict(self.metadata, bogus='not here'))
+        resp = client.post('/parcel/new', data=dict(self.PARCEL_METADATA, bogus='not here'))
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
-            self.assertDictContainsSubset(self.metadata, parcel.metadata)
+            self.assertDictContainsSubset(self.PARCEL_METADATA, parcel.metadata)
             self.assertNotIn('bogus', parcel.metadata)
 
     def test_begin_parcel_saves_default_metadata(self):
         client = self.app.test_client()
         client.post('/test_login', data={'username': 'somebody'})
-        resp = client.post('/parcel/new', data=self.metadata)
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
@@ -54,7 +46,7 @@ class UploadTest(AppTestCase):
 
     def test_show_existing_files_in_parcel(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/new')
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         parcel_path = self.parcels_path/parcel_name
         (parcel_path/'some.txt').write_text('hello world')
@@ -64,7 +56,7 @@ class UploadTest(AppTestCase):
 
     def test_http_post_saves_file_in_parcel(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/new')
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         parcel_path = self.parcels_path/parcel_name
 
@@ -75,7 +67,7 @@ class UploadTest(AppTestCase):
 
     def test_finalize_changes_parceling_flag(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/new')
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         with self.app.test_request_context():
@@ -91,7 +83,7 @@ class UploadTest(AppTestCase):
 
     def test_uploading_in_finalized_parcel_is_not_allowed(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/new')
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         parcel_path = self.parcels_path/parcel_name
         client.post('/parcel/%s/finalize' % parcel_name)
