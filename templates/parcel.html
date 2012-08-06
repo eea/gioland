@@ -20,7 +20,7 @@
   {% set overview_url = url_for('parcel.chain', name=parcel.name) %}
   <a href="{{ overview_url }}">workflow overview</a>
 
-  {% if authorize(['ROLE_ADMIN']) %}
+  {% if authorize_for_parcel(parcel) and config['ALLOW_PARCEL_DELETION'] %}
     <a href="{{ url_for('parcel.delete', name=parcel.name) }}"
        class="delete-parcel">delete</a>
   {% endif %}

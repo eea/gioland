@@ -12,6 +12,7 @@ def create_mock_app(warehouse_path=None):
         'TESTING': True,
         'SECRET_KEY': 'asdf',
         'UNS_SUPPRESS_NOTIFICATIONS': False,
+        'ALLOW_PARCEL_DELETION': True,
     }
     if warehouse_path is not None:
         config['WAREHOUSE_PATH'] = str(warehouse_path)

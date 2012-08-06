@@ -143,9 +143,14 @@ def download(name, filename):
 @parcel_views.route('/parcel/<string:name>/delete', methods=['GET', 'POST'])
 def delete(name):
     wh = get_warehouse()
+    app = flask.current_app
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+
+    if not app.config['ALLOW_PARCEL_DELETION']:
+        flask.abort(403)
     if not auth.authorize(['ROLE_ADMIN']):
         return flask.abort(403)
+
     if flask.request.method == 'POST':
         delete_parcel_chain(wh, parcel.name)
         flask.flash("Parcel %s was deleted." % name, 'system')
@@ -158,10 +163,10 @@ def delete(name):
                     methods=['GET', 'POST'])
 def delete_file(name, filename):
     wh = get_warehouse()
-
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+
     if not authorize_for_parcel(parcel):
-        return flask.abort(403)
+        flask.abort(403)
     if not parcel.uploading:
         flask.abort(403)
 

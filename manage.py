@@ -20,6 +20,7 @@ default_config = {
     'UNS_SUPPRESS_NOTIFICATIONS': True,
     'ROLE_ADMIN': [],
     'CACHING': False,
+    'ALLOW_PARCEL_DELETION': False,
 }
 
 

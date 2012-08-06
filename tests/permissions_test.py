@@ -71,7 +71,6 @@ class PermisionsTest(AppTestCase):
         else:
             self.fail('unexpected http status code')
 
-
     def try_delete(self, parcel_name):
         with record_events(parcel.parcel_deleted) as deleted_parcels:
             post_resp = self.client.post('/parcel/%s/delete' % parcel_name)
@@ -204,6 +203,10 @@ class PermisionsTest(AppTestCase):
         name = self.create_parcel()
         self.assertTrue(self.try_delete(name))
 
+    def test_allow_parcel_deletion(self):
+        self.app.config['ALLOW_PARCEL_DELETION'] = False
+        name = self.create_parcel()
+        self.assertFalse(self.try_delete(name))
 
     def test_random_user_not_allowed_to_delete_file_from_parcel(self):
         self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')

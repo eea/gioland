@@ -181,6 +181,21 @@ class ParcelTest(AppTestCase):
         resp = client.get('/parcel/%s' % parcel_name_1)
         self.assertEqual(resp.status_code, 404)
 
+    def test_delete_parcel_link_if_allow_parcel_deletion(self):
+        parcel_name = self.create_parcel_at_stage('ver')
+
+        client = self.app.test_client()
+        resp = client.get('/parcel/%s' % parcel_name)
+        self.assertEqual(1, len(select(resp.data, '.delete-parcel')))
+
+    def test_delete_parcel_link_if_not_allow_parcel_deletion(self):
+        self.app.config['ALLOW_PARCEL_DELETION'] = False
+        parcel_name = self.create_parcel_at_stage('ver')
+
+        client = self.app.test_client()
+        resp = client.get('/parcel/%s' % parcel_name)
+        self.assertEqual(0, len(select(resp.data, '.delete-parcel')))
+
     def test_filter_parcel(self):
         with self.app.test_request_context():
             parcel1 = self.wh.new_parcel()
