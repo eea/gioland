@@ -3,6 +3,13 @@
 {% from 'bits.html' import breadcrumb_items %}
 
 
+{% if parcel.uploading and authorize_for_parcel(parcel) %}
+  {% set file_authorize = True %}
+{% else %}
+  {% set file_authorize = False %}
+{% endif %}
+
+
 {% block scripts %}
   <script src="{{ url_for('static', filename='resumable.js') }}"></script>
   <script src="{{ url_for('static', filename='mustache.js') }}"></script>
@@ -14,10 +21,8 @@
       <div class="name" title="{{fileName}}">
         {{fileNameTruncated}}
         <div class="err">
-          <a href="" class="file-delete cancel-file">cancel upload</a></div>
+          <a href="" class="cancel-file">cancel upload</a></div>
       </div>
-      <div class="options">
-        <a href="" class="file-delete">remove</a></div>
       <div class="progress-bar">
         <div class="bar"></div>
         <span class="percentage"></span>
@@ -27,13 +32,15 @@
   </script>
   <script>
     $(document).ready(function () {
-      App.Upload({
-        upload_target: "{{ url_for('parcel.upload', name=parcel.name) }}",
-        files_target: "{{ url_for('parcel.files', name=parcel.name) }}",
-        finalize_upload_target: "{{ url_for('parcel.finalize_upload',
-                                             name=parcel.name) }}",
-        container: "#file-upload"
-      });
+      {% if file_authorize %}
+        App.Upload({
+          upload_target: "{{ url_for('parcel.upload', name=parcel.name) }}",
+          files_target: "{{ url_for('parcel.files', name=parcel.name) }}",
+          finalize_upload_target: "{{ url_for('parcel.finalize_upload',
+                                               name=parcel.name) }}",
+          container: "#file-upload"
+        });
+      {% endif %}
     });
   </script>
 {% endblock %}
@@ -72,12 +79,6 @@
 {% if not STAGES[parcel.metadata['stage']]['last'] %}
 
 <h2>Files</h2>
-
-{% if parcel.uploading and authorize_for_parcel(parcel) %}
-  {% set file_authorize = True %}
-{% else %}
-  {% set file_authorize = False %}
-{% endif %}
 
 <div id="file-upload">
   {{ files_table(parcel, delete_buttons=file_authorize) }}

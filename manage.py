@@ -226,16 +226,5 @@ def fsck():
     print "Finished checking for parcel checksums"
 
 
-@manager.command
-def runserver():
-    app = flask.current_app
-    stderr_handler = logging.StreamHandler()
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-    root_logger.addHandler(stderr_handler)
-    app.logger.addHandler(stderr_handler)
-    app.run()
-
-
 if __name__ == '__main__':
     manager.run()

@@ -1,4 +1,4 @@
-(function (App) {
+(function (App, $) {
 
 	var Upload = function (opts) {
 
@@ -6,10 +6,10 @@
 		    return new Upload(opts);
 		}
 
-		var upload_target = opts['upload_target'];
-		var files_target = opts['files_target'];
-		var finalize_upload_target = opts['finalize_upload_target'];
-		var $container = $(opts['container']);
+		var upload_target = opts.upload_target;
+		var files_target = opts.files_target;
+		var finalize_upload_target = opts.finalize_upload_target;
+		var $container = $(opts.container);
 
 		var fileAdded = function (file) {
 			if(file.fileName.length >= 30) {
@@ -19,7 +19,7 @@
 			}
 			var html = Mustache.to_html($("#upload-list-template").html(), file);
 			$container.find(".files").append(html);
-			checkShowHideUploadBtn();
+			upload();
 		};
 
 		var fileProgress = function (file) {
@@ -32,19 +32,16 @@
 		var fileError = function (file, message) {
 			var liContainer = $('#' + file.uniqueIdentifier);
 			liContainer.find('.progress-bar').hide();
-			liContainer.find('.options').show();
 			liContainer.find('.err').text(message);
 		};
 
-		var removeFile = function (e) {
+		var cancelFile = function (e) {
 			e.preventDefault();
 			if(confirm('Are you sure you want to cancel this upload ?')) {
 				var uid = $(this).parents('li').attr('id');
 				var file = r.getFromUniqueIdentifier(uid);
-				r.removeFile(file);
-
+				file.cancel();
 				$(this).parents("li").remove();
-				checkShowHideUploadBtn();
 			}
 		};
 
@@ -69,40 +66,15 @@
 			});
 		};
 
-		var checkShowHideUploadBtn = function () {
-			if(r.files.length > 0) {
-				$container.find('.upload-btn-container').show();
-			} else {
-				$container.find('.upload-btn-container').hide();
-			}
-		};
-
 		var upload = function () {
-			$container.find('.options').hide();
 			$container.find('.progress-bar').show();
-			$container.find('.cancel-btn').show();
 			$container.find('.cancel-file').show();
-
 			window.onbeforeunload = confirmPageLeave;
 			r.upload();
 		};
 
 		var complete = function () {
-			$container.find('.upload-btn-container').hide();
-			$container.find('.cancel-btn').hide();
 			window.onbeforeunload = null;
-		};
-
-		var cancel = function (e) {
-			e.preventDefault();
-			if(confirm('Are you sure you want to cancel all uploads ?')) {
-				$.each(r.files, function(i, file) {
-					file.cancel();
-				});
-				$container.find('.upload-container li').remove();
-				$container.find('.upload-btn').hide();
-				$container.find('.cancel-btn').hide();
-			}
 		};
 
 		var confirmPageLeave = function (e) {
@@ -129,9 +101,7 @@
 			r.on('fileSuccess', fileSuccess);
 			r.on('complete', complete);
 
-			$container.on('click', '.file-delete', removeFile);
-			$container.on('click', '.upload-btn', upload);
-			$container.on('click', '.cancel-btn', cancel);
+			$container.on('click', '.cancel-file', cancelFile);
 		} else {
 			$container.find('.upload-container').hide();
 			$container.find('.upload-container-not-supported').show();
@@ -140,5 +110,5 @@
 
 	App.Upload = Upload;
 
-})(App);
+})(App, $);
 

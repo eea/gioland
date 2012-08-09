@@ -50,11 +50,19 @@ a.delete-parcel {
 }
 
 .upload-container-not-supported {
+    display: none;
+}
+
+.upload-container-not-supported .warning {
+    margin: 15px 0;
     border: 2px dashed #D893A1;
     background: #FBE6F2;
     text-align: center;
-    display: none;
     padding: 10px;
+}
+.upload-container-not-supported .warning  p {
+    line-height: 20px;
+    margin: 0;
 }
 
 .upload-container .droptarget {
@@ -87,10 +95,6 @@ a.delete-parcel {
     margin-top: -20px;
     font-size: 12px;
     float: right;
-}
-
-.upload-container .upload-btn-container {
-    display: none;
 }
 
 .upload-container .progress-bar {

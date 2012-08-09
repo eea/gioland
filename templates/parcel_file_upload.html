@@ -5,12 +5,22 @@
 	</div>
 
 	<ul class="files"></ul>
-	<div class="upload-btn-container">
-		<button class="upload-btn">Upload</button>
-		<a class="cancel-btn" href="">Cancel all uploads</a>
-	</div>
 </div>
 
 <div class="upload-container-not-supported">
-	Your browser doesn't support the upload feature. Please use Firefox 4+ or Chrome.
+	<div class="warning">
+		<p>Your browser doesn't support the upload of large files. Please use <b><a href="http://www.mozilla.org/en-US/firefox/new/">Firefox 4+</a>, Safari 6+ </b> or the latest version of <b><a href="http://www.google.com/chrome/">Chrome</a></b>.
+
+		If you want to use Internet Explorer as your main browser you can install <b><a href="http://www.google.com/chromeframe/">Chrome Frame for IE</a></b> that will enable this feature.<br />
+
+		If you don't have sufficient rights to install programs on your machine, you can try <b><a href="http://portableapps.com/apps/internet/google_chrome_portable">Portable Chrome</a></b>.</p>
+	</div>
+	<div class="upload-container-simple">
+		<form method="POST" enctype="multipart/form-data"
+		      action="{{ url_for('parcel.upload_single_file',
+		      					  name=parcel.name) }}">
+			<input name="file" type="file">
+			<button type="submit">Upload</button>
+		</form>
+	</div>
 </div>

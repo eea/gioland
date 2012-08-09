@@ -78,42 +78,58 @@ def new():
         return flask.render_template('parcel_new.html')
 
 
-@parcel_views.route('/parcel/<string:name>/file', methods=['GET', 'POST'])
+@parcel_views.route('/parcel/<string:name>/chunk', methods=['POST'])
 def upload(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-    stage = STAGES[parcel.metadata['stage']]
 
-    if not authorize_for_parcel(parcel):
-        return flask.abort(403)
-    if not parcel.uploading:
+    if not authorize_for_upload(parcel):
         flask.abort(403)
-    if stage.get('last'):
-        return flask.abort(403)
 
-    if flask.request.method == 'POST':
-        posted_file = flask.request.files['file']
-        form = flask.request.form.to_dict()
+    posted_file = flask.request.files['file']
+    form = flask.request.form.to_dict()
 
-        filename = secure_filename(form['resumableFilename'])
-        identifier = form['resumableIdentifier']
-        chunk_number = int(form['resumableChunkNumber'])
-        chunk_size = int(form['resumableChunkSize'])
-        total_size = int(form['resumableTotalSize'])
+    filename = secure_filename(form['resumableFilename'])
+    identifier = form['resumableIdentifier']
+    chunk_number = int(form['resumableChunkNumber'])
+    chunk_size = int(form['resumableChunkSize'])
+    total_size = int(form['resumableTotalSize'])
 
-        parcel_path = parcel.get_path()
-        if parcel_path.joinpath(filename).exists():
-            return "File already exists", 415
+    parcel_path = parcel.get_path()
+    if parcel_path.joinpath(filename).exists():
+        return "File already exists", 415
 
-        temp = parcel_path.joinpath(identifier)
-        chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
-        if not os.path.isdir(temp):
-            os.makedirs(temp)
-        posted_file.save(chunk_path)
-    else:
-        check_chunk(parcel, **flask.request.args.to_dict())
+    temp = parcel_path.joinpath(identifier)
+    chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
+    if not os.path.isdir(temp):
+        os.makedirs(temp)
+    posted_file.save(chunk_path)
 
     return flask.jsonify({'status': 'success'})
+
+
+@parcel_views.route('/parcel/<string:name>/file', methods=['POST'])
+def upload_single_file(name):
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+
+    if not authorize_for_upload(parcel):
+        flask.abort(403)
+
+    posted_file = flask.request.files['file']
+
+    filename = secure_filename(posted_file.filename)
+    file_path = parcel.get_path().joinpath(filename)
+
+    if file_path.exists():
+        flask.flash("File %s already exists." % filename, 'system')
+    else:
+        if posted_file:
+            posted_file.save(file_path)
+            file_uploaded.send(parcel, filename=filename)
+        else:
+            flask.flash("Please upload a valid file", 'system')
+    return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
 @parcel_views.route('/parcel/<string:name>/finalize_upload', methods=['POST'])
@@ -160,22 +176,18 @@ def all_chunks_uploaded(temp, total_size):
     return False
 
 
-def create_file_from_chunks(parcel, temp, filename):
-    file_path = parcel.get_path().joinpath(filename)
-    try:
-        with open(file_path, 'w+') as original_file:
-            for chunk_path in temp.listdir():
-                with open(chunk_path, 'rb') as chunk:
-                    original_file.write(chunk.read())
-        file_uploaded.send(parcel, filename=filename)
-    finally:
-        temp.rmtree()
+@parcel_views.route('/parcel/<string:name>/chunk')
+def check_chunk(name):
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
 
+    if not authorize_for_upload(parcel):
+        flask.abort(403)
 
-def check_chunk(parcel, **kwargs):
-    chunk_number = kwargs['resumableChunkNumber']
-    chunk_size = int(kwargs['resumableChunkSize'])
-    identifier = kwargs['resumableIdentifier']
+    form = flask.request.args.to_dict()
+    chunk_number = form['resumableChunkNumber']
+    chunk_size = int(form['resumableChunkSize'])
+    identifier = form['resumableIdentifier']
 
     temp = parcel.get_path().joinpath(identifier)
     chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
@@ -184,6 +196,27 @@ def check_chunk(parcel, **kwargs):
         flask.abort(404)
     if not chunk_path.stat().st_size >= chunk_size:
         flask.abort(404)
+    return flask.Response()
+
+
+def create_file_from_chunks(parcel, temp, filename):
+
+    def read_chunk(f):
+        while True:
+            data = f.read(131072)
+            if not data:
+                break
+            yield data
+        f.close()
+
+    file_path = parcel.get_path().joinpath(filename)
+    with open(file_path, 'w+') as original_file:
+        for chunk_path in temp.listdir():
+            with open(chunk_path, 'rb') as chunk_file:
+                for chunk in read_chunk(chunk_file):
+                    original_file.write(chunk)
+    file_uploaded.send(parcel, filename=filename)
+    temp.rmtree()
 
 
 @parcel_views.route('/parcel/<string:name>/finalize', methods=['GET', 'POST'])
@@ -373,6 +406,17 @@ def authorize_for_parcel(parcel):
     return auth.authorize(STAGES[stage]['roles'] + ['ROLE_ADMIN'])
 
 
+def authorize_for_upload(parcel):
+    stage = STAGES[parcel.metadata['stage']]
+    if not authorize_for_parcel(parcel):
+        return False
+    if not parcel.uploading:
+        return False
+    if stage.get('last'):
+        return False
+    return True
+
+
 def date(value, format):
     """ Formats a date according to the given format. """
     timezone = flask.current_app.config.get("TIME_ZONE")
@@ -393,11 +437,12 @@ def clear_chunks(parcel_path):
 
 
 def finalize_parcel(wh, parcel, reject):
-    parcel.finalize()
-    clear_chunks(parcel.get_path())
     stage = parcel.metadata['stage']
     if reject and not STAGES[stage].get('reject'):
         flask.abort(403)
+
+    parcel.finalize()
+    clear_chunks(parcel.get_path())
 
     if reject:
         next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) - 1]

@@ -30,8 +30,8 @@ class UploadTest(AppTestCase):
         chunk_2_data['file'] = (StringIO('map data'), filename)
 
         # upload chunks
-        resp_1 = self.client.post('/parcel/%s/file' % name, data=chunk_1_data)
-        resp_2 = self.client.post('/parcel/%s/file' % name, data=chunk_2_data)
+        resp_1 = self.client.post('/parcel/%s/chunk' % name, data=chunk_1_data)
+        resp_2 = self.client.post('/parcel/%s/chunk' % name, data=chunk_2_data)
 
         if (resp_1.status_code, resp_2.status_code) == (200, 200):
             # finalize upload
@@ -59,11 +59,17 @@ class UploadTest(AppTestCase):
         chunk_1_data['resumableChunkNumber'] = '1'
         chunk_1_data['file'] = (StringIO('teh'), filename)
 
-        resp = self.client.post('/parcel/%s/file' % name,  data=chunk_1_data)
+        resp = self.client.post('/parcel/%s/chunk' % name,  data=chunk_1_data)
         if resp.status_code == 200:
             return True
         else:
             return False
+
+    def try_upload_file(self, name, filename='data.gml'):
+        data = {'file': (StringIO('teh map data'), filename)}
+        resp = self.client.post('/parcel/%s/file' % name, data=data,
+                                follow_redirects=True)
+        return resp
 
     def create_parcel_at_stage(self, stage='sch'):
         with self.app.test_request_context():
@@ -73,14 +79,30 @@ class UploadTest(AppTestCase):
 
     def test_upload_file(self):
         parcel = self.create_parcel_at_stage()
-        self.assertTrue(self.try_upload(parcel.name))
+        resp = self.try_upload_file(parcel.name)
+        self.assertTrue(302, resp.status_code)
 
     def test_reupload_file_not_allowed(self):
+        parcel = self.create_parcel_at_stage()
+        self.try_upload_file(parcel.name)
+        resp = self.try_upload_file(parcel.name)
+        self.assertEqual(1, len(select(resp.data, '.system-msg')))
+
+    def test_upload_file_on_final_stage_forbidden(self):
+        parcel = self.create_parcel_at_stage(stage='fva')
+        resp = self.try_upload_file(parcel.name)
+        self.assertEqual(403, resp.status_code)
+
+    def test_upload_chunks(self):
+        parcel = self.create_parcel_at_stage()
+        self.assertTrue(self.try_upload(parcel.name))
+
+    def test_reupload_chunk_not_allowed(self):
         parcel = self.create_parcel_at_stage()
         self.try_upload(parcel.name)
         self.assertFalse(self.try_upload(parcel.name))
 
-    def test_upload_file_on_final_stage_forbidden(self):
+    def test_upload_chunk_on_final_stage_forbidden(self):
         parcel = self.create_parcel_at_stage(stage='fva')
         self.assertFalse(self.try_upload(parcel.name))
 
@@ -108,7 +130,7 @@ class UploadTest(AppTestCase):
     def test_check_chunk_view(self):
         parcel = self.create_parcel_at_stage()
         self.try_upload_chunk(parcel.name)
-        url = '/parcel/%s/file?resumableFilename=data.gml'\
+        url = '/parcel/%s/chunk?resumableFilename=data.gml'\
               '&resumableIdentifier=data_gml&resumableTotalSize=11'\
               '&resumableChunkNumber=1&resumableChunkSize=3' % parcel.name
         resp = self.client.get(url)
