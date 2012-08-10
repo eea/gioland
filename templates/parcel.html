@@ -2,9 +2,47 @@
 {% from 'bits.html' import metadata_table, files_table with context %}
 {% from 'bits.html' import breadcrumb_items %}
 
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='resumable.js') }}"></script>
+  <script src="{{ url_for('static', filename='mustache.js') }}"></script>
+  <script src="{{ url_for('static', filename='upload.js') }}"></script>
+
+  <script id="upload-list-template" type="text/template">
+    {% raw %}
+    <li id="{{uniqueIdentifier}}">
+      <div class="name" title="{{fileName}}">
+        {{fileNameTruncated}}
+        <div class="err">
+          <a href="" class="file-delete cancel-file">cancel upload</a></div>
+      </div>
+      <div class="options">
+        <a href="" class="file-delete">remove</a></div>
+      <div class="progress-bar">
+        <div class="bar"></div>
+        <span class="percentage"></span>
+      </div>
+    </li>
+    {% endraw %}
+  </script>
+  <script>
+    $(document).ready(function () {
+      App.Upload({
+        upload_target: "{{ url_for('parcel.upload', name=parcel.name) }}",
+        files_target: "{{ url_for('parcel.files', name=parcel.name) }}",
+        finalize_upload_target: "{{ url_for('parcel.finalize_upload',
+                                             name=parcel.name) }}",
+        container: "#file-upload"
+      });
+    });
+  </script>
+{% endblock %}
+
+
 {% block page_heading %}
   <h1>High Resolution Layers</h1>
 {% endblock %}
+
 
 {% block breadcrumb %}
   {{ breadcrumb_items([
@@ -13,6 +51,7 @@
              THEME_MAP[parcel.metadata["theme"]],)
   ]) }}
 {% endblock %}
+
 
 {% block content %}
 
@@ -40,16 +79,12 @@
   {% set file_authorize = False %}
 {% endif %}
 
-{{ files_table(parcel.get_path(), parcel=parcel,
-               delete_buttons=file_authorize) }}
+<div id="file-upload">
+  {{ files_table(parcel, delete_buttons=file_authorize) }}
 
-{% if file_authorize %}
-  <form method="post" enctype="multipart/form-data"
-        action="{{ url_for('parcel.upload', name=parcel.name) }}">
-      <label for="form-upload-file">Add file</label>
-      <input id="form-upload-file" type="file" name="file">
-      <input type="submit" value="Upload">
-    </form>
+  {% if file_authorize %}
+
+    {% include "parcel_file_upload.html" %}
 
     <form method="get"
           action="{{ url_for('parcel.finalize', name=parcel.name) }}">
@@ -64,9 +99,10 @@
         <button type="submit" name="reject" value="on">
           Finalize and reject</button>
       {% endif %}
-
     </form>
-{% endif %}
+
+  {% endif %}
+</div>
 
 {% endif %}
 

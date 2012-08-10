@@ -47,19 +47,32 @@ class PermisionsTest(AppTestCase):
         else:
             self.fail('unexpected http status code')
 
-    def try_upload(self, parcel_name):
-        url = '/parcel/' + parcel_name + '/file'
-        post_data = {'file': (StringIO("xx"), 'y.txt')}
+    def try_upload(self, name):
+        data = {
+            'resumableFilename': 'data.gml',
+            'resumableIdentifier': 'data_gml',
+            'resumableTotalSize': '3',
+        }
+        file_data = dict(data)
+        file_data['resumableChunkSize'] = '3'
+        file_data['resumableChunkNumber'] = '1'
+        file_data['file'] = (StringIO('teh'), 'data.gml')
+
         with record_events(parcel.file_uploaded) as uploaded_files:
-            post_resp = self.client.post(url, data=post_data)
-        if post_resp.status_code == 403:
-            self.assertEqual(len(uploaded_files), 0)
-            return False
-        elif post_resp.status_code == 302:
-            self.assertEqual(len(uploaded_files), 1)
-            return True
-        else:
-            self.fail('unexpected http status code')
+            post_resp = self.client.post('/parcel/%s/file' % name,
+                                         data=file_data)
+            if post_resp.status_code == 403:
+                self.assertEqual(len(uploaded_files), 0)
+                return False
+            elif post_resp.status_code == 200:
+                resp = self.client.post('/parcel/%s/finalize_upload' % name,
+                                        data=data)
+                if resp.status_code != 200:
+                    self.fail('finalize upload failed')
+                self.assertEqual(len(uploaded_files), 1)
+                return True
+            else:
+                self.fail('unexpected http status code')
 
     def try_finalize(self, parcel_name):
         with record_events(parcel.parcel_finalized) as finalized_parcels:
@@ -85,18 +98,18 @@ class PermisionsTest(AppTestCase):
         else:
             self.fail('unexpected http status code')
 
-    def try_delete_file(self, parcel_name, filename):
+    def try_delete_file(self, parcel_name, filename='data.gml'):
         with record_events(parcel.parcel_file_deleted) as deleted_parcel_files:
             post_resp = self.client.post('/parcel/%s/file/%s/delete' %
                                         (parcel_name, filename))
-        if post_resp.status_code == 403:
-            self.assertEqual(len(deleted_parcel_files), 0)
-            return False
-        elif post_resp.status_code == 302:
-            self.assertEqual(len(deleted_parcel_files), 1)
-            return True
-        else:
-            self.fail('unexpected http status code')
+            if post_resp.status_code == 403:
+                self.assertEqual(len(deleted_parcel_files), 0)
+                return False
+            elif post_resp.status_code == 302:
+                self.assertEqual(len(deleted_parcel_files), 1)
+                return True
+            else:
+                self.fail('unexpected http status code')
 
     def test_random_user_not_allowed_to_begin_upload(self):
         self.assertFalse(self.try_new_parcel())
@@ -221,7 +234,7 @@ class PermisionsTest(AppTestCase):
         self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
         name = self.create_parcel()
         self.try_upload(name)
-        self.assertTrue(self.try_delete_file(name, 'y.txt'))
+        self.assertTrue(self.try_delete_file(name))
 
 
 class RolesTest(AppTestCase):

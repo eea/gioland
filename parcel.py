@@ -1,4 +1,5 @@
 import os
+import re
 from cgi import escape
 import flask
 import blinker
@@ -77,12 +78,12 @@ def new():
         return flask.render_template('parcel_new.html')
 
 
-@parcel_views.route('/parcel/<string:name>/file', methods=['POST'])
+@parcel_views.route('/parcel/<string:name>/file', methods=['GET', 'POST'])
 def upload(name):
-    posted_file = flask.request.files['file']
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
     stage = STAGES[parcel.metadata['stage']]
+
     if not authorize_for_parcel(parcel):
         return flask.abort(403)
     if not parcel.uploading:
@@ -90,17 +91,99 @@ def upload(name):
     if stage.get('last'):
         return flask.abort(403)
 
-    filename = secure_filename(posted_file.filename)
-    file_path = flask.safe_join(parcel.get_path(), filename)
-    if file_path.exists():
-        flask.flash("File %s already exists." % filename, 'system')
+    if flask.request.method == 'POST':
+        posted_file = flask.request.files['file']
+        form = flask.request.form.to_dict()
+
+        filename = secure_filename(form['resumableFilename'])
+        identifier = form['resumableIdentifier']
+        chunk_number = int(form['resumableChunkNumber'])
+        chunk_size = int(form['resumableChunkSize'])
+        total_size = int(form['resumableTotalSize'])
+
+        parcel_path = parcel.get_path()
+        if parcel_path.joinpath(filename).exists():
+            return "File already exists", 415
+
+        temp = parcel_path.joinpath(identifier)
+        chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
+        if not os.path.isdir(temp):
+            os.makedirs(temp)
+        posted_file.save(chunk_path)
     else:
-        if posted_file:
-            posted_file.save(file_path)
-            file_uploaded.send(parcel, filename=filename)
-        else:
-            flask.flash("Please upload a valid file", 'system')
-    return flask.redirect(flask.url_for('parcel.view', name=name))
+        check_chunk(parcel, **flask.request.args.to_dict())
+
+    return flask.jsonify({'status': 'success'})
+
+
+@parcel_views.route('/parcel/<string:name>/finalize_upload', methods=['POST'])
+def finalize_upload(name):
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    response = {'status': 'success'}
+
+    form = flask.request.form.to_dict()
+    filename = secure_filename(form['resumableFilename'])
+    identifier = form['resumableIdentifier']
+    total_size = int(form['resumableTotalSize'])
+
+    temp = parcel.get_path().joinpath(identifier)
+    if all_chunks_uploaded(temp, total_size):
+        create_file_from_chunks(parcel, temp, filename)
+    else:
+        response['status'] = 'error'
+        response['message'] = "Upload didn't finalize. an error occurred"
+    return flask.jsonify(response)
+
+
+@parcel_views.route('/parcel/<string:name>/files')
+def files(name):
+    wh = get_warehouse()
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    app = flask.current_app
+
+    if parcel.uploading and authorize_for_parcel(parcel):
+        file_authorize = True
+    else:
+        file_authorize = False
+
+    template = app.jinja_env.get_template('bits.html')
+    return template.module.files_table(parcel, delete_buttons=file_authorize)
+
+
+def all_chunks_uploaded(temp, total_size):
+    pattern = re.compile('^\d+_')
+    chunk_sizes = [f.stat().st_size for f in temp.listdir()
+                   if pattern.match(f.name)]
+    if sum(chunk_sizes) >= total_size:
+        return True
+    return False
+
+
+def create_file_from_chunks(parcel, temp, filename):
+    file_path = parcel.get_path().joinpath(filename)
+    try:
+        with open(file_path, 'w+') as original_file:
+            for chunk_path in temp.listdir():
+                with open(chunk_path, 'rb') as chunk:
+                    original_file.write(chunk.read())
+        file_uploaded.send(parcel, filename=filename)
+    finally:
+        temp.rmtree()
+
+
+def check_chunk(parcel, **kwargs):
+    chunk_number = kwargs['resumableChunkNumber']
+    chunk_size = int(kwargs['resumableChunkSize'])
+    identifier = kwargs['resumableIdentifier']
+
+    temp = parcel.get_path().joinpath(identifier)
+    chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
+
+    if not chunk_path.exists():
+        flask.abort(404)
+    if not chunk_path.stat().st_size >= chunk_size:
+        flask.abort(404)
 
 
 @parcel_views.route('/parcel/<string:name>/finalize', methods=['GET', 'POST'])
@@ -122,7 +205,7 @@ def finalize(name):
 
     else:
         return flask.render_template("parcel_confirm_finalize.html",
-                                     reject=reject)
+                                     parcel=parcel, reject=reject)
 
 
 @parcel_views.route('/parcel/<string:name>')
@@ -304,8 +387,14 @@ def date(value, format):
     return value.strftime(format)
 
 
+def clear_chunks(parcel_path):
+    for d in parcel_path.dirs():
+        d.rmtree()
+
+
 def finalize_parcel(wh, parcel, reject):
     parcel.finalize()
+    clear_chunks(parcel.get_path())
     stage = parcel.metadata['stage']
     if reject and not STAGES[stage].get('reject'):
         flask.abort(403)

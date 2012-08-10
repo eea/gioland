@@ -1,5 +1,5 @@
-import unittest
 import tempfile
+import flask
 from datetime import datetime
 from StringIO import StringIO
 from path import path
@@ -12,86 +12,87 @@ class ParcelTest(AppTestCase):
     CREATE_WAREHOUSE = True
 
     def setUp(self):
+        self.parcels_path = self.wh_path / 'parcels'
         self.addCleanup(authorization_patch().stop)
 
-    def test_download_file(self):
-        map_data = 'teh map data'
+    def test_login(self):
+        client = self.app.test_client()
+        client.post('/test_login', data={'username': 'tester'})
+
+        client.preserve_context = True
+        client.get('/')
+        self.assertEqual(flask.g.username, 'tester')
+
+    def test_begin_parcel_creates_folder(self):
+        client = self.app.test_client()
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
+        self.assertIsNotNone(resp.location)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        self.assertTrue((self.parcels_path / parcel_name).isdir())
+
+    def test_begin_parcel_saves_user_selected_metadata(self):
+        client = self.app.test_client()
+        resp = client.post('/parcel/new',
+                           data=dict(self.PARCEL_METADATA, bogus='not here'))
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertDictContainsSubset(self.PARCEL_METADATA,
+                                          parcel.metadata)
+            self.assertNotIn('bogus', parcel.metadata)
+
+    def test_begin_parcel_saves_default_metadata(self):
         client = self.app.test_client()
         client.post('/test_login', data={'username': 'somebody'})
-
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            (parcel.get_path()/'data.gml').write_text(map_data)
-            parcel.finalize()
-            parcel_name = parcel.name
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertEqual(parcel.metadata['stage'], 'int')
 
-        resp = client.get('/parcel/%s/download/data.gml' % parcel_name)
-        self.assertEqual(resp.data, map_data)
-
-    def try_upload(self, parcel_name, filename='data.gml'):
-        post_data = {'file': (StringIO("xx"), filename)}
+    def test_show_existing_files_in_parcel(self):
         client = self.app.test_client()
-        resp = client.post('/parcel/%s/file' % parcel_name, data=post_data,
-                           follow_redirects=True)
-        return resp
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        parcel_path = self.parcels_path / parcel_name
+        (parcel_path / 'some.txt').write_text('hello world')
 
-    def test_upload_file(self):
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'sch'})
-        resp = self.try_upload(parcel.name)
-        self.assertEqual(200, resp.status_code)
+        resp2 = client.get('/parcel/' + parcel_name)
+        self.assertIn('some.txt', resp2.data)
 
-    def test_reupload_file_generates_message_error(self):
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'sch'})
-
-        with self.app.test_request_context():
-            self.try_upload(parcel.name)
-            resp = self.try_upload(parcel.name)
-            self.assertEqual(1, len(select(resp.data, '.system-msg')))
-
-    def test_upload_file_on_final_stage_forbidden(self):
+    def test_finalize_changes_parceling_flag(self):
         client = self.app.test_client()
-        parcel_name = self.create_parcel_at_stage('fva')
-        with self.app.test_request_context():
-            resp = self.try_upload(parcel_name)
-            self.assertEqual(403, resp.status_code)
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
 
-    def test_delete_file(self):
-        map_data = 'teh map data'
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertTrue(parcel.uploading)
+
+        resp2 = client.post('/parcel/%s/finalize' % parcel_name)
+        parcel_name = resp2.location.rsplit('/', 1)[-1]
+
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertFalse(parcel.uploading)
+
+    def test_uploading_in_finalized_parcel_is_not_allowed(self):
         client = self.app.test_client()
-        client.post('/test_login', data={'username': 'somebody'})
+        resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        parcel_path = self.parcels_path / parcel_name
+        client.post('/parcel/%s/finalize' % parcel_name)
 
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'vch'}) # verification check
-
-            (parcel.get_path()/'data.gml').write_text(map_data)
-
-        resp = client.post('/parcel/%s/file/%s/delete' % (parcel.name, 'data.gml'))
-        self.assertEqual(302, resp.status_code)
-
-    def test_finalized_parcel_forbids_deletion(self):
-        map_data = 'teh map data'
-        client = self.app.test_client()
-        client.post('/test_login', data={'username': 'somebody'})
-
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'vch'}) # verification check
-            (parcel.get_path()/'data.gml').write_text(map_data)
-            parcel.finalize()
-
-        resp = client.post('/parcel/%s/file/%s/delete' % (parcel.name, 'data.gml'))
-        self.assertEqual(403, resp.status_code)
+        resp2 = client.post('/parcel/' + parcel_name + '/file', data={
+            'file': (StringIO("teh file contents"), 'data.gml')})
+        self.assertEqual(resp2.status_code, 403)
+        self.assertEqual(parcel_path.listdir(), [])
 
     def test_finalize_triggers_next_step_with_forward_backward_references(self):
         with self.app.test_request_context():
             parcel = self.wh.new_parcel()
             parcel.save_metadata(self.PARCEL_METADATA)
-            parcel.save_metadata({'stage': 'vch'}) # verification check
+            parcel.save_metadata({'stage': 'vch'})  # verification check
             parcel_name = parcel.name
 
         client = self.app.test_client()
@@ -103,7 +104,8 @@ class ParcelTest(AppTestCase):
             next_parcel_name = parcel.metadata['next_parcel']
             next_parcel = self.wh.get_parcel(next_parcel_name)
             self.assertEqual(next_parcel.metadata['prev_parcel'], parcel.name)
-            self.assertEqual(next_parcel.metadata['stage'], 'enh') # enhancement
+            # enhancement
+            self.assertEqual(next_parcel.metadata['stage'], 'enh')
 
     def test_finalize_preserves_metadata(self):
         client = self.app.test_client()
@@ -114,7 +116,8 @@ class ParcelTest(AppTestCase):
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
             next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
-            self.assertDictContainsSubset(self.PARCEL_METADATA, next_parcel.metadata)
+            self.assertDictContainsSubset(self.PARCEL_METADATA,
+                                          next_parcel.metadata)
 
     def test_parcel_with_corrupted_metadata_fails(self):
         client = self.app.test_client()
@@ -226,6 +229,7 @@ class ParcelTest(AppTestCase):
         resp = client.get('/overview?country=ro&extent=partial')
         data = select(resp.data, ".datatable tbody tr")
         self.assertEqual(0, len(data))
+
 
 class ParcelHistoryTest(AppTestCase):
 
@@ -348,4 +352,3 @@ class ParcelHistoryTest(AppTestCase):
                 'time': utcnow,
                 'description_html': "&lt;html&gt;",
             })
-

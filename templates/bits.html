@@ -39,12 +39,12 @@
 {% endmacro %}
 
 
-{% macro files_table(folder_path, parcel=None, delete_buttons=False) %}
+{% macro files_table(parcel, delete_buttons=False) %}
 
-  {% set files = folder_path.listdir() %}
+  {% set files = parcel.get_files() %}
 
   {% if files %}
-
+    <div class="files-table">
     <ul>
     {% for file_path in files %}
       <li>
@@ -64,7 +64,7 @@
       </li>
     {% endfor %}
     </ul>
-
+    </div>
   {% else %}
 
     <p><i>No files uploaded.</i></p>
