@@ -246,6 +246,8 @@ def finalize(name):
         return flask.abort(403)
     if stage.get('last'):
         return flask.abort(403)
+    if not parcel.uploading:
+        return flask.abort(403)
 
     reject = bool(flask.request.values.get('reject'))
 

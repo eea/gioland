@@ -170,6 +170,14 @@ class ParcelTest(AppTestCase):
         resp = client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(403, resp.status_code)
 
+    def test_finalize_finalized_parcel_forbidden(self):
+        client = self.app.test_client()
+        parcel_name = self.create_parcel_at_stage('enh')
+        resp1 = client.post('/parcel/%s/finalize' % parcel_name)
+        self.assertEqual(resp1.status_code, 302)
+        resp2 = client.post('/parcel/%s/finalize' % parcel_name)
+        self.assertEqual(resp2.status_code, 403)
+
     def test_delete_parcel(self):
         parcel_name_1 = self.create_parcel_at_stage('ver')
         parcel_name_2 = self.create_parcel_at_stage('vch')
