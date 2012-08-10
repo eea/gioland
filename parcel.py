@@ -7,8 +7,8 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from path import path
 from dateutil import tz
-from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
-                         INITIAL_STAGE, COUNTRIES, THEMES,
+from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER, INITIAL_STAGE,
+                         COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES,
                          PROJECTIONS, RESOLUTIONS, EXTENTS)
 import notification
 import auth
@@ -525,6 +525,8 @@ def register_on(app):
 metadata_template_context = {
     'STAGES': STAGES,
     'STAGE_MAP': {k: STAGES[k]['label'] for k in STAGES},
+    'COUNTRIES_MC': COUNTRIES_MC,
+    'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,
     'COUNTRY_MAP': dict(COUNTRIES),
     'THEMES': THEMES,

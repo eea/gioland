@@ -2,10 +2,14 @@ a.delete-parcel {
     color: #C71F1F;
 }
 
+.countrybox-container {
+    overflow: hidden;
+}
+
 .countrybox {
-   display: block;
-   float: left;
-   width: 14em;
+    display: block;
+    float: left;
+    width: 14em;
 }
 
 #workarea .history-list {

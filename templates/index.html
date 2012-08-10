@@ -21,10 +21,26 @@
 
   <h2>EEA Member countries</h2>
 
-  {% for key, label in COUNTRIES %}
-  <div class="countrybox">
-    <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+  <div class="countrybox-container">
+    {% for key, label in COUNTRIES_MC %}
+
+    <div class="countrybox">
+      <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+    </div>
+
+    {% endfor %}
   </div>
-  {% endfor %}
+
+  <h2>Cooperating countries</h2>
+
+  <div class="countrybox-container">
+    {% for key, label in COUNTRIES_CC %}
+
+    <div class="countrybox">
+      <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+    </div>
+
+    {% endfor %}
+  </div>
 
 {% endblock %}
