@@ -1,9 +1,21 @@
 {% extends "layout.html" %}
 
+{% set title = COUNTRY_MAP[code] %}
 
-{% block page_heading %}
-  <h1>High Resolution Layers &ndash; {{ COUNTRY_MAP[code] }}</h1>
+
+{% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
+
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.country', code=code), title),
+  ]) }}
 {% endblock %}
+
+
+{% block page_heading %}<h1>{{ title }}</h1>{% endblock %}
 
 
 {% block content %}

@@ -3,11 +3,18 @@
 {% from 'bits.html' import breadcrumb_items %}
 
 
-{% if parcel.uploading and authorize_for_parcel(parcel) %}
-  {% set file_authorize = True %}
-{% else %}
-  {% set file_authorize = False %}
-{% endif %}
+{% set file_authorize = (parcel.uploading and authorize_for_parcel(parcel)) %}
+{% set metadata = parcel.metadata %}
+{% set country_code = metadata['country'] %}
+{% set title_bits = '%s, %s'|format(THEME_MAP[metadata['theme']],
+                                    STAGE_MAP[metadata['stage']]) %}
+{% set country = COUNTRY_MAP[country_code] %}
+
+
+{% block page_title -%}
+  {{ super() }} &ndash;
+  {{ country }}, {{ title_bits }} (ref. {{ parcel.name }})
+{%- endblock %}
 
 
 {% block scripts %}
@@ -47,15 +54,16 @@
 
 
 {% block page_heading %}
-  <h1>High Resolution Layers</h1>
+  <h1>{{ country }}, {{ title_bits }} (ref. <tt>{{ parcel.name }}</tt>)</h1>
 {% endblock %}
 
 
 {% block breadcrumb %}
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.country', code=country_code), COUNTRY_MAP[country_code]),
     (url_for('parcel.view', name=parcel.name),
-             THEME_MAP[parcel.metadata["theme"]],)
+        '%s (%s)'|format(title_bits, parcel.name)),
   ]) }}
 {% endblock %}
 
@@ -73,7 +81,6 @@
 </p>
 
 <h2>Metadata</h2>
-{% set metadata = parcel.metadata %}
 {{ metadata_table(metadata) }}
 
 {% if not STAGES[parcel.metadata['stage']]['last'] %}

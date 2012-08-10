@@ -1,11 +1,16 @@
 {% extends "layout.html" %}
 
+{% set title = "Search deliveries" %}
+
+
+{% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
+
 
 {% from 'bits.html' import breadcrumb_items %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GioLand'),
-    (url_for('parcel.overview'), 'High Resolution Layers - overview'),
+    (url_for('parcel.overview'), title),
   ]) }}
 {% endblock %}
 
@@ -39,9 +44,7 @@
     </script>
 {% endblock %}
 
-{% block page_heading %}
-  <h1>High Resolution Layers &ndash; overview</h1>
-{% endblock %}
+{% block page_heading %}<h1>{{ title }}</h1>{% endblock %}
 
 
 {% block content %}

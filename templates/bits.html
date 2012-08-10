@@ -132,7 +132,11 @@
         {% set css_class = 'breadcrumbitem' %}
       {%- endif %}
       <div class="{{ css_class }}">
-        <a href="{{ crumb_url }}">{{ crumb_name }}</a>
+        {% if crumb_url %}
+          <a href="{{ crumb_url }}">{{ crumb_name }}</a>
+        {% else %}
+          {{ crumb_name }}
+        {% endif %}
       </div>
     {% endfor %}
     <div class="breadcrumbtail"></div>
