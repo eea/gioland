@@ -29,15 +29,34 @@ def index():
     return flask.render_template('index.html')
 
 
+def get_filter_arguments():
+    return {k: v for k, v in flask.request.args.items()
+            if k in METADATA_FIELDS and v}
+
+
 @parcel_views.route('/overview')
 def overview():
     wh = get_warehouse()
-    filter_arguments = {k: v for k, v in flask.request.args.items()
-                        if k in METADATA_FIELDS and v}
-    parcels = filter_parcels(chain_tails(wh), **filter_arguments)
+    parcels = filter_parcels(chain_tails(wh), **get_filter_arguments())
     return flask.render_template('overview.html', **{
         'parcels': parcels,
     })
+
+
+@parcel_views.route('/api/find_parcels')
+def api_find_parcels():
+    wh = get_warehouse()
+    parcels = filter_parcels(wh.get_all_parcels(), **get_filter_arguments())
+    return flask.jsonify({
+        'parcels': [p.name for p in parcels],
+    })
+
+
+@parcel_views.route('/api/parcel/<string:name>')
+def parcel_metadata(name):
+    wh = get_warehouse()
+    parcel = wh.get_parcel(name)
+    return flask.jsonify({'metadata': dict(parcel.metadata)})
 
 
 @parcel_views.route('/country/<string:code>')

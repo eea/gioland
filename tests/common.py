@@ -73,6 +73,16 @@ class AppTestCase(unittest.TestCase):
         'extent': 'full',
     })
 
+    def new_parcel(self, **extra_metadata):
+        metadata = dict(self.PARCEL_METADATA)
+        metadata.update(extra_metadata)
+        client = self.app.test_client()
+        with patch('auth.authorize'):
+            resp = client.post('/parcel/new', data=metadata)
+        self.assertEqual(resp.status_code, 302)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        return parcel_name
+
     def _pre_setup(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)

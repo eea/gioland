@@ -4,6 +4,7 @@ from datetime import datetime
 from StringIO import StringIO
 from path import path
 from mock import patch
+import flask
 from common import (AppTestCase, create_mock_app, authorization_patch, select)
 
 
@@ -342,3 +343,37 @@ class ParcelHistoryTest(AppTestCase):
                 'description_html': "&lt;html&gt;",
             })
 
+
+class ApiTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
+
+    def get_json(self, url):
+        client = self.app.test_client()
+        resp = client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        return flask.json.loads(resp.data)
+
+    def test_search_in_empty_warehouse_returns_nothing(self):
+        self.assertEqual(self.get_json('/api/find_parcels'), {'parcels': []})
+
+    def test_search_with_no_arguments_returns_all_parcels(self):
+        name1 = self.new_parcel()
+        name2 = self.new_parcel(country='dk')
+        resp = self.get_json('/api/find_parcels')
+        self.assertItemsEqual(resp['parcels'], [name1, name2])
+
+    def test_search_with_country_argument_filters_by_country(self):
+        name1 = self.new_parcel()
+        name2 = self.new_parcel(country='dk')
+        resp = self.get_json('/api/find_parcels?country=dk')
+        self.assertItemsEqual(resp['parcels'], [name2])
+
+    def test_get_parcel_metadata(self):
+        import warehouse
+        name = self.new_parcel()
+        resp = self.get_json('/api/parcel/' + name)
+        with self.app.test_request_context():
+            wh = warehouse.get_warehouse()
+            parcel = wh.get_parcel(name)
+            self.assertEqual(resp['metadata'], parcel.metadata)
