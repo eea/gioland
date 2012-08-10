@@ -11,6 +11,7 @@
       <input type="hidden" name="reject" value="on">
     {% endif %}
     <button type="submit">Yes, finalize</button>
+    <a href="{{ url_for('parcel.view', name=parcel.name) }}">Cancel</a>
   </form>
 
 {% endblock %}

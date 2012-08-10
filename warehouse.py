@@ -12,6 +12,7 @@ from path import path
 from definitions import TREE_FIELDS
 
 
+
 log = logging.getLogger(__name__)
 
 LOGGING_FORMAT = '[%(asctime)s] %(levelname)s %(message)s'
@@ -75,7 +76,9 @@ class Parcel(Persistent):
         return self._warehouse.parcels_path / self.name
 
     def get_files(self):
-        return self.get_path().listdir()
+        for f in self.get_path().listdir():
+            if not f.name.startswith('.') and not f.isdir():
+                yield f
 
     def finalize(self):
         self._warehouse.logger.info("Finalizing %r", self.name)

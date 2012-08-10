@@ -44,3 +44,93 @@ a.delete-parcel {
     padding-top: 6px;
     padding-left: 3px;
 }
+
+.upload-container {
+    margin-top: 15px;
+}
+
+.upload-container-not-supported {
+    display: none;
+}
+
+.upload-container-not-supported .warning {
+    margin: 15px 0;
+    border: 2px dashed #D893A1;
+    background: #FBE6F2;
+    text-align: center;
+    padding: 10px;
+}
+.upload-container-not-supported .warning  p {
+    line-height: 20px;
+    margin: 0;
+}
+
+.upload-container .droptarget {
+    background-color:#eee;
+    border: 2px dashed #aaa;
+    border-color:#666;
+    font-weight:bold;
+    text-align:center;
+}
+
+.upload-container .droptarget a {
+    text-decoration: underline;
+    color: #2A6495;
+}
+
+.upload-container .files {
+    margin-top: 15px;
+}
+
+.upload-container .files li {
+    height: 50px;
+}
+
+.upload-container .files .name {
+    font-size: 12px;
+    width: 200px;
+}
+
+.upload-container .files .options {
+    margin-top: -20px;
+    font-size: 12px;
+    float: right;
+}
+
+.upload-container .progress-bar {
+    position: relative;
+    margin-top: -40px;
+    margin-left: 200px;
+    margin-right: 40px;
+    background: #9CBD94;
+    display: none;
+    height: 10px;
+    top: 9px;
+}
+
+.upload-container .bar {
+    background: green;
+    height: 10px;
+    width: 0;
+}
+
+.upload-container .percentage {
+    position: absolute;
+    right: -40px;
+    top: -7px;
+}
+
+.upload-container .cancel-btn {
+    font-size: 12px;
+    display: none;
+    color: red;
+}
+
+.upload-container .err {
+    font-size: 12px;
+    color: red;
+}
+
+.upload-container .cancel-file {
+    display: none;
+}
