@@ -50,13 +50,7 @@
 {% block content %}
 
   {% from 'bits.html' import parcels_table with context %}
-
-  {% if authorize_for_parcel(None) %}
-    <p><a href="{{ url_for('parcel.new') }}">Begin a new upload</a></p>
-  {% endif %}
-
   {% include "overview_filter.html" %}
-
   {{ parcels_table(parcels) }}
 
 {% endblock %}

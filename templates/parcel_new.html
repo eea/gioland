@@ -1,18 +1,21 @@
 {% extends "layout.html" %}
 
+{% set title = "New delivery" %}
+
+
+{% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
+
 
 {% from 'bits.html' import breadcrumb_items %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GioLand'),
-    (url_for('parcel.new'), 'New upload'),
+    (url_for('parcel.new'), title),
   ]) }}
 {% endblock %}
 
 
-{% block page_heading %}
-  <h1>New upload</h1>
-{% endblock %}
+{% block page_heading %}<h1>{{ title }}</h1>{% endblock %}
 
 
 {% block content %}
