@@ -8,6 +8,7 @@ from BTrees.OOBTree import OOBTree
 from persistent import Persistent
 import transaction
 from path import path
+from definitions import TREE_FIELDS
 
 
 log = logging.getLogger(__name__)
@@ -79,6 +80,23 @@ class Parcel(Persistent):
         self.checksum = checksum(self.get_path())
         self.save_metadata({'upload_time': datetime.utcnow().isoformat()})
 
+    def link_in_tree(self):
+        symlink_path = self._warehouse.tree_path
+        for name in TREE_FIELDS:
+            symlink_path = symlink_path / self.metadata[name]
+        symlink_path.makedirs_p()
+        target_path = self.get_path()
+        for c in xrange(1, 101):
+            symlink_path_c = symlink_path / str(c)
+            if not symlink_path_c.exists():
+                target_path.symlink(symlink_path_c)
+                return symlink_path_c
+            else:
+                if symlink_path_c.readlink() == target_path:
+                    return
+        else:
+            raise RuntimeError("Unable to create symlink, tried 100 numbers")
+
     def add_history_item(self, *args, **kwargs):
         item = ParcelHistoryItem(self, *args, **kwargs)
         item.id_ = len(self.history) + 1
@@ -114,6 +132,10 @@ class Warehouse(Persistent):
     @property
     def parcels_path(self):
         return self.fs_path/'parcels'
+
+    @property
+    def tree_path(self):
+        return self.fs_path/'tree'
 
     def new_parcel(self):
         parcel_path = path(tempfile.mkdtemp(prefix='', dir=self.parcels_path))
@@ -177,6 +199,7 @@ class WarehouseConnector(object):
         log_number += 1
         warehouse.logger.addHandler(handler)
         _ensure_dir(warehouse.parcels_path)
+        _ensure_dir(warehouse.tree_path)
 
         return warehouse, cleanup
 

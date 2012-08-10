@@ -328,3 +328,67 @@ class RequesetTransactionTest(AppTestCase):
         with self.app.test_request_context():
             wh = warehouse.get_warehouse()
             self.assertFalse(hasattr(wh, 'test_value'))
+
+
+class FilesystemSymlinkTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
+
+    @property
+    def symlinks_root(self):
+        return self.wh_path / 'tree'
+
+    def create_parcel(self, stage, finalize_and_link=False):
+        with self.app.test_request_context():
+            wh = warehouse.get_warehouse()
+            parcel = wh.new_parcel()
+            parcel.save_metadata(self.PARCEL_METADATA)
+            parcel.save_metadata({'stage': stage})
+            if finalize_and_link:
+                parcel.finalize()
+                parcel.link_in_tree()
+            return parcel.name
+
+    def symlink_path(self, metadata, *extra):
+        from definitions import METADATA_FIELDS
+        symlink_path = self.symlinks_root
+        for name in METADATA_FIELDS:
+            symlink_path = symlink_path / metadata[name]
+        for bit in extra:
+            symlink_path = symlink_path / str(bit)
+        return symlink_path
+
+    def test_new_parcel_leaves_no_symlink(self):
+        stage = 'enh'
+        self.create_parcel(stage)
+        symlink_path = self.symlink_path(self.PARCEL_METADATA, stage, 1)
+        self.assertFalse(symlink_path.islink())
+        self.assertEqual(self.symlinks_root.listdir(), [])
+
+    def test_finalized_parcel_has_symlink(self):
+        stage = 'enh'
+        name = self.create_parcel(stage, True)
+        symlink_path = self.symlink_path(self.PARCEL_METADATA, stage, 1)
+        self.assertTrue(symlink_path.islink())
+        self.assertEqual(symlink_path.readlink(),
+                         self.wh_path / 'parcels' / name)
+
+    def test_second_finalized_parcel_with_same_metadata_has_symlink(self):
+        stage = 'enh'
+        name1 = self.create_parcel(stage, True)
+        name2 = self.create_parcel(stage, True)
+        symlink_path_2 = self.symlink_path(self.PARCEL_METADATA, stage, 2)
+        self.assertTrue(symlink_path_2.islink())
+        self.assertEqual(symlink_path_2.readlink(),
+                         self.wh_path / 'parcels' / name2)
+
+    def test_repeated_calls_to_link_in_tree_dont_create_more_links(self):
+        stage = 'enh'
+        name = self.create_parcel(stage, True)
+        parent_path = self.symlink_path(self.PARCEL_METADATA, stage)
+        with self.app.test_request_context():
+            wh = warehouse.get_warehouse()
+            parcel = wh.get_parcel(name)
+            parcel.link_in_tree()
+
+        self.assertEqual(parent_path.listdir(), [parent_path / '1'])

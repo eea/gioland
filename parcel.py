@@ -359,6 +359,8 @@ def finalize_parcel(wh, parcel, reject):
         next_parcel, "Next stage", datetime.utcnow(),
         flask.g.username, next_description_html)
 
+    parcel.link_in_tree()
+
     parcel_finalized.send(parcel, next_parcel=next_parcel)
 
 

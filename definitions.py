@@ -10,6 +10,9 @@ METADATA_FIELDS = [
 ]
 
 
+TREE_FIELDS = METADATA_FIELDS + ['stage']
+
+
 STAGES = OrderedDict([
     ('int', dict(label="Intermediate", roles=['ROLE_SERVICE_PROVIDER'])),
     ('sch', dict(label="Semantic check", roles=['ROLE_ETC'], reject=True)),

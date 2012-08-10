@@ -227,6 +227,16 @@ def fsck():
 
 
 @manager.command
+def update_tree():
+    from warehouse import get_warehouse
+    wh = get_warehouse()
+    parcels = [p for p in wh.get_all_parcels() if not p.uploading]
+    parcels.sort(key=lambda p: p.metadata['upload_time'])
+    for p in parcels:
+        print p.name, (p.link_in_tree() or '[already linked]')
+
+
+@manager.command
 def runserver():
     app = flask.current_app
     stderr_handler = logging.StreamHandler()
