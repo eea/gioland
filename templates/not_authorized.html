@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>You are not authorized to view this page.</h1>
+
+<p>You do not have permission to view this page using
+   your current user account.</p>
+
+<p><b>Please try the following:</b></p>
+<ul>
+	<li>
+		<p>If you have another user account with a higher level of permission,
+		click <a href="{{ url_for('auth.login') }}">here</a> to login and try again using that account.</p>
+	</li>
+	<li>
+		<p>If you believe you should be able to view this page, contact the Web site administrator.</p>
+	</li>
+</ul>
+
+
+{% endblock %}
