@@ -29,65 +29,6 @@ class ParcelTest(AppTestCase):
         resp = client.get('/parcel/%s/download/data.gml' % parcel_name)
         self.assertEqual(resp.data, map_data)
 
-    def try_upload(self, parcel_name, filename='data.gml'):
-        post_data = {'file': (StringIO("xx"), filename)}
-        client = self.app.test_client()
-        resp = client.post('/parcel/%s/file' % parcel_name, data=post_data,
-                           follow_redirects=True)
-        return resp
-
-    def test_upload_file(self):
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'sch'})
-        resp = self.try_upload(parcel.name)
-        self.assertEqual(200, resp.status_code)
-
-    def test_reupload_file_generates_message_error(self):
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'sch'})
-
-        with self.app.test_request_context():
-            self.try_upload(parcel.name)
-            resp = self.try_upload(parcel.name)
-            self.assertEqual(1, len(select(resp.data, '.system-msg')))
-
-    def test_upload_file_on_final_stage_forbidden(self):
-        client = self.app.test_client()
-        parcel_name = self.create_parcel_at_stage('fva')
-        with self.app.test_request_context():
-            resp = self.try_upload(parcel_name)
-            self.assertEqual(403, resp.status_code)
-
-    def test_delete_file(self):
-        map_data = 'teh map data'
-        client = self.app.test_client()
-        client.post('/test_login', data={'username': 'somebody'})
-
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'vch'}) # verification check
-
-            (parcel.get_path()/'data.gml').write_text(map_data)
-
-        resp = client.post('/parcel/%s/file/%s/delete' % (parcel.name, 'data.gml'))
-        self.assertEqual(302, resp.status_code)
-
-    def test_finalized_parcel_forbids_deletion(self):
-        map_data = 'teh map data'
-        client = self.app.test_client()
-        client.post('/test_login', data={'username': 'somebody'})
-
-        with self.app.test_request_context():
-            parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'vch'}) # verification check
-            (parcel.get_path()/'data.gml').write_text(map_data)
-            parcel.finalize()
-
-        resp = client.post('/parcel/%s/file/%s/delete' % (parcel.name, 'data.gml'))
-        self.assertEqual(403, resp.status_code)
-
     def test_finalize_triggers_next_step_with_forward_backward_references(self):
         with self.app.test_request_context():
             parcel = self.wh.new_parcel()
