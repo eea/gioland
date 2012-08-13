@@ -134,8 +134,8 @@ class PermisionsTest(AppTestCase):
     def test_random_user_not_allowed(self):
         self.remove_from_role('somebody', 'ROLE_VIEWER')
         resp = self.client.get('/')
-        self.assertEqual(302, resp.status_code)
-        self.assertIn('/not_authorized', resp.location)
+        self.assertEqual(200, resp.status_code)
+        self.assertIn('You are not authorized to view this page.', resp.data)
 
     def test_role_viewer_allowed(self):
         resp = self.client.get('/')

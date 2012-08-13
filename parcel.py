@@ -526,7 +526,7 @@ def authorize_for_view():
     if flask.g.username is None:
         return flask.redirect(flask.url_for('auth.login'))
     if not auth.authorize(ALL_ROLES):
-        return flask.redirect(flask.url_for('auth.not_authorized'))
+        return flask.render_template('not_authorized.html')
 
 
 metadata_template_context = {

@@ -88,11 +88,6 @@ def authorize(role_names):
     return any(has_role(role_name) for role_name in role_names)
 
 
-@auth_views.route('/not_authorized')
-def not_authorized():
-    return flask.render_template('not_authorized.html')
-
-
 def register_on(app):
     app.register_blueprint(auth_views)
     app.before_request(set_user)
