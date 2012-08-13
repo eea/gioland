@@ -69,11 +69,10 @@ COUNTRIES_CC = [
     ('al', "Albania"),
     ('ba', "Bosnia and Herzegovina"),
     ('hr', "Croatia"),
-    ('mc', "Monaco"),
     ('me', "Montenegro"),
     ('mk', "Macedonia, FYR of"),
     ('rs', "Serbia"),
-    ('xk', "Kosovo under the UN SCR 1244/99"),
+    ('xk', "Kosovo"),
 ]
 
 
