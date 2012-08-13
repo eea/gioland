@@ -157,6 +157,7 @@ def get_configuration_from_sarge():
     config['ROLE_ETC'] = services[3]['etc']
     config['ROLE_NRC'] = services[3]['nrc']
     config['ROLE_ADMIN'] = services[3]['admin']
+    config['ROLE_VIEWER'] = services[3]['viewer']
     config['BASE_URL'] = services[4]['base_url']
     config['UNS_CHANNEL_ID'] = services[5]['channel_id']
     config['UNS_LOGIN_USERNAME'] = services[5]['login_username']

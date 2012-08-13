@@ -7,9 +7,9 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from path import path
 from dateutil import tz
-from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER, INITIAL_STAGE,
-                         COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES,
-                         PROJECTIONS, RESOLUTIONS, EXTENTS)
+from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
+                         INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
+                         THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES)
 import notification
 import auth
 from warehouse import get_warehouse
@@ -331,9 +331,6 @@ def delete_file(name, filename):
 def comment(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-    if not flask.g.username:
-        return flask.abort(403)
-
     comment = flask.request.form.get("comment", "").strip()
     if comment:
         add_history_item_and_notify(
@@ -522,6 +519,14 @@ def register_on(app):
         'can_subscribe_to_notifications': notification.can_subscribe,
     })
     app.jinja_env.filters["date"] = date
+
+
+@parcel_views.before_request
+def authorize_for_view():
+    if flask.g.username is None:
+        return flask.redirect(flask.url_for('auth.login'))
+    if not auth.authorize(ALL_ROLES):
+        return flask.redirect(flask.url_for('auth.not_authorized'))
 
 
 metadata_template_context = {

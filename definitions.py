@@ -125,3 +125,13 @@ RDF_URI = {
     'resolution': GIOLAND_SCHEMA + '#resolution',
     'extent': GIOLAND_SCHEMA + '#extent',
 }
+
+
+ALL_ROLES = [
+    'ROLE_SERVICE_PROVIDER',
+    'ROLE_ETC',
+    'ROLE_NRC',
+    'ROLE_ADMIN',
+    'ROLE_VIEWER',
+    'ROLE_ADMIN',
+]

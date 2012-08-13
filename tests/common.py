@@ -14,6 +14,7 @@ def create_mock_app(warehouse_path=None):
         'SECRET_KEY': 'asdf',
         'UNS_SUPPRESS_NOTIFICATIONS': False,
         'ALLOW_PARCEL_DELETION': True,
+        'ROLE_VIEWER': ['user_id:somebody'],
     }
     if warehouse_path is not None:
         config['WAREHOUSE_PATH'] = str(warehouse_path)
@@ -41,9 +42,11 @@ def authorization_patch():
 @contextmanager
 def record_events(signal):
     events = []
+
     def _record(sender, **extra):
         events.append((sender, extra))
     signal.connect(_record)
+
     try:
         yield events
     finally:
@@ -52,7 +55,8 @@ def record_events(signal):
 
 def select(container, selector):
     """ Select elements using CSS """
-    import lxml.html, lxml.cssselect
+    import lxml.html
+    import lxml.cssselect
     if isinstance(container, basestring):
         doc = lxml.html.fromstring(container.decode('utf-8'))
     else:
@@ -76,9 +80,8 @@ class AppTestCase(unittest.TestCase):
     def new_parcel(self, **extra_metadata):
         metadata = dict(self.PARCEL_METADATA)
         metadata.update(extra_metadata)
-        client = self.app.test_client()
         with patch('auth.authorize'):
-            resp = client.post('/parcel/new', data=metadata)
+            resp = self.client.post('/parcel/new', data=metadata)
         self.assertEqual(resp.status_code, 302)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         return parcel_name
@@ -97,6 +100,8 @@ class AppTestCase(unittest.TestCase):
                 connector.close()
 
         self.app = create_mock_app(self.wh_path)
+        self.client = self.app.test_client()
+        self.client.post('/test_login', data={'username': 'somebody'})
 
     @property
     def wh(self):
