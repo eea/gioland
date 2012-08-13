@@ -5,7 +5,8 @@ from common import AppTestCase, record_events, authorization_patch
 
 
 def setUpModule(self):
-    import notification; self.notification = notification
+    import notification
+    self.notification = notification
 
 
 class NotificationDeliveryTest(AppTestCase):
@@ -104,24 +105,21 @@ class NotificationTriggerTest(AppTestCase):
         self.addCleanup(authorization_patch().stop)
 
     def test_notification_triggered_on_new_parcel(self):
-        with self.app.test_client() as client:
-            with record_events(notification.uns_notification_sent) as events:
-                resp = client.post('/parcel/new', data=self.PARCEL_METADATA)
-                self.assertEqual(resp.status_code, 302)
-                self.assertEqual([event_title(e) for e in events],
-                                 ["New upload"])
+        with record_events(notification.uns_notification_sent) as events:
+            resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual([event_title(e) for e in events], ["New upload"])
 
     def test_notification_triggered_twice_on_finalize_parcel(self):
-        with self.app.test_client() as client:
-            resp_1 = client.post('/parcel/new', data=self.PARCEL_METADATA)
-            self.assertEqual(resp_1.status_code, 302)
-            parcel_name = resp_1.location.rsplit('/', 1)[-1]
+        resp_1 = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        self.assertEqual(resp_1.status_code, 302)
+        parcel_name = resp_1.location.rsplit('/', 1)[-1]
 
-            with record_events(notification.uns_notification_sent) as events:
-                resp_2 = client.post('/parcel/%s/finalize' % parcel_name)
-                self.assertEqual(resp_2.status_code, 302)
-                self.assertEqual([event_title(e) for e in events],
-                                 ["Finalized", "Next stage"])
+        with record_events(notification.uns_notification_sent) as events:
+            resp_2 = self.client.post('/parcel/%s/finalize' % parcel_name)
+            self.assertEqual(resp_2.status_code, 302)
+            self.assertEqual([event_title(e) for e in events],
+                             ["Finalized", "Next stage"])
 
 
 class NotificationSubscriptionTest(AppTestCase):
@@ -129,8 +127,6 @@ class NotificationSubscriptionTest(AppTestCase):
     def setUp(self):
         self.channel_id = '1234'
         self.app.config['UNS_CHANNEL_ID'] = self.channel_id
-        self.client = self.app.test_client()
-        self.client.post('/test_login', data={'username': 'somebody'})
 
     @patch('notification.get_uns_proxy')
     def test_subscribe_calls_to_uns(self, mock_proxy):

@@ -16,7 +16,8 @@ BAD_METADATA_VALUES = [
 
 
 def setUpModule(self):
-    import warehouse; self.warehouse = warehouse
+    import warehouse
+    self.warehouse = warehouse
 
 
 class ParcelTest(unittest.TestCase):
@@ -24,8 +25,8 @@ class ParcelTest(unittest.TestCase):
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
-        self.parcels_path = self.wh_path/'parcels'
+        self.wh_path = self.tmp / 'warehouse'
+        self.parcels_path = self.wh_path / 'parcels'
         wh_connector = warehouse.WarehouseConnector(self.wh_path)
         self.wh, warehouse_cleanup = wh_connector.open_warehouse()
         self.addCleanup(warehouse_cleanup)
@@ -74,8 +75,8 @@ class ZodbPersistenceTest(unittest.TestCase):
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
-        self.parcels_path = self.wh_path/'parcels'
+        self.wh_path = self.tmp / 'warehouse'
+        self.parcels_path = self.wh_path / 'parcels'
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
 
     @contextmanager
@@ -92,7 +93,7 @@ class ZodbPersistenceTest(unittest.TestCase):
             self.assertEqual(len(list(wh1.get_all_parcels())), 1)
             [parcel_1] = wh1.get_all_parcels()
             parcel_path_1 = parcel_1.get_path()
-            (parcel_path_1/'one').write_text("hello world")
+            (parcel_path_1 / 'one').write_text("hello world")
             transaction.commit()
 
         with self.warehouse() as wh2:
@@ -100,8 +101,8 @@ class ZodbPersistenceTest(unittest.TestCase):
             [parcel] = wh2.get_all_parcels()
             parcel_path = parcel.get_path()
             self.assertEqual(parcel_path, parcel_path_1)
-            self.assertEqual(parcel_path.listdir(), [parcel_path/'one'])
-            self.assertEqual((parcel_path/'one').text(), "hello world")
+            self.assertEqual(parcel_path.listdir(), [parcel_path / 'one'])
+            self.assertEqual((parcel_path / 'one').text(), "hello world")
 
     def test_saved_parcel_metadata_is_persisted(self):
         with self.warehouse() as wh1:
@@ -120,8 +121,8 @@ class UploadTest(unittest.TestCase):
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
-        self.uploads_path = self.wh_path/'uploads'
+        self.wh_path = self.tmp / 'warehouse'
+        self.uploads_path = self.wh_path / 'uploads'
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
 
     def get_warehouse(self):
@@ -139,8 +140,8 @@ class UploadTest(unittest.TestCase):
         wh = self.get_warehouse()
         upload = wh.new_parcel()
         upload_path = upload.get_path()
-        file1_path = upload_path/'somefile.txt'
-        file2_path = upload_path/'otherfile.txt'
+        file1_path = upload_path / 'somefile.txt'
+        file2_path = upload_path / 'otherfile.txt'
         file1_path.write_text('one')
         file2_path.write_text('two')
         self.assertItemsEqual(upload.get_files(), [file1_path, file2_path])
@@ -163,8 +164,8 @@ class UploadFinalizationTest(unittest.TestCase):
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
-        self.uploads_path = self.wh_path/'uploads'
+        self.wh_path = self.tmp / 'warehouse'
+        self.uploads_path = self.wh_path / 'uploads'
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
 
     def get_warehouse(self):
@@ -189,9 +190,9 @@ class UploadFinalizationTest(unittest.TestCase):
     def test_finalize_upload_preserves_files(self):
         wh = self.get_warehouse()
         upload = wh.new_parcel()
-        (upload.get_path()/'somefile.txt').write_text('the contents')
+        (upload.get_path() / 'somefile.txt').write_text('the contents')
         upload.finalize()
-        file_path = upload.get_path()/'somefile.txt'
+        file_path = upload.get_path() / 'somefile.txt'
         self.assertTrue(file_path.isfile())
         self.assertEqual(file_path.text(), 'the contents')
 
@@ -216,9 +217,9 @@ class UploadFinalizationTest(unittest.TestCase):
         map_data = 'teh map data'
         hexdigest = hashlib.md5(map_data).hexdigest()
 
-        path = (self.tmp/'checksum')
+        path = (self.tmp / 'checksum')
         path.makedirs()
-        (path/'data.gml').write_text(map_data)
+        (path / 'data.gml').write_text(map_data)
 
         self.assertEqual([(u'data.gml', hexdigest)], warehouse.checksum(path))
 
@@ -235,7 +236,7 @@ class DeleteParcelTest(unittest.TestCase):
     def setUp(self):
         self.tmp = path(tempfile.mkdtemp())
         self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp/'warehouse'
+        self.wh_path = self.tmp / 'warehouse'
         self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
         self.wh, warehouse_cleanup = self.wh_connector.open_warehouse()
         self.addCleanup(warehouse_cleanup)
@@ -298,11 +299,9 @@ class RequesetTransactionTest(AppTestCase):
 
     CREATE_WAREHOUSE = True
 
-    def setUp(self):
-        self.client = self.app.test_client()
-
     def test_commit_on_success(self):
         import parcel
+
         @self.app.route('/change_something', methods=['POST'])
         def change_something():
             wh = warehouse.get_warehouse()
@@ -317,6 +316,7 @@ class RequesetTransactionTest(AppTestCase):
 
     def test_rollback_on_error(self):
         import parcel
+
         @self.app.route('/change_something', methods=['POST'])
         def change_something():
             wh = warehouse.get_warehouse()
