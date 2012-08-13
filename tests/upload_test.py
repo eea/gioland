@@ -8,7 +8,6 @@ class UploadTest(AppTestCase):
     CREATE_WAREHOUSE = True
 
     def setUp(self):
-        self.client = self.app.test_client()
         self.parcels_path = self.wh_path / 'parcels'
         self.addCleanup(authorization_patch().stop)
 

@@ -5,20 +5,24 @@ from common import AppTestCase, record_events
 
 
 def setUpModule(self):
-    import parcel; self.parcel = parcel
-    import warehouse; self.warehouse = warehouse
+    import parcel
+    import warehouse
+    self.parcel = parcel
+    self.warehouse = warehouse
 
 
 class PermisionsTest(AppTestCase):
 
     CREATE_WAREHOUSE = True
 
-    def setUp(self):
-        self.client = self.app.test_client()
-        self.client.post('/test_login', data={'username': 'somebody'})
-
     def add_to_role(self, username, role_name):
         self.app.config.setdefault(role_name, []).append('user_id:' + username)
+
+    def remove_from_role(self, username, role_name):
+        if role_name in self.app.config:
+            users = self.app.config[role_name]
+            self.app.config[role_name] = [u for u in users
+                                          if u != 'user_id:%s' % username]
 
     def create_parcel(self, stage=None):
         with patch('auth.authorize'):
@@ -121,13 +125,28 @@ class PermisionsTest(AppTestCase):
             else:
                 self.fail('unexpected http status code')
 
+    def test_no_user_not_allowed(self):
+        self.client.get('/test_logout')
+        resp = self.client.get('/')
+        self.assertEqual(302, resp.status_code)
+        self.assertIn('/login', resp.location)
+
+    def test_random_user_not_allowed(self):
+        self.remove_from_role('somebody', 'ROLE_VIEWER')
+        resp = self.client.get('/')
+        self.assertEqual(302, resp.status_code)
+        self.assertIn('/not_authorized', resp.location)
+
+    def test_role_viewer_allowed(self):
+        resp = self.client.get('/')
+        self.assertEqual(200, resp.status_code)
+
     def test_random_user_not_allowed_to_begin_upload(self):
         self.assertFalse(self.try_new_parcel())
 
     def test_service_provider_allowed_to_begin_upload(self):
         self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
         self.assertTrue(self.try_new_parcel())
-
 
     def test_random_user_not_allowed_to_upload_at_intermediate_state(self):
         name = self.create_parcel()
@@ -154,7 +173,6 @@ class PermisionsTest(AppTestCase):
         name = self.create_parcel()
         self.assertTrue(self.try_finalize(name))
 
-
     def test_random_user_not_allowed_to_upload_at_semantic_check_stage(self):
         name = self.create_parcel(stage='sch')
         self.assertFalse(self.try_upload(name))
@@ -171,7 +189,6 @@ class PermisionsTest(AppTestCase):
         name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_upload(name))
         self.assertTrue(self.try_upload_file(name))
-
 
     def test_random_user_not_allowed_to_finalize_at_semantic_check_stage(self):
         name = self.create_parcel(stage='sch')
@@ -191,7 +208,6 @@ class PermisionsTest(AppTestCase):
         self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_finalize(name))
-
 
     def test_random_user_not_allowed_to_upload_at_enhancement_stage(self):
         name = self.create_parcel(stage='enh')
@@ -223,7 +239,6 @@ class PermisionsTest(AppTestCase):
         self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel(stage='enh')
         self.assertTrue(self.try_finalize(name))
-
 
     def test_random_user_not_allowed_to_delete_parcel(self):
         name = self.create_parcel()

@@ -331,9 +331,6 @@ def delete_file(name, filename):
 def comment(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-    if not flask.g.username:
-        return flask.abort(403)
-
     comment = flask.request.form.get("comment", "").strip()
     if comment:
         add_history_item_and_notify(
