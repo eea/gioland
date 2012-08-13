@@ -466,6 +466,7 @@ def finalize_parcel(wh, parcel, reject):
         next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) - 1]
     else:
         next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
+    next_stage_def = STAGES[next_stage]
 
     next_parcel = wh.new_parcel()
     next_parcel.save_metadata({
@@ -478,7 +479,7 @@ def finalize_parcel(wh, parcel, reject):
 
     next_url = flask.url_for('parcel.view', name=next_parcel.name)
     description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
-        next_url, STAGES[next_parcel.metadata['stage']]['label'])
+        next_url, next_stage_def['label'])
 
     title = "%s finished" % stage_def['label']
     if reject:
@@ -492,8 +493,11 @@ def finalize_parcel(wh, parcel, reject):
     next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
         prev_url, stage_def['label'])
     add_history_item_and_notify(
-        next_parcel, "Next stage", datetime.utcnow(),
-        flask.g.username, next_description_html)
+        next_parcel,
+        "%s started" % next_stage_def['label'],
+        datetime.utcnow(),
+        flask.g.username,
+        next_description_html)
 
     parcel.link_in_tree()
 

@@ -120,7 +120,7 @@ class NotificationTriggerTest(AppTestCase):
             self.assertEqual(resp_2.status_code, 302)
             self.assertEqual([event_title(e) for e in events],
                              ["Service provider upload finished",
-                              "Next stage"])
+                              "Semantic check started"])
 
 
 class NotificationSubscriptionTest(AppTestCase):

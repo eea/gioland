@@ -279,7 +279,7 @@ class ParcelHistoryTest(AppTestCase):
             item = parcel2.history[0]
             self.check_history_item(item, {
                 'time': utcnow,
-                'title': "Next stage",
+                'title': "Semantic check started",
                 'actor': 'somebody',
             })
             self.assertIn(parcel1_name, item.description_html)
