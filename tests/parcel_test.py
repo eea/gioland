@@ -258,7 +258,7 @@ class ParcelHistoryTest(AppTestCase):
             item = parcel.history[-1]
             self.check_history_item(item, {
                 'time': utcnow,
-                'title': "Finalized",
+                'title': "Service provider upload finished",
                 'actor': 'somebody',
             })
             self.assertIn(parcel.metadata['next_parcel'],

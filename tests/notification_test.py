@@ -53,7 +53,7 @@ class NotificationDeliveryTest(AppTestCase):
             RDF_URI['actor']: "somewho",
             RDF_URI['locality']: "Italy",
             RDF_URI['stage']: "Enhancement",
-            RDF_URI['title']: "Now hear this (asdf)",
+            RDF_URI['title']: "Now hear this (stage reference: asdf)",
             RDF_URI['identifier']: "http://example.com/parcel/asdf",
             RDF_URI['theme']: "Grassland Cover",
             RDF_URI['projection']: "National",
@@ -119,7 +119,8 @@ class NotificationTriggerTest(AppTestCase):
             resp_2 = self.client.post('/parcel/%s/finalize' % parcel_name)
             self.assertEqual(resp_2.status_code, 302)
             self.assertEqual([event_title(e) for e in events],
-                             ["Finalized", "Next stage"])
+                             ["Service provider upload finished",
+                              "Next stage"])
 
 
 class NotificationSubscriptionTest(AppTestCase):

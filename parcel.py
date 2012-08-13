@@ -455,7 +455,8 @@ def clear_chunks(parcel_path):
 
 def finalize_parcel(wh, parcel, reject):
     stage = parcel.metadata['stage']
-    if reject and not STAGES[stage].get('reject'):
+    stage_def = STAGES[stage]
+    if reject and not stage_def.get('reject'):
         flask.abort(403)
 
     parcel.finalize()
@@ -479,14 +480,17 @@ def finalize_parcel(wh, parcel, reject):
     description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
         next_url, STAGES[next_parcel.metadata['stage']]['label'])
 
-    title = "Finalized (rejected)" if reject else "Finalized"
+    title = "%s finished" % stage_def['label']
+    if reject:
+        title += " (rejected)"
+
     add_history_item_and_notify(
         parcel, title, datetime.utcnow(),
         flask.g.username, description_html)
 
     prev_url = flask.url_for('parcel.view', name=parcel.name)
     next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
-        prev_url, STAGES[parcel.metadata['stage']]['label'])
+        prev_url, stage_def['label'])
     add_history_item_and_notify(
         next_parcel, "Next stage", datetime.utcnow(),
         flask.g.username, next_description_html)

@@ -69,10 +69,11 @@ def prepare_notification_rdf(item):
     parcel_url = (app.config['BASE_URL'] +
                   flask.url_for('parcel.view', name=parcel.name))
     event_id = "%s#history-%d" % (parcel_url, item.id_)
+    title = "%s (stage reference: %s)" % (item.title, parcel.name)
 
     event_data = [
         (RDF_URI['rdf_type'], RDF_URI['parcel_event']),
-        (RDF_URI['title'], "%s (%s)" % (item.title, parcel.name)),
+        (RDF_URI['title'], title),
         (RDF_URI['identifier'], parcel_url),
         (RDF_URI['date'], item.time.strftime('%Y-%b-%d %H:%M:%S')),
         (RDF_URI['actor'], item.actor),
