@@ -283,7 +283,7 @@ class ParcelHistoryTest(AppTestCase):
                 'actor': 'somebody',
             })
             self.assertIn(parcel1_name, item.description_html)
-            self.assertIn("Intermediate", item.description_html)
+            self.assertIn("Service provider upload", item.description_html)
 
     def test_parcel_comment(self):
         utcnow = datetime.utcnow()

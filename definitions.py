@@ -15,7 +15,7 @@ TREE_FIELDS = METADATA_FIELDS + ['stage']
 
 STAGES = OrderedDict([
     ('int', {
-        'label': "Intermediate",
+        'label': "Service provider upload",
         'roles': ['ROLE_SERVICE_PROVIDER'],
     }),
 
