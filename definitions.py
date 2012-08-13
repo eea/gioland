@@ -14,14 +14,49 @@ TREE_FIELDS = METADATA_FIELDS + ['stage']
 
 
 STAGES = OrderedDict([
-    ('int', dict(label="Intermediate", roles=['ROLE_SERVICE_PROVIDER'])),
-    ('sch', dict(label="Semantic check", roles=['ROLE_ETC'], reject=True)),
-    ('ver', dict(label="Verification", roles=['ROLE_NRC'])),
-    ('vch', dict(label="Verification check", roles=['ROLE_ETC'], reject=True)),
-    ('enh', dict(label="Enhancement", roles=['ROLE_NRC'])),
-    ('ech', dict(label="Enhancement check", roles=['ROLE_ETC'], reject=True)),
-    ('fin', dict(label="Final integrated", roles=[])),
-    ('fva', dict(label="Final validated", roles=[], last=True)),
+    ('int', {
+        'label': "Intermediate",
+        'roles': ['ROLE_SERVICE_PROVIDER'],
+    }),
+
+    ('sch', {
+        'label': "Semantic check",
+        'roles': ['ROLE_ETC'],
+        'reject': True,
+    }),
+
+    ('ver', {
+        'label': "Verification",
+        'roles': ['ROLE_NRC'],
+    }),
+
+    ('vch', {
+        'label': "Verification check",
+        'roles': ['ROLE_ETC'],
+        'reject': True,
+    }),
+
+    ('enh', {
+        'label': "Enhancement",
+        'roles': ['ROLE_NRC'],
+    }),
+
+    ('ech', {
+        'label': "Enhancement check",
+        'roles': ['ROLE_ETC'],
+        'reject': True,
+    }),
+
+    ('fin', {
+        'label': "Final integrated",
+        'roles': [],
+    }),
+
+    ('fva', {
+        'label': "Final validated",
+        'roles': [],
+        'last': True,
+    }),
 ])
 
 
