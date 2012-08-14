@@ -19,7 +19,7 @@ default_config = {
     'UNS_CHANNEL_ID': 0,
     'UNS_SUPPRESS_NOTIFICATIONS': True,
     'ROLE_ADMIN': [],
-    'CACHING': False,
+    'CACHING': True,
     'ALLOW_PARCEL_DELETION': False,
 }
 

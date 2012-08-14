@@ -15,6 +15,7 @@ def create_mock_app(warehouse_path=None):
         'UNS_SUPPRESS_NOTIFICATIONS': False,
         'ALLOW_PARCEL_DELETION': True,
         'ROLE_VIEWER': ['user_id:somebody'],
+        'CACHING': False,
     }
     if warehouse_path is not None:
         config['WAREHOUSE_PATH'] = str(warehouse_path)
