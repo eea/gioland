@@ -154,6 +154,7 @@ RDF_URI = {
     'parcel_event': GIOLAND_SCHEMA + '#parcelevent',
     'locality': GIOLAND_SCHEMA + '#locality',
     'actor': GIOLAND_SCHEMA + '#actor',
+    'actor_name': GIOLAND_SCHEMA + '#actor_name',
     'stage': GIOLAND_SCHEMA + '#stage',
     'theme': GIOLAND_SCHEMA + '#theme',
     'projection': GIOLAND_SCHEMA + '#projection',

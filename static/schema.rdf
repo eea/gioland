@@ -16,6 +16,10 @@
         <rdfs:label>Actor</rdfs:label>
     </rdf:Property>
 
+    <rdf:Property rdf:ID="actor_name">
+        <rdfs:label>Actor name</rdfs:label>
+    </rdf:Property>
+
     <rdf:Property rdf:ID="stage">
         <rdfs:label>Stage</rdfs:label>
     </rdf:Property>

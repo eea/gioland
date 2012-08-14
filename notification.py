@@ -4,6 +4,7 @@ import flask
 import blinker
 from definitions import (COUNTRIES, STAGES, THEMES, PROJECTIONS, RESOLUTIONS,
                          EXTENTS, RDF_URI)
+import auth
 
 
 metadata_rdf_fields = [
@@ -69,7 +70,12 @@ def prepare_notification_rdf(item):
     parcel_url = (app.config['BASE_URL'] +
                   flask.url_for('parcel.view', name=parcel.name))
     event_id = "%s#history-%d" % (parcel_url, item.id_)
-    title = "%s (stage reference: %s)" % (item.title, parcel.name)
+    full_name = auth.ldap_full_name(item.actor)
+
+    title = item.title
+    if full_name:
+        title += " by %s" % full_name
+    title += " (stage reference: %s)" % parcel.name
 
     event_data = [
         (RDF_URI['rdf_type'], RDF_URI['parcel_event']),
@@ -77,6 +83,7 @@ def prepare_notification_rdf(item):
         (RDF_URI['identifier'], parcel_url),
         (RDF_URI['date'], item.time.strftime('%Y-%b-%d %H:%M:%S')),
         (RDF_URI['actor'], item.actor),
+        (RDF_URI['actor_name'], full_name),
     ]
 
     for rdf_uri, metadata_name, value_map in metadata_rdf_fields:
