@@ -143,6 +143,7 @@ class Warehouse(Persistent):
 
     def new_parcel(self):
         parcel_path = path(tempfile.mkdtemp(prefix='', dir=self.parcels_path))
+        parcel_path.chmod(0755)
         parcel = Parcel(self, parcel_path.name)
         self._parcels[parcel.name] = parcel
         self.logger.info("New parcel %r", parcel.name)

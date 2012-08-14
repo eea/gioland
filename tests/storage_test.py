@@ -52,6 +52,10 @@ class ParcelTest(unittest.TestCase):
         self.wh.new_parcel()
         self.assertEqual(len(self.parcels_path.listdir()), 1)
 
+    def test_parcel_folder_has_correct_permissions(self):
+        parcel = self.wh.new_parcel()
+        self.assertEqual(parcel.get_path().stat().st_mode, 040755)
+
     def test_get_parcel_filesystem_path(self):
         self.wh.new_parcel()
         [wh_parcel_path] = self.parcels_path.listdir()
