@@ -12,8 +12,6 @@ import flaskext.script
 
 default_config = {
     'LDAP_TIMEOUT': 10,
-    'LDAP_SERVER': 'ldap://ldap3.eionet.europa.eu',
-    'LDAP_USER_DN_PATTERN': "uid={user_id},ou=Users,o=EIONET,l=Europe",
     'TIME_ZONE': 'Europe/Copenhagen',
     'BASE_URL': "",
     'UNS_CHANNEL_ID': 0,
@@ -21,6 +19,7 @@ default_config = {
     'ROLE_ADMIN': [],
     'CACHING': True,
     'ALLOW_PARCEL_DELETION': False,
+    'LDAP_SERVER': None,
 }
 
 
@@ -163,6 +162,8 @@ def get_configuration_from_sarge():
     config['UNS_LOGIN_USERNAME'] = services[5]['login_username']
     config['UNS_LOGIN_PASSWORD'] = services[5]['login_password']
     config['UNS_SUPPRESS_NOTIFICATIONS'] = bool(services[5].get('suppress'))
+    config['LDAP_SERVER'] = services[6]['server']
+    config['LDAP_USER_DN_PATTERN'] = services[6]['user_dn_pattern']
 
     return config
 

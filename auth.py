@@ -65,15 +65,21 @@ def ldap_full_name(user_id):
 class LdapConnection(object):
 
     def __init__(self, app):
-        self.conn = ldap.initialize(app.config['LDAP_SERVER'])
-        self.conn.protocol_version = ldap.VERSION3
-        self.conn.timeout = app.config['LDAP_TIMEOUT']
-        self._user_dn_pattern = app.config['LDAP_USER_DN_PATTERN']
+        ldap_server = app.config['LDAP_SERVER']
+        if ldap_server is None:
+            self.conn = None
+        else:
+            self.conn = ldap.initialize(ldap_server)
+            self.conn.protocol_version = ldap.VERSION3
+            self.conn.timeout = app.config['LDAP_TIMEOUT']
+            self._user_dn_pattern = app.config['LDAP_USER_DN_PATTERN']
 
     def get_user_dn(self, user_id):
         return self._user_dn_pattern.format(user_id=user_id)
 
     def bind(self, user_id, password):
+        if self.conn is None:
+            return False
         user_dn = self.get_user_dn(user_id)
         try:
             result = self.conn.simple_bind_s(user_dn, password)
@@ -83,6 +89,8 @@ class LdapConnection(object):
         return True
 
     def get_user_name(self, user_id):
+        if self.conn is None:
+            return u""
         user_dn = self.get_user_dn(user_id)
         result2 = self.conn.search_s(user_dn, ldap.SCOPE_BASE)
         [[_dn, attr]] = result2
