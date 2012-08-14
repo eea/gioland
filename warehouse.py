@@ -12,7 +12,6 @@ from path import path
 from definitions import TREE_FIELDS
 
 
-
 log = logging.getLogger(__name__)
 
 LOGGING_FORMAT = '[%(asctime)s] %(levelname)s %(message)s'
@@ -140,7 +139,7 @@ class Warehouse(Persistent):
 
     @property
     def tree_path(self):
-        return self.fs_path/'tree'
+        return self.fs_path / 'tree'
 
     def new_parcel(self):
         parcel_path = path(tempfile.mkdtemp(prefix='', dir=self.parcels_path))
@@ -181,7 +180,8 @@ class WarehouseConnector(object):
 
         conn = self._get_db().open()
         transaction.begin()
-        handler = logging.handlers.WatchedFileHandler(self._fs_path / 'activity.log')
+        handler = logging.handlers.WatchedFileHandler(
+            self._fs_path / 'activity.log')
         handler.setLevel(logging.INFO)
         handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
 
