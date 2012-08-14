@@ -23,9 +23,11 @@ def login():
             return flask.redirect(flask.url_for('parcel.index'))
 
         elif form['action'] == 'login':
-            if ldap_bind(form['username'], form['password']):
-                flask.session['username'] = form['username']
-                flask.flash("Login successful as %s" % form['username'],
+            ldapconn = LdapConnection(flask.current_app)
+            user_id = form['username']
+            if ldapconn.bind(user_id, form['password']):
+                flask.session['username'] = user_id
+                flask.flash("Login successful as %s" % ldap_full_name(user_id),
                             'system')
                 return flask.redirect(flask.url_for('parcel.index'))
 
@@ -36,34 +38,55 @@ def login():
         else:
             return flask.abort(400)
 
-    return flask.render_template('auth_login.html')
+    user_id = flask.g.username
+    return flask.render_template('auth_login.html', **{
+        'user_id': user_id,
+        'full_name': ldap_full_name(user_id) if user_id else None,
+    })
 
 
 @auth_views.route('/login/impersonate', methods=['POST'])
 def impersonate():
+    app = flask.current_app
     if not authorize(['ROLE_ADMIN']):
         flask.abort(403)
     user_id = flask.request.form['user_id']
-    flask.current_app.logger.warn("User %r impersonating %r",
-                                  flask.g.username, user_id)
+    app.logger.warn("User %r impersonating %r", flask.g.username, user_id)
     flask.session['username'] = user_id
-    flask.flash("Login successful as %s" % user_id, 'system')
+    flask.flash("Login successful as %s" % ldap_full_name(user_id), 'system')
     return flask.redirect(flask.url_for('auth.login'))
 
 
-def ldap_bind(user_id, password):
-    app = flask.current_app
-    conn = ldap.initialize(app.config['LDAP_SERVER'])
-    conn.protocol_version = ldap.VERSION3
-    conn.timeout = app.config['LDAP_TIMEOUT']
+@cached(timeout=5 * 60)
+def ldap_full_name(user_id):
+    return LdapConnection(flask.current_app).get_user_name(user_id)
 
-    user_dn = app.config['LDAP_USER_DN_PATTERN'].format(user_id=user_id)
-    try:
-        result = conn.simple_bind_s(user_dn, password)
-    except (ldap.INVALID_CREDENTIALS, ldap.UNWILLING_TO_PERFORM):
-        return False
-    assert result[:2] == (ldap.RES_BIND, [])
-    return True
+
+class LdapConnection(object):
+
+    def __init__(self, app):
+        self.conn = ldap.initialize(app.config['LDAP_SERVER'])
+        self.conn.protocol_version = ldap.VERSION3
+        self.conn.timeout = app.config['LDAP_TIMEOUT']
+        self._user_dn_pattern = app.config['LDAP_USER_DN_PATTERN']
+
+    def get_user_dn(self, user_id):
+        return self._user_dn_pattern.format(user_id=user_id)
+
+    def bind(self, user_id, password):
+        user_dn = self.get_user_dn(user_id)
+        try:
+            result = self.conn.simple_bind_s(user_dn, password)
+        except (ldap.INVALID_CREDENTIALS, ldap.UNWILLING_TO_PERFORM):
+            return False
+        assert result[:2] == (ldap.RES_BIND, [])
+        return True
+
+    def get_user_name(self, user_id):
+        user_dn = self.get_user_dn(user_id)
+        result2 = self.conn.search_s(user_dn, ldap.SCOPE_BASE)
+        [[_dn, attr]] = result2
+        return attr['cn'][0].decode('utf-8')
 
 
 def authorize(role_names):
@@ -91,6 +114,12 @@ def authorize(role_names):
 def register_on(app):
     app.register_blueprint(auth_views)
     app.before_request(set_user)
+
+    @app.context_processor
+    def inject():
+        return {
+            'ldap_full_name': ldap_full_name,
+        }
 
 
 @cached(timeout=5 * 60)

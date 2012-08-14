@@ -25,7 +25,12 @@
           <a id="ewlink" href="http://ew.eea.europa.eu/">EnviroWindows</a>
         </div>
         <div id="righttools">
-          <a href="{{ url_for('auth.login') }}">login</a>
+          {% if g.username %}
+            <a href="{{ url_for('auth.login') }}"
+               >{{ ldap_full_name(g.username) }}</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">login</a>
+          {% endif %}
         </div>
       </div>
       <div id="pagehead">

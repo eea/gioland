@@ -8,7 +8,10 @@
 
   {% if g.username %}
 
-    <p>You are logged in as <tt>{{ g.username }}</tt>.</p>
+    <p>
+      You are logged in as
+      <strong>{{ full_name }}</strong> ({{ user_id }}).
+    </p>
 
     <form method="post">
       <input type="hidden" name="action" value="logout">
