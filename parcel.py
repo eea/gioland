@@ -539,7 +539,8 @@ def register_on(app):
 @parcel_views.before_request
 def authorize_for_view():
     if flask.g.username is None:
-        return flask.redirect(flask.url_for('auth.login'))
+        url = flask.request.url
+        return flask.redirect(flask.url_for('auth.login', next=url))
     if not auth.authorize(ALL_ROLES):
         return flask.render_template('not_authorized.html')
 

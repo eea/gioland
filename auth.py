@@ -23,13 +23,14 @@ def login():
             return flask.redirect(flask.url_for('parcel.index'))
 
         elif form['action'] == 'login':
+            next = form['next'] or flask.url_for('parcel.index')
             ldapconn = LdapConnection(flask.current_app)
             user_id = form['username']
             if ldapconn.bind(user_id, form['password']):
                 flask.session['username'] = user_id
                 flask.flash("Login successful as %s" % ldap_full_name(user_id),
                             'system')
-                return flask.redirect(flask.url_for('parcel.index'))
+                return flask.redirect(next)
 
             else:
                 flask.flash("Login failed.", 'error')
@@ -37,11 +38,14 @@ def login():
 
         else:
             return flask.abort(400)
+    else:
+        next = flask.request.args.get('next', '')
 
     user_id = flask.g.username
     return flask.render_template('auth_login.html', **{
         'user_id': user_id,
         'full_name': ldap_full_name(user_id) if user_id else None,
+        'next': next,
     })
 
 
