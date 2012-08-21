@@ -76,6 +76,7 @@ class AppTestCase(unittest.TestCase):
         'projection': 'eur',
         'resolution': '25m',
         'extent': 'full',
+        'coverage': '',
     })
 
     def new_parcel(self, **extra_metadata):

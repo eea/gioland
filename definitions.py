@@ -7,6 +7,7 @@ METADATA_FIELDS = [
     'projection',
     'resolution',
     'extent',
+    'coverage',
 ]
 
 

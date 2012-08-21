@@ -6,6 +6,38 @@
 {% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
 
 
+{% block scripts %}
+<script>
+  $(function() {
+    $('#upload-meta-extent').on('change', function () {
+      var val = $(this).val();
+      if(val == 'full') {
+        $('#coverage-container').hide();
+        $('#upload-meta-coverage').val('');
+      }
+      if(val == 'partial') {
+        $('#coverage-container').show();
+        $('#upload-meta-coverage').focus();
+      }
+    }).change();
+
+    $('#parcel_form').on('submit', function (e) {
+      var coverage = $('#upload-meta-coverage');
+      var coverage_container = $('#coverage-container');
+      var extent = $('#upload-meta-extent');
+
+      if(extent.val() == 'partial' && $.trim(coverage.val()) == "") {
+        coverage_container.find('.err').show();
+        e.preventDefault();
+      }
+
+    });
+  });
+</script>
+{% endblock %}
+
+
+
 {% from 'bits.html' import breadcrumb_items %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
@@ -22,7 +54,7 @@
 
   {% from 'bits.html' import pick_from_list %}
 
-  <form method="post">
+  <form id="parcel_form" method="post">
 
     <table>
     {% for name, label, items in [
@@ -40,6 +72,17 @@
       </tr>
 
     {% endfor %}
+
+    <tr id="coverage-container" style="display: none;">
+      <td><label for="upload-meta-coverage">Coverage</label></td>
+      <td>
+        <input id="upload-meta-coverage" name="coverage" type="text"
+               style="width: 158px;">
+        <span class="err">(required)</span>
+        <div class="err" style="display: none">This field is required</div>
+      </td>
+    </tr>
+
     </table>
 
     <button type="submit">Begin upload</button>

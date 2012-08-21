@@ -24,7 +24,10 @@
 
     <tr>
       <th>Extent</th>
-      <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
+      <td>
+        {{ EXTENT_MAP[metadata['extent']] }} <br>
+        <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
+      </td>
     </tr>
 
     {% if show_stage %}

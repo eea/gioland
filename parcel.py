@@ -79,6 +79,9 @@ def new():
 
         wh = get_warehouse()
         form = flask.request.form.to_dict()
+        if form['extent'] == 'full':
+            form['coverage'] = ''
+
         metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
         metadata['stage'] = INITIAL_STAGE
 
@@ -512,6 +515,10 @@ def validate_metadata(metadata):
             STAGES])
     )
     for key, value in metadata.items():
+        if key == 'coverage':
+            if metadata['extent'] == 'partial' and not value:
+                return False
+            continue
         if value and value in dict(data_map[key]).keys():
             continue
         return False

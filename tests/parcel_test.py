@@ -215,6 +215,35 @@ class ParcelTest(AppTestCase):
         data = select(resp.data, ".datatable tbody tr")
         self.assertEqual(0, len(data))
 
+    def test_partial_coverage_is_saved_in_metadata(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = 'partial'
+        data['coverage'] = 'Forest type 1/3'
+
+        resp = self.client.post('/parcel/new', data=data)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertEqual(parcel.metadata['coverage'], 'Forest type 1/3')
+
+    def test_parcel_coverage_for_extent_partial_mandatory(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = 'partial'
+        resp = self.client.post('/parcel/new', data=data)
+        self.assertEqual(400, resp.status_code)
+
+    def test_coverage_for_full_extent_is_empty_string(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = 'full'
+        data['coverage'] = 'Forest type 1/3'
+
+        resp = self.client.post('/parcel/new', data=data)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertEqual(parcel.metadata['coverage'], '')
+
 
 class ParcelHistoryTest(AppTestCase):
 

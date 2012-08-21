@@ -138,3 +138,9 @@ a.delete-parcel {
 .upload-container .cancel-file {
     display: none;
 }
+
+.err {
+    padding-top: 4px;
+    font-size: 12px;
+    color: red;
+}
