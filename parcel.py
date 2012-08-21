@@ -1,6 +1,7 @@
 import os
 import re
 from cgi import escape
+from itertools import groupby
 import flask
 import blinker
 from werkzeug.utils import secure_filename
@@ -65,9 +66,11 @@ def country(code):
     wh = get_warehouse()
     all_parcels = [p for p in chain_tails(wh)
                    if p.metadata['country'] == code]
+    grouped_parcels = group_parcels(all_parcels)
+
     return flask.render_template('country.html', **{
         'code': code,
-        'all_parcels': all_parcels,
+        'grouped_parcels': grouped_parcels,
     })
 
 
@@ -362,6 +365,16 @@ def walk_parcels(wh, name, metadata_key='next_parcel'):
             return
 
 
+def get_parcels_by_stage(name):
+    wh = get_warehouse()
+    stages_with_parcels = dict([(stage, None) for stage in STAGES])
+    for parcel in walk_parcels(wh, name, 'prev_parcel'):
+        stage = parcel.metadata['stage']
+        if not stages_with_parcels[stage]:
+            stages_with_parcels[stage] = parcel
+    return stages_with_parcels
+
+
 def add_history_item_and_notify(parcel, *args, **kwargs):
     item = parcel.add_history_item(*args, **kwargs)
     notification.notify(item)
@@ -383,6 +396,15 @@ def chain(name):
         'first_parcel': first_parcel,
         'workflow_parcels': workflow_parcels,
     })
+
+
+def group_parcels(parcels):
+    def grouper(parcel):
+        return {"country": parcel.metadata['country'],
+                "projection": parcel.metadata['projection'],
+                "resolution": parcel.metadata['resolution'],
+                "extent": parcel.metadata['extent']}
+    return groupby(parcels, key=grouper)
 
 
 @parcel_views.route('/subscribe', methods=['GET', 'POST'])
@@ -467,6 +489,7 @@ def finalize_parcel(wh, parcel, reject):
 
     if reject:
         next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) - 1]
+        parcel.save_metadata({'rejection': 'true'})
     else:
         next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
     next_stage_def = STAGES[next_stage]
@@ -532,6 +555,7 @@ def register_on(app):
         'authorize': auth.authorize,
         'authorize_for_parcel': authorize_for_parcel,
         'can_subscribe_to_notifications': notification.can_subscribe,
+        'get_parcels_by_stage': get_parcels_by_stage,
     })
     app.jinja_env.filters["date"] = date
 
