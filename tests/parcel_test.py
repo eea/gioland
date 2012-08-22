@@ -150,6 +150,29 @@ class ParcelTest(AppTestCase):
                 next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
                 self.assertEqual(next_parcel.metadata['stage'], prev_stage)
 
+    def test_finalize_with_reject_saves_rejected_metadata(self):
+        for stage in ['sch', 'vch', 'ech']:
+            parcel_name = self.create_parcel_at_stage(stage)
+            resp = self.client.post('/parcel/%s/finalize' % parcel_name,
+                                    data={'reject': 'on'})
+            with self.app.test_request_context():
+                parcel = self.wh.get_parcel(parcel_name)
+                self.assertTrue(parcel.metadata['rejection'])
+
+    def test_get_parcels_by_stage(self):
+        import parcel
+        self.create_parcel_at_stage('int')
+        parcel_name_1 = self.create_parcel_at_stage('sch')
+        self.client.post('/parcel/%s/finalize' % parcel_name_1,
+                         data={'reject': 'on'})
+
+        with self.app.test_request_context():
+            parcel_name = self.wh.get_parcel(parcel_name_1)\
+                              .metadata['next_parcel']
+            parcels_by_stage = parcel.get_parcels_by_stage(parcel_name)
+            parcels = [p for p in parcels_by_stage.values() if p]
+            self.assertEqual(2, len(parcels))
+
     def test_finalize_last_parcel_forbidden(self):
         parcel_name = self.create_parcel_at_stage('fva')
         resp = self.client.post('/parcel/%s/finalize' % parcel_name)
@@ -243,6 +266,39 @@ class ParcelTest(AppTestCase):
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
             self.assertEqual(parcel.metadata['coverage'], '')
+
+    def test_country_workflow_overview_group(self):
+        data = dict(self.PARCEL_METADATA)
+        self.client.post('/parcel/new', data=data)
+
+        data['extent'] = 'partial'
+        data['coverage'] = 'Test coverage'
+        self.client.post('/parcel/new', data=data)
+
+        resp = self.client.get('/country/be')
+        table_headers = select(resp.data, '.title')
+        self.assertEqual(2, len(table_headers))
+
+        table_headers_text = [''.join(t.text.split()) for t in table_headers]
+        self.assertIn('Belgium/European/25m/Full', table_headers_text)
+        self.assertIn('Belgium/European/25m/Partial', table_headers_text)
+
+    def test_country_workflow_overview_group_contain_correct_parcels(self):
+        data = dict(self.PARCEL_METADATA)
+        self.client.post('/parcel/new', data=data)
+
+        data['extent'] = 'partial'
+        data['theme'] = 'tty'
+        data['coverage'] = 'Test coverage'
+        self.client.post('/parcel/new', data=data)
+
+        resp = self.client.get('/country/be')
+        themes = select(resp.data, '.scope-row')
+        self.assertEqual(2, len(themes))
+
+        themes_text = [t.text.strip() for t in themes]
+        self.assertIn('Grassland Cover', themes_text)
+        self.assertIn('Tree Type', themes_text)
 
 
 class ParcelHistoryTest(AppTestCase):
