@@ -149,6 +149,7 @@
 
 {% macro parcel_status(parcel) %}
 
+  <a href="{{ url_for('parcel.view', name=parcel.name) }}">
   {% if parcel.uploading %}
 
     <em>in progress</em>
@@ -156,20 +157,15 @@
   {% else %}
 
     {% if parcel.metadata['rejection'] %}
-
       <img src="{{ url_for('static', filename='rejected.gif') }}"
            width="16" height="16" alt="Rejected">
-
     {% else %}
-
-      <a href="{{ url_for('parcel.view', name=parcel.name) }}">
-          <img src="{{ url_for('static', filename='ok.gif') }}"
-               width="16" height="16" alt="Finalized">
-      </a>
-
+      <img src="{{ url_for('static', filename='ok.gif') }}"
+           width="16" height="16" alt="Finalized">
     {% endif %}
 
   {% endif %}
+  </a>
 
 {% endmacro %}
 
