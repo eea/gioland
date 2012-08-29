@@ -157,12 +157,14 @@
 
     {% if parcel.metadata['rejection'] %}
 
-      <img src="/static/rejected.gif" width="16" height="16" alt="Rejected">
+      <img src="{{ url_for('static', filename='rejected.gif') }}"
+           width="16" height="16" alt="Rejected">
 
     {% else %}
 
       <a href="{{ url_for('parcel.view', name=parcel.name) }}">
-          <img src="/static/ok.gif" width="16" height="16" alt="Finalized">
+          <img src="{{ url_for('static', filename='ok.gif') }}"
+               width="16" height="16" alt="Finalized">
       </a>
 
     {% endif %}
