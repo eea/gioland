@@ -18,6 +18,7 @@ metadata_rdf_fields = [
 
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 signals = blinker.Namespace()
 uns_notification_sent = signals.signal("uns-notification-sent")

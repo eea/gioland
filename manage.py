@@ -237,4 +237,5 @@ if __name__ == '__main__':
     stderr_handler = logging.StreamHandler()
     stderr_handler.setFormatter(logging.Formatter(LOG_FORMAT))
     logging.getLogger().addHandler(stderr_handler)
+    logging.getLogger('werkzeug').setLevel(logging.INFO)
     manager.run()

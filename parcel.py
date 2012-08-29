@@ -13,7 +13,7 @@ from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES)
 import notification
 import auth
-from warehouse import get_warehouse
+from warehouse import get_warehouse, _current_user
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -128,6 +128,8 @@ def upload(name):
     chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
     if not os.path.isdir(temp):
         os.makedirs(temp)
+    wh.logger.info("Begin chunked upload file %r for parcel %r (user %s)",
+                   filename, parcel.name, _current_user())
     posted_file.save(chunk_path)
 
     return flask.jsonify({'status': 'success'})
@@ -175,6 +177,8 @@ def upload_single_file(name):
         if posted_file:
             posted_file.save(file_path)
             file_uploaded.send(parcel, filename=filename)
+            wh.logger.info("Finished upload %r for parcel %r (user %s)",
+                           filename, parcel.name, _current_user())
         else:
             flask.flash("Please upload a valid file", 'system')
     return flask.redirect(flask.url_for('parcel.view', name=name))
@@ -194,6 +198,8 @@ def finalize_upload(name):
     temp = parcel.get_path().joinpath(identifier)
     if all_chunks_uploaded(temp, total_size):
         create_file_from_chunks(parcel, temp, filename)
+        wh.logger.info("Finished chunked upload %r for parcel %r (user %s)",
+                       filename, parcel.name, _current_user())
     else:
         response['status'] = 'error'
         response['message'] = "Upload didn't finalize. an error occurred"
@@ -320,6 +326,8 @@ def delete_file(name, filename):
     if flask.request.method == 'POST':
         filename = secure_filename(filename)
         file_path = flask.safe_join(parcel.get_path(), filename)
+        wh.logger.info("Delete file %r for parcel %r (user %s)",
+                       filename, parcel.name, _current_user())
         try:
             os.unlink(file_path)
             parcel_file_deleted.send(parcel)

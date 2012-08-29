@@ -19,6 +19,15 @@ BLOCK_SIZE = 8192
 log_number = 1
 
 
+def _current_user():
+    default = '[nobody]'
+    try:
+        import flask
+        return flask.g.username or default
+    except:
+        return default
+
+
 def _ensure_unicode(thing):
     if isinstance(thing, str):
         try:
@@ -66,8 +75,8 @@ class Parcel(Persistent):
         self.history = PersistentList()
 
     def save_metadata(self, new_metadata):
-        self._warehouse.logger.info("Metadata update for %r: %r",
-                                    self.name, new_metadata)
+        self._warehouse.logger.info("Metadata update for %r: %r (user %s)",
+                                    self.name, new_metadata, _current_user())
         for key, value in new_metadata.iteritems():
             self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
 
@@ -80,7 +89,8 @@ class Parcel(Persistent):
                 yield f
 
     def finalize(self):
-        self._warehouse.logger.info("Finalizing %r", self.name)
+        self._warehouse.logger.info("Finalizing %r (user %s)",
+                                    self.name, _current_user())
         self.checksum = checksum(self.get_path())
         self.save_metadata({'upload_time': datetime.utcnow().isoformat()})
 
@@ -146,11 +156,12 @@ class Warehouse(Persistent):
         parcel_path.chmod(0755)
         parcel = Parcel(self, parcel_path.name)
         self._parcels[parcel.name] = parcel
-        self.logger.info("New parcel %r", parcel.name)
+        self.logger.info("New parcel %r (user %s)",
+                         parcel.name, _current_user())
         return parcel
 
     def delete_parcel(self, name):
-        self.logger.info("Deleting parcel %r", name)
+        self.logger.info("Deleting parcel %r (user %s)", name, _current_user())
         parcel = self._parcels.pop(name)
         parcel.get_path().rmtree()
 
