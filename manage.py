@@ -23,6 +23,9 @@ default_config = {
 }
 
 
+LOG_FORMAT = "[%(asctime)s] %(module)s %(levelname)s %(message)s"
+
+
 def register_monitoring_views(app):
     import warehouse
 
@@ -91,15 +94,7 @@ manager = flaskext.script.Manager(create_app)
 def _set_up_logging(app):
     import notification
 
-    stderr_handler = logging.StreamHandler()
-    stderr_handler.level = logging.INFO
-    log_fmt = logging.Formatter("[%(asctime)s] %(module)s "
-                                "%(levelname)s %(message)s")
-    stderr_handler.setFormatter(log_fmt)
-    app.logger.addHandler(stderr_handler)
-
-    notification.log.setLevel(logging.DEBUG)
-    notification.log.addHandler(stderr_handler)
+    log_fmt = logging.Formatter(LOG_FORMAT)
 
     if app.config.get('LOGGING_FOLDER'):
         varlog = path(app.config['LOGGING_FOLDER'])
@@ -239,4 +234,7 @@ def update_tree():
 
 
 if __name__ == '__main__':
+    stderr_handler = logging.StreamHandler()
+    stderr_handler.setFormatter(logging.Formatter(LOG_FORMAT))
+    logging.getLogger().addHandler(stderr_handler)
     manager.run()
