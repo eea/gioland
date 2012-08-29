@@ -204,6 +204,9 @@
       <tr>
         <th class="scope-row" scope="row">
           {{ THEME_MAP[parcel.metadata['theme']] }}
+          {% if parcel.metadata['extent'] == 'partial' %}
+            ({{ parcel.metadata['coverage'] }})
+          {% endif %}
         </th>
 
         {% set parcels_by_stage = get_parcels_by_stage(parcel.name) %}
