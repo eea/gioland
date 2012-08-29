@@ -145,3 +145,96 @@
     <div class="breadcrumbtail"></div>
   </div>
 {% endmacro %}
+
+
+{% macro parcel_status(parcel) %}
+
+  {% if parcel.uploading %}
+
+    <em>in progress</em>
+
+  {% else %}
+
+    {% if parcel.metadata['rejection'] %}
+
+      <img src="/static/rejected.gif" width="16" height="16" alt="Rejected">
+
+    {% else %}
+
+      <a href="{{ url_for('parcel.view', name=parcel.name) }}">
+          <img src="/static/ok.gif" width="16" height="16" alt="Finalized">
+      </a>
+
+    {% endif %}
+
+  {% endif %}
+
+{% endmacro %}
+
+
+{% macro workflow_overview(parcels) %}
+
+  {% for grouper, parcels in grouped_parcels %}
+
+  <table class="datatable" style="width: 100%;">
+    <colgroup style="width: 11em;"></colgroup>
+    <thead>
+      <tr>
+        <th class="title" colspan="9">
+          {{ COUNTRY_MAP[grouper.country] }} /
+          {{ PROJECTION_MAP[grouper.projection] }} /
+          {{ RESOLUTION_MAP[grouper.resolution] }} /
+          {{ EXTENT_MAP[grouper.extent] }}
+        </th>
+      </tr>
+      <tr>
+        <th>HRL</th>
+        <th>Intermediate</th>
+        <th>Semantic Check</th>
+        <th>Verification</th>
+        <th>Verification Check</th>
+        <th>Enhacement</th>
+        <th>Enhacement Check</th>
+        <th>Final Integrated</th>
+        <th>Final Validated</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for parcel in parcels %}
+
+      <tr>
+        <th class="scope-row" scope="row">
+          {{ THEME_MAP[parcel.metadata['theme']] }}
+        </th>
+
+        {% set parcels_by_stage = get_parcels_by_stage(parcel.name) %}
+
+        {% for stage in STAGES %}
+
+        {% set parcel_by_stage = parcels_by_stage[stage] %}
+
+        <td class="center">
+          {% if parcel_by_stage %}
+
+            {{ parcel_status(parcel_by_stage) }}
+
+          {% endif %}
+
+        </td>
+
+        {% endfor %}
+
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+  {% endfor %}
+
+{% endmacro %}
+
+
