@@ -196,5 +196,5 @@ class UploadTest(AppTestCase):
             self.assertEqual(1, len(parcel_path.listdir()))
 
             with open(parcel_path.joinpath('data.txt'), 'rb') as data:
-                self.assertEqual(40, len(data.read()))
+                self.assertEqual(''.join(map(str, range(0, 25))), data.read())
 
