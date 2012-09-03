@@ -93,8 +93,8 @@ def new():
             flask.abort(400)
 
         parcel.save_metadata(metadata)
-        add_history_item_and_notify(
-            parcel, "New upload", datetime.utcnow(), flask.g.username, "")
+        parcel.add_history_item(
+            "New upload", datetime.utcnow(), flask.g.username, "")
         parcel_created.send(parcel)
         url = flask.url_for('parcel.view', name=parcel.name)
         return flask.redirect(url)
@@ -526,8 +526,7 @@ def finalize_parcel(wh, parcel, reject):
     prev_url = flask.url_for('parcel.view', name=parcel.name)
     next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
         prev_url, stage_def['label'])
-    add_history_item_and_notify(
-        next_parcel,
+    next_parcel.add_history_item(
         "%s started" % next_stage_def['label'],
         datetime.utcnow(),
         flask.g.username,
