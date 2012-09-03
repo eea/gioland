@@ -239,9 +239,13 @@ def create_file_from_chunks(parcel, temp, filename):
                 break
             yield data
 
+    def sorted_listdir(temp_path):
+        name = lambda f: int(f.name.split('_')[0])
+        return sorted(temp_path.listdir(), key=name)
+
     file_path = parcel.get_path().joinpath(filename)
-    with open(file_path, 'w+') as original_file:
-        for chunk_path in temp.listdir():
+    with open(file_path, 'wb') as original_file:
+        for chunk_path in sorted_listdir(temp):
             with open(chunk_path, 'rb') as chunk_file:
                 for chunk in read_chunk(chunk_file):
                     original_file.write(chunk)

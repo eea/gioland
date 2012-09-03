@@ -170,3 +170,31 @@ class UploadTest(AppTestCase):
         self.assertEqual(200, resp.status_code)
         response = json.loads(resp.data)
         self.assertEqual('error', response['status'])
+
+    def create_chunks_for_parcel(self, parcel):
+        parcel_path = parcel.get_path()
+        temp = parcel_path.joinpath('temp')
+        temp.makedirs()
+
+        i = 0
+        while i < 25:
+            with open(temp.joinpath(str(i)), 'wb') as chunk:
+                chunk.write(str(i))
+            i += 1
+        return temp
+
+    def test_create_file_from_chunks(self):
+        from parcel import create_file_from_chunks
+        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            parcel_path = parcel.get_path()
+            temp = self.create_chunks_for_parcel(parcel)
+            create_file_from_chunks(parcel, temp, 'data.txt')
+
+            self.assertEqual(1, len(parcel_path.listdir()))
+
+            with open(parcel_path.joinpath('data.txt'), 'rb') as data:
+                self.assertEqual(40, len(data.read()))
+
