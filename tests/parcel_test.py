@@ -296,9 +296,9 @@ class ParcelTest(AppTestCase):
         themes = select(resp.data, '.scope-row')
         self.assertEqual(2, len(themes))
 
-        themes_text = ''.join(t.text.strip() for t in themes)
-        self.assertIn('Grassland Cover', themes_text)
-        self.assertIn('Tree Type', themes_text)
+        themes_text = [t.text.strip() for t in themes]
+        self.assertIn('Grassland Cover', ''.join(themes_text))
+        self.assertIn('Tree Type', ''.join(themes_text))
 
 
 class ParcelHistoryTest(AppTestCase):
