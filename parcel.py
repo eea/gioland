@@ -531,7 +531,7 @@ def finalize_parcel(wh, parcel, reject):
     next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
         prev_url, stage_def['label'])
     next_parcel.add_history_item(
-        "%s started" % next_stage_def['label'],
+        "Ready for %s" % next_stage_def['label'],
         datetime.utcnow(),
         flask.g.username,
         next_description_html)
