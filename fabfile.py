@@ -1,16 +1,19 @@
 from StringIO import StringIO
+import subprocess
 from fabric.api import *
 from fabric.contrib.files import exists
 from path import path
 
 
 env.update({
-    'hosts': ['gaur'],
     'use_ssh_config': True,
     'python_prefix': path('/var/local/gioland/workflow/Python-2.7.3'),
     'sarge_home': path('/var/local/gioland/workflow/sarge'),
     'gioland_venv': path('/var/local/gioland/workflow/sarge/var/gioland-venv'),
 })
+
+if not env['hosts']:
+    env['hosts'] = ['gaur']
 
 
 def sarge(cmd):
@@ -44,13 +47,14 @@ def virtualenv():
 
 @task
 def install():
-    if not exists("%(gioland_version_folder)s/.git" % env):
-        run("git init '%(gioland_version_folder)s'" % env)
-
-    local("git push -f '%(host_string)s:%(gioland_version_folder)s' "
-          "HEAD:incoming" % env)
+    src = subprocess.check_output(['git', 'archive', 'HEAD'])
+    run("mkdir {gioland_version_instance}".format(**env))
+    put(StringIO(src), str(env['gioland_version_folder'] / '.src.tar'))
     with cd(env['gioland_version_folder']):
-        run("git reset incoming --hard")
+        try:
+            run("tar xvf .src.tar")
+        finally:
+            run("rm .src.tar")
 
     if not exists(env['gioland_version_instance']):
         run("mkdir -p '%s'" % env['gioland_version_instance'])
