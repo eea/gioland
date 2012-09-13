@@ -3,6 +3,7 @@ import flask
 import ldap
 from eea.usersdb import UsersDB
 from utils import cached
+from definitions import ALL_ROLES
 
 
 auth_views = flask.Blueprint('auth', __name__)
@@ -121,6 +122,18 @@ def authorize(role_names):
             return False
 
     return any(has_role(role_name) for role_name in role_names)
+
+
+@auth_views.route('/roles_debug')
+def roles_debug():
+    app = flask.current_app
+    text = ""
+    for name in ALL_ROLES:
+        text += name + "\n"
+        for value in app.config.get(name, []):
+            text += "    " + repr(value) + "\n"
+        text += "\n"
+    return flask.Response(text, content_type='text/plain')
 
 
 def register_on(app):
