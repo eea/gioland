@@ -145,7 +145,7 @@ class PermisionsTest(AppTestCase):
         self.assertFalse(self.try_new_parcel())
 
     def test_service_provider_allowed_to_begin_upload(self):
-        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        self.add_to_role('somebody', 'ROLE_SP')
         self.assertTrue(self.try_new_parcel())
 
     def test_random_user_not_allowed_to_upload_at_intermediate_state(self):
@@ -154,7 +154,7 @@ class PermisionsTest(AppTestCase):
         self.assertFalse(self.try_upload_file(name))
 
     def test_service_provider_allowed_to_upload_at_intermediate_state(self):
-        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        self.add_to_role('somebody', 'ROLE_SP')
         name = self.create_parcel()
         self.assertTrue(self.try_upload(name))
         self.assertTrue(self.try_upload_file(name))
@@ -164,7 +164,7 @@ class PermisionsTest(AppTestCase):
         self.assertFalse(self.try_finalize(name))
 
     def test_service_provider_allowed_to_finalize_at_intermediate_state(self):
-        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        self.add_to_role('somebody', 'ROLE_SP')
         name = self.create_parcel()
         self.assertTrue(self.try_finalize(name))
 
@@ -195,7 +195,7 @@ class PermisionsTest(AppTestCase):
         self.assertFalse(self.try_finalize(name))
 
     def test_service_provider_not_allowed_to_finalize_at_semantic_check(self):
-        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        self.add_to_role('somebody', 'ROLE_SP')
         name = self.create_parcel(stage='sch')
         self.assertFalse(self.try_finalize(name))
 
@@ -255,14 +255,14 @@ class PermisionsTest(AppTestCase):
         self.assertFalse(self.try_delete(name))
 
     def test_random_user_not_allowed_to_delete_file_from_parcel(self):
-        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        self.add_to_role('somebody', 'ROLE_SP')
         name = self.create_parcel()
         self.try_upload(name)
-        self.app.config["ROLE_SERVICE_PROVIDER"] = []
+        self.app.config["ROLE_SP"] = []
         self.assertFalse(self.try_delete_file(name, 'y.txt'))
 
     def test_admin_user_allowed_to_delete_file_from_parcel(self):
-        self.add_to_role('somebody', 'ROLE_SERVICE_PROVIDER')
+        self.add_to_role('somebody', 'ROLE_SP')
         name = self.create_parcel()
         self.try_upload(name)
         self.assertTrue(self.try_delete_file(name))

@@ -147,7 +147,7 @@ def get_configuration_from_sarge():
     config['ERROR_MAIL_RECIPIENTS'] = services[1]['ERROR_MAIL_RECIPIENTS']
     config['SENTRY_DSN'] = services[1]['SENTRY_DSN']
     config['SECRET_KEY'] = str(services[2]['SECRET_KEY'])
-    config['ROLE_SERVICE_PROVIDER'] = services[3]['sp']
+    config['ROLE_SP'] = services[3]['sp']
     config['ROLE_ETC'] = services[3]['etc']
     config['ROLE_NRC'] = services[3]['nrc']
     config['ROLE_ADMIN'] = services[3]['admin']

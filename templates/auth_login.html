@@ -33,8 +33,7 @@
   {% if request.args.get('debug') == 'on' %}
     <p>
       Roles:
-      {% for role in ['ROLE_SERVICE_PROVIDER', 'ROLE_ETC',
-                      'ROLE_NRC', 'ROLE_ADMIN'] %}
+      {% for role in ['ROLE_SP', 'ROLE_ETC', 'ROLE_NRC', 'ROLE_ADMIN'] %}
         {% if authorize([role]) %}<tt>{{ role }}</tt>{% endif %}
       {% endfor %}
     </p>

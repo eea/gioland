@@ -17,7 +17,7 @@ TREE_FIELDS = METADATA_FIELDS + ['stage']
 STAGES = OrderedDict([
     ('int', {
         'label': "Service provider upload",
-        'roles': ['ROLE_SERVICE_PROVIDER'],
+        'roles': ['ROLE_SP'],
     }),
 
     ('sch', {
@@ -166,7 +166,7 @@ RDF_URI = {
 
 
 ALL_ROLES = [
-    'ROLE_SERVICE_PROVIDER',
+    'ROLE_SP',
     'ROLE_ETC',
     'ROLE_NRC',
     'ROLE_ADMIN',
