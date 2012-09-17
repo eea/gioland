@@ -169,7 +169,6 @@ ALL_ROLES = [
     'ROLE_SP',
     'ROLE_ETC',
     'ROLE_NRC',
-    'ROLE_ADMIN',
     'ROLE_VIEWER',
     'ROLE_ADMIN',
 ]
