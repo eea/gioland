@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; activity log</h1>
+{% endblock %}
+
+{% block content %}
+
+  <p style="font-family: monospace">
+    {%- for line in log_file -%}
+      {{- line -}}<br>
+    {%- endfor -%}
+  </p>
+
+{% endblock %}

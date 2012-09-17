@@ -141,6 +141,16 @@ def roles_debug():
     return flask.render_template('auth_roles_debug.html', ALL_ROLES=ALL_ROLES)
 
 
+@auth_views.route('/logs')
+@require_admin
+def roles_debug():
+    import warehouse
+    app = flask.current_app
+    warehouse_log_file = app.config['WAREHOUSE_PATH'] / warehouse.LOG_FILE_NAME
+    with warehouse_log_file.open('rb') as log_file:
+        return flask.render_template('auth_logs.html', log_file=log_file)
+
+
 def register_on(app):
     app.register_blueprint(auth_views)
     app.before_request(set_user)

@@ -15,6 +15,7 @@ from definitions import TREE_FIELDS
 log = logging.getLogger(__name__)
 
 LOGGING_FORMAT = '[%(asctime)s] %(levelname)s %(message)s'
+LOG_FILE_NAME = 'activity.log'
 BLOCK_SIZE = 8192
 log_number = 1
 
@@ -193,7 +194,7 @@ class WarehouseConnector(object):
         conn = self._get_db().open()
         transaction.begin()
         handler = logging.handlers.WatchedFileHandler(
-            self._fs_path / 'activity.log')
+            self._fs_path / LOG_FILE_NAME)
         handler.setLevel(logging.INFO)
         handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
 
