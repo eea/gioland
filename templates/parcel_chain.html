@@ -43,7 +43,13 @@
 
         <td>
           {% if parcel.uploading %}
-            <em>in progress</em>
+
+            {% if STAGES[parcel.metadata['stage']]['last'] %}
+              <em>done</em>
+            {% else %}
+              <em>in progress</em>
+            {% endif %}
+
           {% else %}
             {{ parcel.metadata['upload_time'] }}
           {% endif %}

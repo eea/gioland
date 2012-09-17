@@ -152,7 +152,11 @@
   <a href="{{ url_for('parcel.view', name=parcel.name) }}">
   {% if parcel.uploading %}
 
-    <em>in progress</em>
+    {% if STAGES[parcel.metadata['stage']]['last'] %}
+      <em>done</em>
+    {% else %}
+      <em>in progress</em>
+    {% endif %}
 
   {% else %}
 
