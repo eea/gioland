@@ -2,3 +2,6 @@
 nose==1.1.2
 mock==0.8.0
 lxml==2.3.3
+Fabric==1.4.3
+pycrypto==2.6
+ssh==1.7.14

@@ -2,7 +2,6 @@
 
 import os
 import logging
-from logging.handlers import SMTPHandler, WatchedFileHandler
 import code
 import copy
 from path import path
@@ -23,7 +22,7 @@ default_config = {
 }
 
 
-LOG_FORMAT = "[%(asctime)s] %(module)s %(levelname)s %(message)s"
+LOG_FORMAT = "[%(asctime)s] %(name)s %(levelname)s %(message)s"
 
 
 def register_monitoring_views(app):
@@ -49,7 +48,7 @@ def create_app(config={}, testing=False):
     if testing:
         app.config['TESTING'] = True
     else:
-        app.config.update(get_configuration_from_sarge())
+        app.config.update(configuration_from_environ())
         app.config.from_pyfile("settings.py", silent=True)
     app.config.update(config)
     warehouse.initialize_app(app)
@@ -57,9 +56,6 @@ def create_app(config={}, testing=False):
     parcel.register_on(app)
     register_monitoring_views(app)
     utils.initialize_app(app)
-    if app.config.get('SENTRY_DSN'):
-        from raven.contrib.flask import Sentry
-        app.extensions['_sentry_instance'] = Sentry(app)
     return app
 
 
@@ -92,74 +88,41 @@ manager = flaskext.script.Manager(create_app)
 
 
 def _set_up_logging(app):
-    import notification
+    from logging.handlers import WatchedFileHandler
 
-    log_fmt = logging.Formatter(LOG_FORMAT)
+    log_dir = app.config.get('LOG_DIR')
+    if log_dir:
+        info_log = WatchedFileHandler(log_dir / 'info.log')
+        info_log.setFormatter(logging.Formatter(LOG_FORMAT))
+        info_log.setLevel(logging.INFO)
+        logging.getLogger().addHandler(info_log)
 
-    if app.config.get('LOGGING_FOLDER'):
-        varlog = path(app.config['LOGGING_FOLDER'])
-
-        info_handler = WatchedFileHandler(varlog / 'info.log')
-        info_handler.setFormatter(log_fmt)
-        info_handler.setLevel(logging.INFO)
-        app.logger.addHandler(info_handler)
-        notification.log.addHandler(info_handler)
-
-        if app.config.get('LOGGING_DEBUG_LOG'):
-            debug_handler = WatchedFileHandler(varlog / 'debug.log')
-            debug_handler.setFormatter(log_fmt)
-            debug_handler.setLevel(logging.DEBUG)
-            app.logger.addHandler(debug_handler)
-            notification.log.addHandler(debug_handler)
-
-    recipients = app.config.get('ERROR_MAIL_RECIPIENTS', [])
-    if recipients:
-        smtp_host = app.config.get('MAIL_SERVER', 'localhost')
-        smtp_port = int(app.config.get('MAIL_PORT', 25))
-
-        mail_handler_cfg = {
-            'fromaddr': app.config['DEFAULT_MAIL_SENDER'],
-            'toaddrs': recipients,
-            'subject': "Error in %s" % app.config['DEPLOYMENT_NAME'],
-            'mailhost': (smtp_host, smtp_port),
-        }
-
-        error_mail_handler = SMTPHandler(**mail_handler_cfg)
-        error_mail_handler.setLevel(logging.ERROR)
-        app.logger.addHandler(error_mail_handler)
+    sentry_dsn = app.config.get('SENTRY_DSN')
+    if sentry_dsn:
+        from raven.conf import setup_logging
+        from raven.handlers.logging import SentryHandler
+        setup_logging(SentryHandler(sentry_dsn, level=logging.WARN))
 
 
-def get_configuration_from_sarge():
-    if 'SARGEAPP_CFG' not in os.environ:
-        return {}
-
+def configuration_from_environ():
+    env = os.environ.get
     config = {}
-    with open(os.environ['SARGEAPP_CFG'], 'rb') as f:
-        sargeapp_cfg = flask.json.load(f)
-
-    services = sargeapp_cfg['services']
-
-    config['WAREHOUSE_PATH'] = path(services[0]['path'])
-    config['DEPLOYMENT_NAME'] = services[1]['DEPLOYMENT_NAME']
-    config['LOGGING_FOLDER'] = services[1]['LOGGING_FOLDER']
-    config['LOGGING_DEBUG_LOG'] = services[1].get('LOGGING_DEBUG_LOG', False)
-    config['DEFAULT_MAIL_SENDER'] = services[1]['DEFAULT_MAIL_SENDER']
-    config['ERROR_MAIL_RECIPIENTS'] = services[1]['ERROR_MAIL_RECIPIENTS']
-    config['SENTRY_DSN'] = services[1]['SENTRY_DSN']
-    config['SECRET_KEY'] = str(services[2]['SECRET_KEY'])
-    config['ROLE_SP'] = services[3]['sp']
-    config['ROLE_ETC'] = services[3]['etc']
-    config['ROLE_NRC'] = services[3]['nrc']
-    config['ROLE_ADMIN'] = services[3]['admin']
-    config['ROLE_VIEWER'] = services[3]['viewer']
-    config['BASE_URL'] = services[4]['base_url']
-    config['UNS_CHANNEL_ID'] = services[5]['channel_id']
-    config['UNS_LOGIN_USERNAME'] = services[5]['login_username']
-    config['UNS_LOGIN_PASSWORD'] = services[5]['login_password']
-    config['UNS_SUPPRESS_NOTIFICATIONS'] = bool(services[5].get('suppress'))
-    config['LDAP_SERVER'] = services[6]['server']
-    config['LDAP_USER_DN_PATTERN'] = services[6]['user_dn_pattern']
-
+    config['WAREHOUSE_PATH'] = path(env('WAREHOUSE_DIR', ''))
+    config['SENTRY_DSN'] = env('SENTRY_DSN')
+    config['SECRET_KEY'] = env('SECRET_KEY')
+    config['ROLE_SP'] = env('ROLE_SP', '').split()
+    config['ROLE_ETC'] = env('ROLE_ETC', '').split()
+    config['ROLE_NRC'] = env('ROLE_NRC', '').split()
+    config['ROLE_ADMIN'] = env('ROLE_ADMIN', '').split()
+    config['ROLE_VIEWER'] = env('ROLE_VIEWER', '').split()
+    config['BASE_URL'] = env('BASE_URL', 'http://localhost:8000')
+    config['UNS_CHANNEL_ID'] = env('UNS_CHANNEL_ID')
+    config['UNS_LOGIN_USERNAME'] = env('UNS_LOGIN_USERNAME')
+    config['UNS_LOGIN_PASSWORD'] = env('UNS_LOGIN_PASSWORD')
+    config['UNS_SUPPRESS_NOTIFICATIONS'] = bool(env('UNS_SUPPRESS'))
+    config['LDAP_SERVER'] = env('LDAP_SERVER')
+    config['LDAP_USER_DN_PATTERN'] = env('LDAP_USER_DN_PATTERN')
+    config['LOG_DIR'] = path(env('LOG_DIR', ''))
     return config
 
 
@@ -234,8 +197,8 @@ def update_tree():
 
 
 if __name__ == '__main__':
-    stderr_handler = logging.StreamHandler()
-    stderr_handler.setFormatter(logging.Formatter(LOG_FORMAT))
-    logging.getLogger().addHandler(stderr_handler)
+    stderr = logging.StreamHandler()
+    stderr.setFormatter(logging.Formatter(LOG_FORMAT))
+    logging.getLogger().addHandler(stderr)
     logging.getLogger('werkzeug').setLevel(logging.INFO)
     manager.run()
