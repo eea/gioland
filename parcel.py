@@ -457,7 +457,7 @@ def filter_parcels(parcels, **kwargs):
 
 def authorize_for_parcel(parcel):
     stage = INITIAL_STAGE if parcel is None else parcel.metadata['stage']
-    return auth.authorize(STAGES[stage]['roles'] + ['ROLE_ADMIN'])
+    return auth.authorize(STAGES[stage]['roles'])
 
 
 def authorize_for_upload(parcel):

@@ -17,45 +17,45 @@ TREE_FIELDS = METADATA_FIELDS + ['stage']
 STAGES = OrderedDict([
     ('int', {
         'label': "Service provider upload",
-        'roles': ['ROLE_SP'],
+        'roles': ['ROLE_SP', 'ROLE_ADMIN'],
     }),
 
     ('sch', {
         'label': "Semantic check",
-        'roles': ['ROLE_ETC'],
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'reject': True,
     }),
 
     ('ver', {
         'label': "Verification",
-        'roles': ['ROLE_NRC'],
+        'roles': ['ROLE_NRC', 'ROLE_ADMIN'],
     }),
 
     ('vch', {
         'label': "Verification check",
-        'roles': ['ROLE_ETC'],
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'reject': True,
     }),
 
     ('enh', {
         'label': "Enhancement",
-        'roles': ['ROLE_NRC'],
+        'roles': ['ROLE_NRC', 'ROLE_ADMIN'],
     }),
 
     ('ech', {
         'label': "Enhancement check",
-        'roles': ['ROLE_ETC'],
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'reject': True,
     }),
 
     ('fin', {
         'label': "Final integrated",
-        'roles': [],
+        'roles': ['ROLE_ADMIN'],
     }),
 
     ('fva', {
         'label': "Final validated",
-        'roles': [],
+        'roles': ['ROLE_ADMIN'],
         'last': True,
     }),
 ])
