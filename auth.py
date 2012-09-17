@@ -1,4 +1,5 @@
 import urlparse
+from functools import wraps
 import flask
 import ldap
 from eea.usersdb import UsersDB
@@ -124,9 +125,19 @@ def authorize(role_names):
     return any(has_role(role_name) for role_name in role_names)
 
 
+def require_admin(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not authorize(['ROLE_ADMIN']):
+            url = flask.request.url
+            return flask.redirect(flask.url_for('auth.login', next=url))
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @auth_views.route('/roles_debug')
+@require_admin
 def roles_debug():
-    app = flask.current_app
     return flask.render_template('auth_roles_debug.html', ALL_ROLES=ALL_ROLES)
 
 
