@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; role assignments</h1>
+{% endblock %}
+
+{% block content %}
+
+  <h2>Role assignments</h2>
+
+  <dl>
+  {% for name in ALL_ROLES %}
+
+    <dt>{{ name }}</dl>
+
+    {% for value in config.get(name, []) %}
+      <dd><tt>{{ value }}</tt></dd>
+    {% else %}
+      <dd><em>(nobody assigned)</em></dd>
+    {% endfor %}
+
+  {% endfor %}
+  </dl>
+
+
+  <h2>Roles allowed on parcel stage</h2>
+
+  <dl>
+  {% for stage in STAGES.values() %}
+
+    <dt>{{ stage['label'] }}</dl>
+
+    {% for role in stage['roles'] %}
+      <dd><tt>{{ role }}</tt></dd>
+    {% else %}
+      <dd><em>(nobody assigned)</em></dd>
+    {% endfor %}
+
+  {% endfor %}
+  </dl>
+
+{% endblock %}

@@ -127,13 +127,7 @@ def authorize(role_names):
 @auth_views.route('/roles_debug')
 def roles_debug():
     app = flask.current_app
-    text = ""
-    for name in ALL_ROLES:
-        text += name + "\n"
-        for value in app.config.get(name, []):
-            text += "    " + repr(value) + "\n"
-        text += "\n"
-    return flask.Response(text, content_type='text/plain')
+    return flask.render_template('auth_roles_debug.html', ALL_ROLES=ALL_ROLES)
 
 
 def register_on(app):
