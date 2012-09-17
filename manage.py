@@ -56,6 +56,13 @@ def create_app(config={}, testing=False):
     parcel.register_on(app)
     register_monitoring_views(app)
     utils.initialize_app(app)
+
+    sentry_dsn = app.config.get('SENTRY_DSN')
+    if sentry_dsn:
+        from raven.conf import setup_logging
+        from raven.handlers.logging import SentryHandler
+        setup_logging(SentryHandler(sentry_dsn, level=logging.WARN))
+
     return app
 
 
@@ -87,23 +94,6 @@ class ReverseProxied(object):
 manager = flaskext.script.Manager(create_app)
 
 
-def _set_up_logging(app):
-    from logging.handlers import WatchedFileHandler
-
-    log_dir = app.config.get('LOG_DIR')
-    if log_dir:
-        info_log = WatchedFileHandler(log_dir / 'info.log')
-        info_log.setFormatter(logging.Formatter(LOG_FORMAT))
-        info_log.setLevel(logging.INFO)
-        logging.getLogger().addHandler(info_log)
-
-    sentry_dsn = app.config.get('SENTRY_DSN')
-    if sentry_dsn:
-        from raven.conf import setup_logging
-        from raven.handlers.logging import SentryHandler
-        setup_logging(SentryHandler(sentry_dsn, level=logging.WARN))
-
-
 def configuration_from_environ():
     env = os.environ.get
     config = {}
@@ -122,7 +112,6 @@ def configuration_from_environ():
     config['UNS_SUPPRESS_NOTIFICATIONS'] = bool(env('UNS_SUPPRESS'))
     config['LDAP_SERVER'] = env('LDAP_SERVER')
     config['LDAP_USER_DN_PATTERN'] = env('LDAP_USER_DN_PATTERN')
-    config['LOG_DIR'] = path(env('LOG_DIR', ''))
     return config
 
 
@@ -133,8 +122,6 @@ class RunCherryPyCommand(flaskext.script.Command):
     ]
 
     def handle(self, app, port):
-        _set_up_logging(app)
-
         import cherrypy.wsgiserver
         listen = ('127.0.0.1', port)
         wsgi_app = ReverseProxied(app.wsgi_app)
