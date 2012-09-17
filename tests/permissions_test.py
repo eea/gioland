@@ -318,3 +318,25 @@ class RolesTest(AppTestCase):
         with self.app.test_request_context():
             self.app.preprocess_request()
             self.assertFalse(auth.authorize(['ROLE_ETC']))
+
+
+class RequireAdminTest(AppTestCase):
+
+    def setUp(self):
+        import auth
+
+        @self.app.route('/some_view')
+        @auth.require_admin
+        def some_view():
+            return "inside"
+
+    def test_admin_required_decorator_redirects_to_login(self):
+        resp = self.client.get('/some_view')
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/login', resp.location)
+
+    def test_admin_required_decorator_allows_admin_user(self):
+        self.app.config.setdefault('ROLE_ADMIN', []).append('user_id:somebody')
+        resp = self.client.get('/some_view')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, "inside")
