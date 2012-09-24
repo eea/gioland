@@ -122,7 +122,6 @@ THEMES = [
     ('tcd',     "Tree Cover Density"),
     ('fty',     "Forest Type"),
     ('tnt',     "Tree / Non-tree"),
-    ('tty',     "Tree Type"),
     ('grc',     "Grassland Cover"),
     ('grd',     "Grassland Density"),
     ('wet',     "Wetlands"),
@@ -136,7 +135,6 @@ PROJECTIONS = [
 
 RESOLUTIONS = [
     ('20m', "20m"),
-    ('25m', "25m"),
     ('100m', "100m"),
 ]
 

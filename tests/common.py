@@ -74,7 +74,7 @@ class AppTestCase(unittest.TestCase):
         'country': 'be',
         'theme': 'grc',
         'projection': 'eur',
-        'resolution': '25m',
+        'resolution': '20m',
         'extent': 'full',
         'coverage': '',
     })
