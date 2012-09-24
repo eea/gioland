@@ -143,7 +143,7 @@ def roles_debug():
 
 @auth_views.route('/logs')
 @require_admin
-def roles_debug():
+def view_logs():
     import warehouse
     app = flask.current_app
     warehouse_log_file = app.config['WAREHOUSE_PATH'] / warehouse.LOG_FILE_NAME
