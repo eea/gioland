@@ -112,6 +112,8 @@ def configuration_from_environ():
     config['UNS_SUPPRESS_NOTIFICATIONS'] = bool(env('UNS_SUPPRESS'))
     config['LDAP_SERVER'] = env('LDAP_SERVER')
     config['LDAP_USER_DN_PATTERN'] = env('LDAP_USER_DN_PATTERN')
+    if env('ALLOW_PARCEL_DELETION'):
+        config['ALLOW_PARCEL_DELETION'] = True
     return config
 
 
