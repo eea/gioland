@@ -28,7 +28,7 @@ STAGES = OrderedDict([
 
     ('ver', {
         'label': "Verification",
-        'roles': ['ROLE_NRC', 'ROLE_ADMIN'],
+        'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
     }),
 
     ('vch', {
