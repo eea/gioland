@@ -56,9 +56,9 @@
     <thead>
       <th>Country</th>
       <th>Theme</th>
+      <th>Extent</th>
       <th>Projection</th>
       <th>Resolution</th>
-      <th>Extent</th>
       <th>Stage</th>
       <th>Updated</th>
     </thead>
@@ -69,10 +69,15 @@
         {% set url = url_for('parcel.view', name=parcel.name) %}
         {% set metadata = parcel.metadata %}
         <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
-        <td>{{ THEME_MAP[metadata['theme']] }}</td>
+        <td>
+          {{ THEME_MAP[metadata['theme']] }}
+          {% if parcel.metadata['extent'] == 'partial' %}
+            ({{ parcel.metadata['coverage'] }})
+          {% endif %}
+        </td>
+        <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
         <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
-        <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
         <td><a href="{{ url }}">{{ STAGE_MAP[metadata['stage']] }}</a></td>
         <td>{{ parcel.last_modified|datetime }}</td>
       </tr>
