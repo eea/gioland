@@ -40,7 +40,8 @@ def get_filter_arguments():
 @parcel_views.route('/overview')
 def overview():
     wh = get_warehouse()
-    parcels = filter_parcels(chain_tails(wh), **get_filter_arguments())
+    parcels = list(filter_parcels(chain_tails(wh), **get_filter_arguments()))
+    parcels.sort(key=lambda p: p.last_modified, reverse=True)
     return flask.render_template('overview.html', **{
         'parcels': parcels,
     })

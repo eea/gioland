@@ -216,9 +216,12 @@ class ParcelTest(AppTestCase):
         self.assertEqual(0, len(select(resp.data, '.delete-parcel')))
 
     def test_filter_parcel(self):
+        now = datetime.utcnow()
         with self.app.test_request_context():
             parcel1 = self.wh.new_parcel()
+            parcel1.add_history_item('create', now, 'tester', '')
             parcel2 = self.wh.new_parcel()
+            parcel2.add_history_item('create', now, 'tester', '')
 
             parcel1.metadata['country'] = 'ro'
             parcel1.metadata['extent'] = 'partial'

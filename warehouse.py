@@ -118,6 +118,10 @@ class Parcel(Persistent):
         self.history.append(item)
         return item
 
+    @property
+    def last_modified(self):
+        return self.history[-1].time
+
 
 class ParcelHistoryItem(Persistent):
 

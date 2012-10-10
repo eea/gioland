@@ -60,6 +60,7 @@
       <th>Resolution</th>
       <th>Extent</th>
       <th>Stage</th>
+      <th>Updated</th>
     </thead>
 
     <tbody>
@@ -73,6 +74,7 @@
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
         <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
         <td><a href="{{ url }}">{{ STAGE_MAP[metadata['stage']] }}</a></td>
+        <td>{{ parcel.last_modified|datetime }}</td>
       </tr>
     {% endfor %}
     </tbody>
