@@ -77,37 +77,6 @@
 {% endmacro %}
 
 
-{% macro parcels_table(parcels_list) %}
-  <table class="datatable">
-
-    <thead>
-      <th>Country</th>
-      <th>Theme</th>
-      <th>Projection</th>
-      <th>Resolution</th>
-      <th>Extent</th>
-      <th>Stage</th>
-    </thead>
-
-    <tbody>
-    {% for parcel in parcels_list %}
-      <tr>
-        {% set url = url_for('parcel.view', name=parcel.name) %}
-        {% set metadata = parcel.metadata %}
-        <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
-        <td>{{ THEME_MAP[metadata['theme']] }}</td>
-        <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
-        <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
-        <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
-        <td><a href="{{ url }}">{{ STAGE_MAP[metadata['stage']] }}</a></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-
-  </table>
-{% endmacro %}
-
-
 {% macro pick_from_list(id, name, items, any=False) -%}
   <select id="{{ id }}" name="{{ name }}">
   {% if any %}
