@@ -228,7 +228,7 @@ class ParcelTest(AppTestCase):
 
             parcel2.metadata['country'] = 'at'
 
-        resp = self.client.get('/overview?country=ro&extent=partial')
+        resp = self.client.get('/search?country=ro&extent=partial')
         rows = select(resp.data, ".datatable tbody tr")
         self.assertEqual(1, len(rows))
 
@@ -237,7 +237,7 @@ class ParcelTest(AppTestCase):
             parcel1 = self.wh.new_parcel()
             parcel1.metadata['country'] = 'ro'
 
-        resp = self.client.get('/overview?country=ro&extent=partial')
+        resp = self.client.get('/search?country=ro&extent=partial')
         data = select(resp.data, ".datatable tbody tr")
         self.assertEqual(0, len(data))
 

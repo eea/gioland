@@ -10,7 +10,7 @@
 {% block breadcrumb %}
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GioLand'),
-    (url_for('parcel.overview'), title),
+    (url_for('parcel.search'), title),
   ]) }}
 {% endblock %}
 
@@ -49,7 +49,7 @@
 
 {% block content %}
 
-  {% include "overview_filter.html" %}
+  {% include "search_filter.html" %}
 
   <table class="datatable">
 
