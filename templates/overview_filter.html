@@ -6,6 +6,7 @@
   {{ pick_from_list('filter-projection', 'projection', PROJECTIONS, any=True) }}
   {{ pick_from_list('filter-resolution', 'resolution', RESOLUTIONS, any=True) }}
   {{ pick_from_list('filter-extent', 'extent', EXTENTS, any=True) }}
+  {{ pick_from_list('filter-stage', 'stage', STAGES_PICKLIST, any=True) }}
   <div class="clear">
     <a href="{{ url_for('parcel.overview') }}">Clear filters</a>
   </div>

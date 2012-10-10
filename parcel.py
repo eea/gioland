@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from path import path
 from dateutil import tz
-from definitions import (EDITABLE_METADATA, STAGES, STAGE_ORDER,
+from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES)
 import notification
@@ -33,7 +33,7 @@ def index():
 
 def get_filter_arguments():
     return {k: v for k, v in flask.request.args.items()
-            if k in EDITABLE_METADATA and v}
+            if k in METADATA and v}
 
 
 @parcel_views.route('/overview')
@@ -580,9 +580,12 @@ def authorize_for_view():
         return flask.render_template('not_authorized.html')
 
 
+STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]
+
 metadata_template_context = {
     'STAGES': STAGES,
-    'STAGE_MAP': {k: STAGES[k]['label'] for k in STAGES},
+    'STAGES_PICKLIST': STAGES_PICKLIST,
+    'STAGE_MAP': dict(STAGES_PICKLIST),
     'COUNTRIES_MC': COUNTRIES_MC,
     'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,
