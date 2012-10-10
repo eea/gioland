@@ -170,3 +170,8 @@ ALL_ROLES = [
     'ROLE_VIEWER',
     'ROLE_ADMIN',
 ]
+
+
+DATE_FORMAT = {
+    'long': '%d/%m/%Y %H:%M',
+}

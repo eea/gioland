@@ -10,7 +10,8 @@ from path import path
 from dateutil import tz
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
-                         THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES)
+                         THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
+                         DATE_FORMAT)
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
@@ -471,8 +472,8 @@ def authorize_for_upload(parcel):
     return True
 
 
-def date(value, format):
-    """ Formats a date according to the given format. """
+def datetime_filter(value, format_name='long'):
+    """ Formats a datetime according to the given format. """
     timezone = flask.current_app.config.get("TIME_ZONE")
     if timezone:
         from_zone = tz.gettz("UTC")
@@ -482,7 +483,7 @@ def date(value, format):
         value = value.replace(tzinfo=from_zone)
         # Convert time zone
         value = value.astimezone(to_zone)
-    return value.strftime(format)
+    return value.strftime(DATE_FORMAT[format_name])
 
 
 def clear_chunks(parcel_path):
@@ -568,7 +569,7 @@ def register_on(app):
         'can_subscribe_to_notifications': notification.can_subscribe,
         'get_parcels_by_stage': get_parcels_by_stage,
     })
-    app.jinja_env.filters["date"] = date
+    app.jinja_env.filters["datetime"] = datetime_filter
 
 
 @parcel_views.before_request

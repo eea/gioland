@@ -122,7 +122,7 @@
 
   <li class="history-item">
     <h3>{{ item.title }} on
-        {{ item.time|date("%d/%m/%Y %H:%M") }}
+        {{ item.time|datetime }}
         by {{ item.actor }}</h3>
     <div class="history-item-description">
       {{ item.description_html|safe }}
