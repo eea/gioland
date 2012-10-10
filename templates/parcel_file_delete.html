@@ -8,7 +8,7 @@
     (url_for('parcel.view', name=parcel.name),
              THEME_MAP[parcel.metadata["theme"]]),
     (url_for('parcel.delete_file', name=parcel.name,
-    		 filename=filename), 'Delete file'),
+             filename=filename), 'Delete file'),
   ]) }}
 {% endblock %}
 
@@ -18,7 +18,7 @@
 <h2>Existing files</h2>
 
 <p>Delete file <em>{{ filename }}</em> from parcel
-	<em>{{ parcel.name }}</em>?</p>
+  <em>{{ parcel.name }}</em>?</p>
 
 <form method="post">
   <button type="submit">Yes, delete</button>

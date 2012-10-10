@@ -1,12 +1,12 @@
 {% from 'bits.html' import pick_from_list %}
 
 <div class="filters">
-	{{ pick_from_list('filter-country', 'country', COUNTRIES, any=True) }}
-	{{ pick_from_list('filter-theme', 'theme', THEMES, any=True) }}
-	{{ pick_from_list('filter-projection', 'projection', PROJECTIONS, any=True) }}
-	{{ pick_from_list('filter-resolution', 'resolution', RESOLUTIONS, any=True) }}
-	{{ pick_from_list('filter-extent', 'extent', EXTENTS, any=True) }}
-	<div class="clear">
-		<a href="{{ url_for('parcel.overview') }}">Clear filters</a>
-	</div>
+  {{ pick_from_list('filter-country', 'country', COUNTRIES, any=True) }}
+  {{ pick_from_list('filter-theme', 'theme', THEMES, any=True) }}
+  {{ pick_from_list('filter-projection', 'projection', PROJECTIONS, any=True) }}
+  {{ pick_from_list('filter-resolution', 'resolution', RESOLUTIONS, any=True) }}
+  {{ pick_from_list('filter-extent', 'extent', EXTENTS, any=True) }}
+  <div class="clear">
+    <a href="{{ url_for('parcel.overview') }}">Clear filters</a>
+  </div>
 </div>

@@ -19,28 +19,28 @@
     <script src="{{ url_for('static', filename='uri.js') }}"></script>
     <script>
       function filter() {
-    			var uri = URI(document.location.href);
-    			var name = $(this).attr("name");
-    			var val = $(this).val();
+          var uri = URI(document.location.href);
+          var name = $(this).attr("name");
+          var val = $(this).val();
 
-    			uri.removeSearch(name);
-    			if(val) { uri.addSearch(name, val); }
-    			document.location = uri.href();
+          uri.removeSearch(name);
+          if(val) { uri.addSearch(name, val); }
+          document.location = uri.href();
       }
 
       function default_select_filters() {
-      	var uri = URI(document.location.href);
-      	var query = URI.parseQuery(uri.query());
-      	$.each(query, function (k, v) {
-      		$("#filter-" + k).find("option[value=" + v + "]")
-      									   .attr("selected", "selected");
-      	});
+        var uri = URI(document.location.href);
+        var query = URI.parseQuery(uri.query());
+        $.each(query, function (k, v) {
+          $("#filter-" + k).find("option[value=" + v + "]")
+                           .attr("selected", "selected");
+        });
       }
 
-    	$(document).ready(function () {
-    		$(".filters").on("change", "select", filter);
-    		default_select_filters();
-    	});
+      $(document).ready(function () {
+        $(".filters").on("change", "select", filter);
+        default_select_filters();
+      });
     </script>
 {% endblock %}
 

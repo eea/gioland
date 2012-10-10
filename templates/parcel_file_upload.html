@@ -1,28 +1,37 @@
 <div class="upload-container">
-	<div class="droptarget">
-		<p>Drop files here to upload or
-			<a class="browse">select from your computer</a></p>
-	</div>
+  <div class="droptarget">
+    <p>Drop files here to upload or
+      <a class="browse">select from your computer</a></p>
+  </div>
 
-	<ul class="files"></ul>
+  <ul class="files"></ul>
 </div>
 
 <div class="upload-container-not-supported">
-	<div class="warning">
-		<p>Your browser doesn't support the upload of large files, you may still upload small files using the from below.</p>
+  <div class="warning">
+    <p>Your browser doesn't support the upload of large files, you may still
+    upload small files using the from below.</p>
 
-		<p>Please use <b><a href="http://www.mozilla.org/en-US/firefox/new/">Firefox 4+</a></b> or the latest version of <b><a href="http://www.google.com/chrome/">Chrome</a></b>.</p>
+    <p>Please use
+    <b><a href="http://www.mozilla.org/en-US/firefox/new/">Firefox 4+</a></b>
+    or the latest version of
+    <b><a href="http://www.google.com/chrome/">Chrome</a></b>.</p>
 
-		<p>If you want to use Internet Explorer as your main browser you can install <b><a href="http://www.google.com/chromeframe/">Chrome Frame for IE</a></b> that will enable this feature.<br />
+    <p>If you want to use Internet Explorer as your main browser you can
+    install
+    <b><a href="http://www.google.com/chromeframe/">Chrome Frame for IE</a></b>
+    that will enable this feature.<br />
 
-		If you don't have sufficient rights to install programs on your machine, you can try <b><a href="http://portableapps.com/apps/internet/google_chrome_portable">Portable Chrome</a></b>.</p>
-	</div>
-	<div class="upload-container-simple">
-		<form method="POST" enctype="multipart/form-data"
-		      action="{{ url_for('parcel.upload_single_file',
-		      					  name=parcel.name) }}">
-			<input name="file" type="file">
-			<button type="submit">Upload</button>
-		</form>
-	</div>
+    If you don't have sufficient rights to install programs on your machine,
+    you can try
+    <b><a href="http://portableapps.com/apps/internet/google_chrome_portable">Portable Chrome</a></b>.</p>
+  </div>
+  <div class="upload-container-simple">
+    <form method="POST" enctype="multipart/form-data"
+          action="{{ url_for('parcel.upload_single_file',
+                      name=parcel.name) }}">
+      <input name="file" type="file">
+      <button type="submit">Upload</button>
+    </form>
+  </div>
 </div>
