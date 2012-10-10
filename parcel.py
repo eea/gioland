@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from path import path
 from dateutil import tz
-from definitions import (METADATA_FIELDS, STAGES, STAGE_ORDER,
+from definitions import (EDITABLE_METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES)
 import notification
@@ -33,7 +33,7 @@ def index():
 
 def get_filter_arguments():
     return {k: v for k, v in flask.request.args.items()
-            if k in METADATA_FIELDS and v}
+            if k in EDITABLE_METADATA and v}
 
 
 @parcel_views.route('/overview')
@@ -85,7 +85,7 @@ def new():
         if form['extent'] == 'full':
             form['coverage'] = ''
 
-        metadata = {k: form.get(k, '') for k in METADATA_FIELDS}
+        metadata = {k: form.get(k, '') for k in EDITABLE_METADATA}
         metadata['stage'] = INITIAL_STAGE
 
         parcel = wh.new_parcel()
@@ -512,7 +512,7 @@ def finalize_parcel(wh, parcel, reject):
         'stage': next_stage,
     })
     next_parcel.save_metadata({k: parcel.metadata.get(k, '')
-                               for k in METADATA_FIELDS})
+                               for k in EDITABLE_METADATA})
     parcel.save_metadata({'next_parcel': next_parcel.name})
 
     next_url = flask.url_for('parcel.view', name=next_parcel.name)

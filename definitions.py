@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 
-METADATA_FIELDS = [
+EDITABLE_METADATA = [
     'country',
     'theme',
     'projection',
@@ -11,7 +11,7 @@ METADATA_FIELDS = [
 ]
 
 
-TREE_FIELDS = METADATA_FIELDS + ['stage']
+METADATA = EDITABLE_METADATA + ['stage']
 
 
 STAGES = OrderedDict([

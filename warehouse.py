@@ -9,7 +9,7 @@ from BTrees.OOBTree import OOBTree
 from persistent import Persistent
 import transaction
 from path import path
-from definitions import TREE_FIELDS
+from definitions import METADATA
 
 
 log = logging.getLogger(__name__)
@@ -97,7 +97,7 @@ class Parcel(Persistent):
 
     def link_in_tree(self):
         symlink_path = self._warehouse.tree_path
-        for name in TREE_FIELDS:
+        for name in METADATA:
             symlink_path = symlink_path / self.metadata[name]
         symlink_path.makedirs_p()
         target_path = self.get_path()

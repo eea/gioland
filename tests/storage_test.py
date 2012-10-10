@@ -354,9 +354,9 @@ class FilesystemSymlinkTest(AppTestCase):
             return parcel.name
 
     def symlink_path(self, metadata, *extra):
-        from definitions import METADATA_FIELDS
+        from definitions import EDITABLE_METADATA
         symlink_path = self.symlinks_root
-        for name in METADATA_FIELDS:
+        for name in EDITABLE_METADATA:
             symlink_path = symlink_path / metadata[name]
         for bit in extra:
             symlink_path = symlink_path / str(bit)
