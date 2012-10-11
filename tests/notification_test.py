@@ -1,6 +1,7 @@
 from datetime import datetime
 from contextlib import contextmanager
 from mock import Mock, patch, call
+from dateutil import tz
 from common import AppTestCase, record_events, authorization_patch
 
 
@@ -41,6 +42,11 @@ class NotificationDeliveryTest(AppTestCase):
     def test_notification_rdf(self):
         from definitions import RDF_URI
 
+        zone = 'Asia/Tokyo'
+        self.app.config['TIME_ZONE'] = zone
+        now = (self.utcnow.replace(tzinfo=tz.gettz('UTC'))
+                          .astimezone(tz.gettz(zone)))
+
         with self.app.test_request_context():
             rdf_triples = notification.prepare_notification_rdf(self.item,
                                                                 'comment')
@@ -50,7 +56,7 @@ class NotificationDeliveryTest(AppTestCase):
 
         rdf_data = {p: o for s, p, o in rdf_triples}
         self.assertDictContainsSubset({
-            RDF_URI['date']: self.utcnow.strftime('%Y-%b-%d %H:%M:%S'),
+            RDF_URI['date']: now.strftime('%Y-%b-%d %H:%M:%S'),
             RDF_URI['actor']: "somewho",
             RDF_URI['locality']: "Italy",
             RDF_URI['stage']: "Enhancement",

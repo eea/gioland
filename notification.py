@@ -5,6 +5,7 @@ import blinker
 from definitions import (COUNTRIES, STAGES, THEMES, PROJECTIONS, RESOLUTIONS,
                          EXTENTS, RDF_URI, UNS_FIELD_DEFS, METADATA)
 import auth
+from utils import format_datetime
 
 
 metadata_rdf_fields = [(field['rdf_uri'], field['name'], dict(field['range']))
@@ -82,7 +83,7 @@ def prepare_notification_rdf(item, event_type):
         (RDF_URI['rdf_type'], RDF_URI['parcel_event']),
         (RDF_URI['title'], title),
         (RDF_URI['identifier'], parcel_url),
-        (RDF_URI['date'], item.time.strftime('%Y-%b-%d %H:%M:%S')),
+        (RDF_URI['date'], format_datetime(item.time, 'uns')),
         (RDF_URI['actor'], item.actor),
         (RDF_URI['actor_name'], full_name),
         (RDF_URI['event_type'], event_type),

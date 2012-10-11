@@ -215,4 +215,5 @@ ALL_ROLES = [
 
 DATE_FORMAT = {
     'long': '%d/%m/%Y %H:%M',
+    'uns': '%Y-%b-%d %H:%M:%S',
 }
