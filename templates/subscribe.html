@@ -23,19 +23,16 @@
   <form method="post">
 
     <table>
-    {% for name, label, items in [
-            ('country', "Country", COUNTRIES),
-            ('theme', "Theme", THEMES),
-            ('projection', "Projection", PROJECTIONS),
-            ('resolution', "Spatial resolution", RESOLUTIONS),
-            ('extent', "Extent", EXTENTS),
-        ] %}
+    {% for field in UNS_FIELD_DEFS %}
+      {% set name = field['name'] %}
+      {% set label = field['label'] %}
+      {% set items = field['range'] %}
 
       <tr>
-        {% set items = [('', 'all')] + items %}
-        {% set field_id = 'subscribe-meta-' + name %}
-        <td><label for="{{ field_id }}">{{ label }}</label></td>
-        <td>{{ pick_from_list(field_id, name, items) }}</td>
+        {% set field_id = 'subscribe-meta-' + field['name'] %}
+        <td><label for="{{ field_id }}">{{ field['label'] }}</label></td>
+        <td>{{ pick_from_list(field_id, field['name'],
+                              field['range'], any=True) }}</td>
       </tr>
 
     {% endfor %}

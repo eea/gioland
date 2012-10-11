@@ -11,7 +11,7 @@ from dateutil import tz
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
-                         DATE_FORMAT)
+                         DATE_FORMAT, UNS_FIELD_DEFS)
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
@@ -600,4 +600,5 @@ metadata_template_context = {
     'PROJECTION_MAP': dict(PROJECTIONS),
     'EXTENTS': EXTENTS,
     'EXTENT_MAP': dict(EXTENTS),
+    'UNS_FIELD_DEFS': UNS_FIELD_DEFS,
 }
