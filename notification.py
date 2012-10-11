@@ -3,12 +3,13 @@ from xmlrpclib import ServerProxy
 import flask
 import blinker
 from definitions import (COUNTRIES, STAGES, THEMES, PROJECTIONS, RESOLUTIONS,
-                         EXTENTS, RDF_URI, UNS_FIELD_DEFS)
+                         EXTENTS, RDF_URI, UNS_FIELD_DEFS, METADATA)
 import auth
 
 
 metadata_rdf_fields = [(field['rdf_uri'], field['name'], dict(field['range']))
-                       for field in UNS_FIELD_DEFS]
+                       for field in UNS_FIELD_DEFS
+                       if field['name'] in METADATA]
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -56,7 +57,7 @@ def subscribe(user_id, filters):
     uns.makeSubscription(channel_id, user_id, rdf_filters)
 
 
-def prepare_notification_rdf(item):
+def prepare_notification_rdf(item, event_type):
     app = flask.current_app
 
     parcel = item.parcel
@@ -71,6 +72,12 @@ def prepare_notification_rdf(item):
         title += " by %s" % full_name
     title += " (stage reference: %s)" % parcel.name
 
+    [event_type_def] = [f for f in UNS_FIELD_DEFS if f['name'] == 'event_type']
+    event_type_values = [k for k, v in event_type_def['range']]
+    if event_type not in event_type_values:
+        raise RuntimeError("Unknown event type %r (not in %r)" %
+                           (event_type, event_type_values))
+
     event_data = [
         (RDF_URI['rdf_type'], RDF_URI['parcel_event']),
         (RDF_URI['title'], title),
@@ -78,6 +85,7 @@ def prepare_notification_rdf(item):
         (RDF_URI['date'], item.time.strftime('%Y-%b-%d %H:%M:%S')),
         (RDF_URI['actor'], item.actor),
         (RDF_URI['actor_name'], full_name),
+        (RDF_URI['event_type'], event_type),
     ]
 
     for rdf_uri, metadata_name, value_map in metadata_rdf_fields:
@@ -87,8 +95,8 @@ def prepare_notification_rdf(item):
     return [[event_id, pred, obj] for pred, obj in event_data]
 
 
-def notify(item):
-    rdf_triples = prepare_notification_rdf(item)
+def notify(item, event_type):
+    rdf_triples = prepare_notification_rdf(item, event_type)
     app = flask.current_app
     channel_id = app.config['UNS_CHANNEL_ID']
     send_notifications = not (app.testing or

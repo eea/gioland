@@ -40,4 +40,8 @@
         <rdfs:label>Extent</rdfs:label>
     </rdf:Property>
 
+    <rdf:Property rdf:ID="event_type">
+        <rdfs:label>Event type</rdfs:label>
+    </rdf:Property>
+
 </rdf:RDF>

@@ -354,7 +354,7 @@ def comment(name):
     comment = flask.request.form.get("comment", "").strip()
     if comment:
         add_history_item_and_notify(
-            parcel, "Comment", datetime.utcnow(),
+            parcel, 'comment', "Comment", datetime.utcnow(),
             flask.g.username, escape(comment))
     return flask.redirect(flask.url_for('parcel.view', name=name))
 
@@ -389,9 +389,9 @@ def get_parcels_by_stage(name):
     return stages_with_parcels
 
 
-def add_history_item_and_notify(parcel, *args, **kwargs):
+def add_history_item_and_notify(parcel, event_type, *args, **kwargs):
     item = parcel.add_history_item(*args, **kwargs)
-    notification.notify(item)
+    notification.notify(item, event_type)
 
 
 @parcel_views.route('/parcel/<string:name>/chain')
@@ -526,7 +526,7 @@ def finalize_parcel(wh, parcel, reject):
         title += " (rejected)"
 
     add_history_item_and_notify(
-        parcel, title, datetime.utcnow(),
+        parcel, 'stage_finished', title, datetime.utcnow(),
         flask.g.username, description_html)
 
     prev_url = flask.url_for('parcel.view', name=parcel.name)

@@ -160,6 +160,7 @@ RDF_URI = {
     'projection': GIOLAND_SCHEMA + '#projection',
     'resolution': GIOLAND_SCHEMA + '#resolution',
     'extent': GIOLAND_SCHEMA + '#extent',
+    'event_type': GIOLAND_SCHEMA + '#event_type',
 }
 
 
@@ -194,6 +195,11 @@ UNS_FIELD_DEFS = [
      'label': "Stage",
      'rdf_uri': RDF_URI['stage'],
      'range': [(k, STAGES[k]['label']) for k in STAGES]},
+
+    {'name': 'event_type',
+     'label': "Event type",
+     'rdf_uri': RDF_URI['event_type'],
+     'range': [('comment', "Comment"), ('stage_finished', "Stage finished")]},
 
 ]
 

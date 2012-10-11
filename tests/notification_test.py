@@ -34,7 +34,7 @@ class NotificationDeliveryTest(AppTestCase):
 
         with record_events(notification.uns_notification_sent) as events:
             with self.app.test_request_context():
-                notification.notify(self.item)
+                notification.notify(self.item, 'comment')
 
         self.assertEqual(len(events), 1)
 
@@ -42,7 +42,8 @@ class NotificationDeliveryTest(AppTestCase):
         from definitions import RDF_URI
 
         with self.app.test_request_context():
-            rdf_triples = notification.prepare_notification_rdf(self.item)
+            rdf_triples = notification.prepare_notification_rdf(self.item,
+                                                                'comment')
 
         [event_id] = list(set(s for s, p, o in rdf_triples))
         self.assertEqual(event_id, "http://example.com/parcel/asdf#history-1")
@@ -59,6 +60,7 @@ class NotificationDeliveryTest(AppTestCase):
             RDF_URI['projection']: "National",
             RDF_URI['resolution']: "20m",
             RDF_URI['extent']: "Partial",
+            RDF_URI['event_type']: "comment",
         }, rdf_data)
 
     @contextmanager
@@ -70,14 +72,14 @@ class NotificationDeliveryTest(AppTestCase):
 
     def test_uns_not_called_in_tests(self):
         with self.record_uns_calls() as uns_calls:
-            notification.notify(self.item)
+            notification.notify(self.item, 'comment')
         self.assertEqual(len(uns_calls), 0)
 
     def test_uns_not_called_if_suppressed(self):
         with self.record_uns_calls() as uns_calls:
             self.app.config['UNS_SUPPRESS_NOTIFICATIONS'] = True
             try:
-                notification.notify(self.item)
+                notification.notify(self.item, 'comment')
             finally:
                 self.app.config['UNS_SUPPRESS_NOTIFICATIONS'] = False
         self.assertEqual(len(uns_calls), 0)
@@ -86,7 +88,7 @@ class NotificationDeliveryTest(AppTestCase):
         with self.record_uns_calls() as uns_calls:
             self.app.config['TESTING'] = False
             try:
-                notification.notify(self.item)
+                notification.notify(self.item, 'comment')
             finally:
                 self.app.config['TESTING'] = True
         self.assertEqual(len(uns_calls), 1)
