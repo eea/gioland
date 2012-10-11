@@ -163,6 +163,35 @@ RDF_URI = {
 }
 
 
+UNS_FIELD_DEFS = [
+
+    {'name': 'country',
+     'rdf_uri': RDF_URI['locality'],
+     'range': COUNTRIES},
+
+    {'name': 'theme',
+     'rdf_uri': RDF_URI['theme'],
+     'range': THEMES},
+
+    {'name': 'extent',
+     'rdf_uri': RDF_URI['extent'],
+     'range': EXTENTS},
+
+    {'name': 'projection',
+     'rdf_uri': RDF_URI['projection'],
+     'range': PROJECTIONS},
+
+    {'name': 'resolution',
+     'rdf_uri': RDF_URI['resolution'],
+     'range': RESOLUTIONS},
+
+    {'name': 'stage',
+     'rdf_uri': RDF_URI['stage'],
+     'range': [(k, STAGES[k]['label']) for k in STAGES]},
+
+]
+
+
 ALL_ROLES = [
     'ROLE_SP',
     'ROLE_ETC',

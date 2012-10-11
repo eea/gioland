@@ -3,19 +3,12 @@ from xmlrpclib import ServerProxy
 import flask
 import blinker
 from definitions import (COUNTRIES, STAGES, THEMES, PROJECTIONS, RESOLUTIONS,
-                         EXTENTS, RDF_URI)
+                         EXTENTS, RDF_URI, UNS_FIELD_DEFS)
 import auth
 
 
-metadata_rdf_fields = [
-    (RDF_URI['locality'], 'country', dict(COUNTRIES)),
-    (RDF_URI['extent'], 'extent', dict(EXTENTS)),
-    (RDF_URI['projection'], 'projection', dict(PROJECTIONS)),
-    (RDF_URI['resolution'], 'resolution', dict(RESOLUTIONS)),
-    (RDF_URI['theme'], 'theme', dict(THEMES)),
-    (RDF_URI['stage'], 'stage', {k: STAGES[k]['label'] for k in STAGES}),
-]
-
+metadata_rdf_fields = [(field['rdf_uri'], field['name'], dict(field['range']))
+                       for field in UNS_FIELD_DEFS]
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
