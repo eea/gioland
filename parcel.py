@@ -7,14 +7,14 @@ import blinker
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from path import path
-from dateutil import tz
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
-                         DATE_FORMAT, UNS_FIELD_DEFS)
+                         UNS_FIELD_DEFS)
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
+from utils import format_datetime
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -473,20 +473,6 @@ def authorize_for_upload(parcel):
     return True
 
 
-def datetime_filter(value, format_name='long'):
-    """ Formats a datetime according to the given format. """
-    timezone = flask.current_app.config.get("TIME_ZONE")
-    if timezone:
-        from_zone = tz.gettz("UTC")
-        to_zone = tz.gettz(timezone)
-        # Tell the datetime object that it's in UTC time zone since
-        # datetime objects are 'naive' by default
-        value = value.replace(tzinfo=from_zone)
-        # Convert time zone
-        value = value.astimezone(to_zone)
-    return value.strftime(DATE_FORMAT[format_name])
-
-
 def clear_chunks(parcel_path):
     for d in parcel_path.dirs():
         d.rmtree()
@@ -570,7 +556,7 @@ def register_on(app):
         'can_subscribe_to_notifications': notification.can_subscribe,
         'get_parcels_by_stage': get_parcels_by_stage,
     })
-    app.jinja_env.filters["datetime"] = datetime_filter
+    app.jinja_env.filters["datetime"] = format_datetime
 
 
 @parcel_views.before_request
