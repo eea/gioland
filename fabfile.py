@@ -4,6 +4,7 @@ import json
 from functools import wraps
 from fabric.api import *
 from fabric.contrib.files import exists
+from fabric.contrib.project import upload_project
 from path import path
 import imp
 
@@ -199,3 +200,10 @@ del gioland
 @task
 def ssh():
     open_shell()
+
+
+@task
+def upload_docs():
+    local_html = path(__file__).parent / 'docs' / '_build' / 'html'
+    remote_dir = SARGE_HOME / 'var' / 'gioland-docs'
+    upload_project(str(local_html), str(remote_dir))
