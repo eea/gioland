@@ -13,8 +13,22 @@
 
     <dt>{{ name }}</dl>
 
-    {% for value in config.get(name, []) %}
-      <dd><tt>{{ value }}</tt></dd>
+    {% for principal in config.get(name, []) %}
+      <dd><tt>
+        {%- if principal.startswith('ldap_group:') -%}
+          {%- set group_name = principal['ldap_group:'|length:] -%}
+          {%- set group_url = "http://eionet.europa.eu/ldap-roles/?role_id=" +
+                              group_name %}
+          <a href="{{ group_url }}">{{ principal }}</a>
+        {%- elif principal.startswith('user_id:') -%}
+          {%- set user_id = principal['user_id:'|length:] -%}
+          {%- set user_url = "http://www.eionet.europa.eu/eionet_account_tools"
+                             "/users/edit_user?id=" + user_id %}
+          <a href="{{ user_url }}">{{ principal }}</a>
+        {%- else -%}
+          {{ principal }}
+        {%- endif -%}
+      </tt></dd>
     {% else %}
       <dd><em>(nobody assigned)</em></dd>
     {% endfor %}
