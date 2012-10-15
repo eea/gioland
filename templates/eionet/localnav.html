@@ -16,10 +16,11 @@
       <a href="{{ url_for('parcel.subscribe') }}">Subscribe to notifications</a>
     </li>
 
+    {% if authorize(['ROLE_ADMIN']) %}
     <li>
-      <a href="http://eionet.europa.eu/ldap-roles/?role_id=eionet-group-gioland"
-         title="Roles - Who is who">Roles</a>
+      <a href="{{ url_for('auth.roles_debug') }}">Roles</a>
     </li>
+    {% endif %}
 
     {% if authorize_for_parcel(None) %}
     <li>
