@@ -26,7 +26,7 @@ def get_uns_proxy():
     return ServerProxy(url).UNSService
 
 
-def create_channel(title="GioLand",
+def create_channel(title="GIO Land",
                    description="High Resolution Layers workflow updates"):
     uns = get_uns_proxy()
     print uns.createChannel(title, description)

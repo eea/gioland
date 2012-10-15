@@ -4,7 +4,7 @@
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
 
     <owl:Ontology rdf:about="">
-        <rdfs:label>GioLand High Resolution Layers schema</rdfs:label>
+        <rdfs:label>GIO Land High Resolution Layers schema</rdfs:label>
         <owl:versionInfo>2012-07-12.1</owl:versionInfo>
     </owl:Ontology>
 
