@@ -103,7 +103,7 @@ class Parcel(Persistent):
         target_path = self.get_path()
         for c in xrange(1, 101):
             symlink_path_c = symlink_path / str(c)
-            if not symlink_path_c.exists():
+            if not symlink_path_c.islink():
                 target_path.symlink(symlink_path_c)
                 return symlink_path_c
             else:

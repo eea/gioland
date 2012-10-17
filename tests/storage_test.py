@@ -386,6 +386,18 @@ class FilesystemSymlinkTest(AppTestCase):
         self.assertEqual(symlink_path_2.readlink(),
                          self.wh_path / 'parcels' / name2)
 
+    def test_symlink_generator_skips_over_broken_symlinks(self):
+        stage = 'enh'
+        name1 = self.create_parcel(stage, True)
+        with self.app.test_request_context():
+            wh = warehouse.get_warehouse()
+            wh.delete_parcel(name1)
+        name2 = self.create_parcel(stage, True)
+        symlink_path_2 = self.symlink_path(self.PARCEL_METADATA, stage, 2)
+        self.assertTrue(symlink_path_2.islink())
+        self.assertEqual(symlink_path_2.readlink(),
+                         self.wh_path / 'parcels' / name2)
+
     def test_repeated_calls_to_link_in_tree_dont_create_more_links(self):
         stage = 'enh'
         name = self.create_parcel(stage, True)
