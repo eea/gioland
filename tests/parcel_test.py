@@ -117,12 +117,6 @@ class ParcelTest(AppTestCase):
         resp = self.client.post('/parcel/new', data=metadata)
         self.assertEqual(400, resp.status_code)
 
-    def test_parcel_with_corrupted_metadata_fails(self):
-        metadata = dict(self.PARCEL_METADATA)
-        metadata['country'] = 'country'
-        resp = self.client.post('/parcel/new', data=metadata)
-        self.assertEqual(400, resp.status_code)
-
     def create_parcel_at_stage(self, stage):
         resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
