@@ -5,7 +5,7 @@ import logging
 import code
 import copy
 import flask
-import flaskext.script
+from flask.ext import script
 
 
 default_config = {
@@ -89,7 +89,7 @@ class ReverseProxied(object):
         return self.app(environ, start_response)
 
 
-manager = flaskext.script.Manager(create_app)
+manager = script.Manager(create_app)
 
 
 def configuration_from_environ():
@@ -124,10 +124,10 @@ def configuration_from_environ():
     return config
 
 
-class RunCherryPyCommand(flaskext.script.Command):
+class RunCherryPyCommand(script.Command):
 
     option_list = [
-        flaskext.script.Option('--port', '-p', dest='port', type=int),
+        script.Option('--port', '-p', dest='port', type=int),
     ]
 
     def handle(self, app, port):
