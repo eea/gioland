@@ -43,13 +43,12 @@ def create_app(config={}, testing=False):
     import parcel
     import warehouse
     import utils
-    app = flask.Flask(__name__, instance_relative_config=True)
+    app = flask.Flask(__name__)
     app.config.update(copy.deepcopy(default_config))
     if testing:
         app.config['TESTING'] = True
     else:
         app.config.update(configuration_from_environ())
-        app.config.from_pyfile("settings.py", silent=True)
     app.config.update(config)
     warehouse.initialize_app(app)
     auth.register_on(app)
@@ -95,25 +94,33 @@ manager = flaskext.script.Manager(create_app)
 
 
 def configuration_from_environ():
-    env = os.environ.get
+    BOOL = lambda value: value == 'on'
+    STR = lambda value: value
+    STRLIST = lambda value: value.split()
+    INT = lambda value: int(value)
+    options = {
+        'DEBUG': BOOL,
+        'WAREHOUSE_PATH': STR,
+        'SENTRY_DSN': STR,
+        'SECRET_KEY': STR,
+        'ROLE_SP': STR,
+        'ROLE_ETC': STRLIST,
+        'ROLE_NRC': STRLIST,
+        'ROLE_ADMIN': STRLIST,
+        'ROLE_VIEWER': STRLIST,
+        'BASE_URL': STR,
+        'UNS_CHANNEL_ID': INT,
+        'UNS_LOGIN_USERNAME': STR,
+        'UNS_LOGIN_PASSWORD': STR,
+        'UNS_SUPPRESS_NOTIFICATIONS': BOOL,
+        'LDAP_SERVER': STR,
+        'LDAP_USER_DN_PATTERN': STR,
+        'ALLOW_PARCEL_DELETION': BOOL,
+    }
     config = {}
-    config['WAREHOUSE_PATH'] = path(env('WAREHOUSE_DIR', ''))
-    config['SENTRY_DSN'] = env('SENTRY_DSN')
-    config['SECRET_KEY'] = env('SECRET_KEY')
-    config['ROLE_SP'] = env('ROLE_SP', '').split()
-    config['ROLE_ETC'] = env('ROLE_ETC', '').split()
-    config['ROLE_NRC'] = env('ROLE_NRC', '').split()
-    config['ROLE_ADMIN'] = env('ROLE_ADMIN', '').split()
-    config['ROLE_VIEWER'] = env('ROLE_VIEWER', '').split()
-    config['BASE_URL'] = env('BASE_URL', 'http://localhost:8000')
-    config['UNS_CHANNEL_ID'] = env('UNS_CHANNEL_ID')
-    config['UNS_LOGIN_USERNAME'] = env('UNS_LOGIN_USERNAME')
-    config['UNS_LOGIN_PASSWORD'] = env('UNS_LOGIN_PASSWORD')
-    config['UNS_SUPPRESS_NOTIFICATIONS'] = bool(env('UNS_SUPPRESS'))
-    config['LDAP_SERVER'] = env('LDAP_SERVER')
-    config['LDAP_USER_DN_PATTERN'] = env('LDAP_USER_DN_PATTERN')
-    if env('ALLOW_PARCEL_DELETION'):
-        config['ALLOW_PARCEL_DELETION'] = True
+    for name, converter in options.items():
+        if name in os.environ:
+            config[name] = converter(os.environ[name])
     return config
 
 
