@@ -1,8 +1,15 @@
+import time
 from functools import wraps
+import logging
 from werkzeug.contrib.cache import NullCache, SimpleCache
 import flask
 from dateutil import tz
+from zc.lockfile import LockFile, LockError
 from definitions import DATE_FORMAT
+
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 
 def cached(timeout):
@@ -44,3 +51,33 @@ def format_datetime(value, format_name='long'):
         # Convert time zone
         value = value.astimezone(to_zone)
     return value.strftime(DATE_FORMAT[format_name])
+
+
+LOCK_TIMEOUT = 5.0
+
+
+def get_lock():
+    lock_path = flask.current_app.config['LOCK_FILE_PATH']
+    t0 = time.time()
+    while True:
+        if time.time() - t0 > LOCK_TIMEOUT:
+            raise RuntimeError("Timeout while getting exclusive lock")
+
+        try:
+            return LockFile(lock_path)
+
+        except LockError:
+            log.debug("Lock busy, sleeping ...")
+            time.sleep(0.2)
+
+
+def exclusive_lock(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        lock = get_lock()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            lock.close()
+
+    return wrapper

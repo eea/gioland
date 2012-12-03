@@ -101,6 +101,7 @@ def configuration_from_environ():
     options = {
         'DEBUG': BOOL,
         'WAREHOUSE_PATH': STR,
+        'LOCK_FILE_PATH': STR,
         'SENTRY_DSN': STR,
         'SECRET_KEY': STR,
         'ROLE_SP': STR,
