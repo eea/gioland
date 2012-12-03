@@ -14,7 +14,7 @@ from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
-from utils import format_datetime
+from utils import format_datetime, exclusive_lock
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -106,6 +106,7 @@ def new():
 
 
 @parcel_views.route('/parcel/<string:name>/chunk', methods=['POST'])
+@exclusive_lock
 def upload(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
@@ -138,6 +139,7 @@ def upload(name):
 
 
 @parcel_views.route('/parcel/<string:name>/chunk')
+@exclusive_lock
 def check_chunk(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
@@ -161,6 +163,7 @@ def check_chunk(name):
 
 
 @parcel_views.route('/parcel/<string:name>/file', methods=['POST'])
+@exclusive_lock
 def upload_single_file(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
@@ -187,6 +190,7 @@ def upload_single_file(name):
 
 
 @parcel_views.route('/parcel/<string:name>/finalize_upload', methods=['POST'])
+@exclusive_lock
 def finalize_upload(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
@@ -256,6 +260,7 @@ def create_file_from_chunks(parcel, temp, filename):
 
 
 @parcel_views.route('/parcel/<string:name>/finalize', methods=['GET', 'POST'])
+@exclusive_lock
 def finalize(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
@@ -300,6 +305,7 @@ def download(name, filename):
 
 
 @parcel_views.route('/parcel/<string:name>/delete', methods=['GET', 'POST'])
+@exclusive_lock
 def delete(name):
     wh = get_warehouse()
     app = flask.current_app
@@ -320,6 +326,7 @@ def delete(name):
 
 @parcel_views.route('/parcel/<string:name>/file/<string:filename>/delete',
                     methods=['GET', 'POST'])
+@exclusive_lock
 def delete_file(name, filename):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
