@@ -1,11 +1,8 @@
-import tempfile
-import flask
 from datetime import datetime
 from StringIO import StringIO
-from path import path
 from mock import patch
 import flask
-from common import (AppTestCase, create_mock_app, authorization_patch, select)
+from common import AppTestCase, authorization_patch, select
 
 
 class ParcelTest(AppTestCase):
@@ -137,18 +134,19 @@ class ParcelTest(AppTestCase):
                                   ('vch', 'ver'),
                                   ('ech', 'enh')]:
             parcel_name = self.create_parcel_at_stage(stage)
-            resp = self.client.post('/parcel/%s/finalize' % parcel_name,
-                                    data={'reject': 'on'})
+            self.client.post('/parcel/%s/finalize' % parcel_name,
+                             data={'reject': 'on'})
             with self.app.test_request_context():
                 parcel = self.wh.get_parcel(parcel_name)
-                next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
+                next_parcel = self.wh.get_parcel(
+                                parcel.metadata['next_parcel'])
                 self.assertEqual(next_parcel.metadata['stage'], prev_stage)
 
     def test_finalize_with_reject_saves_rejected_metadata(self):
         for stage in ['sch', 'vch', 'ech']:
             parcel_name = self.create_parcel_at_stage(stage)
-            resp = self.client.post('/parcel/%s/finalize' % parcel_name,
-                                    data={'reject': 'on'})
+            self.client.post('/parcel/%s/finalize' % parcel_name,
+                             data={'reject': 'on'})
             with self.app.test_request_context():
                 parcel = self.wh.get_parcel(parcel_name)
                 self.assertTrue(parcel.metadata['rejection'])

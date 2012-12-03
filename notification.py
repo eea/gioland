@@ -2,8 +2,7 @@ import logging
 from xmlrpclib import ServerProxy
 import flask
 import blinker
-from definitions import (COUNTRIES, STAGES, THEMES, PROJECTIONS, RESOLUTIONS,
-                         EXTENTS, RDF_URI, UNS_FIELD_DEFS, METADATA)
+from definitions import RDF_URI, UNS_FIELD_DEFS, METADATA
 import auth
 from utils import format_datetime
 

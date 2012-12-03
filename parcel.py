@@ -120,8 +120,6 @@ def upload(name):
     filename = secure_filename(form['resumableFilename'])
     identifier = form['resumableIdentifier']
     chunk_number = int(form['resumableChunkNumber'])
-    chunk_size = int(form['resumableChunkSize'])
-    total_size = int(form['resumableTotalSize'])
 
     parcel_path = parcel.get_path()
     if parcel_path.joinpath(filename).exists():

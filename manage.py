@@ -4,7 +4,6 @@ import os
 import logging
 import code
 import copy
-from path import path
 import flask
 import flaskext.script
 
@@ -30,7 +29,7 @@ def register_monitoring_views(app):
 
     @app.route('/ping')
     def ping():
-        wh = warehouse.get_warehouse()
+        warehouse.get_warehouse()
         return 'gioland is ok'
 
     @app.route('/crash')
@@ -170,7 +169,6 @@ def shell(warehouse=False):
 @manager.command
 def fsck():
     from warehouse import get_warehouse, checksum
-    from parcel import chain_tails
 
     wh = get_warehouse()
     parcels = wh.get_all_parcels()

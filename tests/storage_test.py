@@ -304,8 +304,6 @@ class RequesetTransactionTest(AppTestCase):
     CREATE_WAREHOUSE = True
 
     def test_commit_on_success(self):
-        import parcel
-
         @self.app.route('/change_something', methods=['POST'])
         def change_something():
             wh = warehouse.get_warehouse()
@@ -319,8 +317,6 @@ class RequesetTransactionTest(AppTestCase):
             self.assertEqual(wh.test_value, 'asdf')
 
     def test_rollback_on_error(self):
-        import parcel
-
         @self.app.route('/change_something', methods=['POST'])
         def change_something():
             wh = warehouse.get_warehouse()
