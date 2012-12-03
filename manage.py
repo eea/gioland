@@ -196,6 +196,7 @@ def update_tree():
 if __name__ == '__main__':
     stderr = logging.StreamHandler()
     stderr.setFormatter(logging.Formatter(LOG_FORMAT))
+    stderr.setLevel(getattr(logging, os.environ.get('LOG_LEVEL', 'INFO')))
     logging.getLogger().addHandler(stderr)
     logging.getLogger('werkzeug').setLevel(logging.INFO)
     manager.run()
