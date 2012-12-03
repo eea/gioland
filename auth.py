@@ -20,7 +20,7 @@ def login():
         form = flask.request.form
 
         if form['action'] == 'logout':
-            del flask.session['username']
+            flask.session.pop('username', None)
             flask.flash("Logged out.", 'system')
             return flask.redirect(flask.url_for('parcel.index'))
 
