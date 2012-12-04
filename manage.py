@@ -96,7 +96,6 @@ def configuration_from_environ():
     BOOL = lambda value: value == 'on'
     STR = lambda value: value
     STRLIST = lambda value: value.split()
-    INT = lambda value: int(value)
     options = {
         'DEBUG': BOOL,
         'WAREHOUSE_PATH': STR,
@@ -109,7 +108,7 @@ def configuration_from_environ():
         'ROLE_ADMIN': STRLIST,
         'ROLE_VIEWER': STRLIST,
         'BASE_URL': STR,
-        'UNS_CHANNEL_ID': INT,
+        'UNS_CHANNEL_ID': STR,
         'UNS_LOGIN_USERNAME': STR,
         'UNS_LOGIN_PASSWORD': STR,
         'UNS_SUPPRESS_NOTIFICATIONS': BOOL,
