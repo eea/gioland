@@ -102,7 +102,7 @@ def configuration_from_environ():
         'LOCK_FILE_PATH': STR,
         'SENTRY_DSN': STR,
         'SECRET_KEY': STR,
-        'ROLE_SP': STR,
+        'ROLE_SP': STRLIST,
         'ROLE_ETC': STRLIST,
         'ROLE_NRC': STRLIST,
         'ROLE_ADMIN': STRLIST,
