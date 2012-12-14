@@ -196,4 +196,5 @@ if __name__ == '__main__':
     stderr.setLevel(getattr(logging, os.environ.get('LOG_LEVEL', 'INFO')))
     logging.getLogger().addHandler(stderr)
     logging.getLogger('werkzeug').setLevel(logging.INFO)
+    logging.getLogger('zc.lockfile').setLevel(logging.CRITICAL)
     manager.run()
