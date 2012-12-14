@@ -1,6 +1,7 @@
 import time
 from functools import wraps
 import logging
+from contextlib import contextmanager
 from werkzeug.contrib.cache import NullCache, SimpleCache
 import flask
 from dateutil import tz
@@ -71,16 +72,24 @@ def get_lock():
             time.sleep(0.2)
 
 
-def exclusive_lock(func):
+def exclusive_lock(func=None):
+    if func is None:
+        # we're being used as context manager
+        @contextmanager
+        def locker():
+            lock = get_lock()
+            t0 = time.time()
+            try:
+                yield
+            finally:
+                lock.close()
+                duration = time.time() - t0
+                log.debug("Held lock for %.3f" % duration)
+        return locker()
+
     @wraps(func)
     def wrapper(*args, **kwargs):
-        lock = get_lock()
-        t0 = time.time()
-        try:
+        with exclusive_lock():
             return func(*args, **kwargs)
-        finally:
-            lock.close()
-            duration = time.time() - t0
-            log.debug("Held lock for %.3f" % duration)
 
     return wrapper
