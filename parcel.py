@@ -6,6 +6,7 @@ import flask
 import blinker
 from werkzeug.utils import secure_filename
 from datetime import datetime
+import tempfile
 from path import path
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
@@ -106,32 +107,36 @@ def new():
 
 
 @parcel_views.route('/parcel/<string:name>/chunk', methods=['POST'])
-@exclusive_lock
 def upload(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    form = flask.request.form.to_dict()
 
     if not authorize_for_upload(parcel):
         flask.abort(403)
 
-    posted_file = flask.request.files['file']
-    form = flask.request.form.to_dict()
-
-    filename = secure_filename(form['resumableFilename'])
     identifier = form['resumableIdentifier']
     chunk_number = int(form['resumableChunkNumber'])
 
     parcel_path = parcel.get_path()
+    temp = parcel_path.joinpath(identifier)
+    if not os.path.isdir(temp):
+        os.makedirs(temp)
+    filename = secure_filename(form['resumableFilename'])
     if parcel_path.joinpath(filename).exists():
         return "File already exists", 415
 
-    temp = parcel_path.joinpath(identifier)
-    chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
-    if not os.path.isdir(temp):
-        os.makedirs(temp)
-    wh.logger.info("Begin chunked upload file %r for parcel %r (user %s)",
-                   filename, parcel.name, _current_user())
-    posted_file.save(chunk_path)
+    posted_file = flask.request.files['file']
+    tmp_file = tempfile.NamedTemporaryFile(dir=temp, delete=False)
+    tmp = path(tmp_file.name)
+    tmp_file.close()
+    posted_file.save(tmp)
+
+    with exclusive_lock():
+        chunk_path = temp.joinpath('%s_%s' % (chunk_number, identifier))
+        wh.logger.info("Begin chunked upload file %r for parcel %r (user %s)",
+                       filename, parcel.name, _current_user())
+        tmp.rename(chunk_path)
 
     return flask.jsonify({'status': 'success'})
 
