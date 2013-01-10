@@ -60,7 +60,7 @@ def api_find_parcels():
 @parcel_views.route('/api/parcel/<string:name>')
 def parcel_metadata(name):
     wh = get_warehouse()
-    parcel = wh.get_parcel(name)
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
     return flask.jsonify({'metadata': dict(parcel.metadata)})
 
 
