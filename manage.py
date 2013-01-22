@@ -13,7 +13,7 @@ default_config = {
     'TIME_ZONE': 'Europe/Copenhagen',
     'BASE_URL': "",
     'UNS_CHANNEL_ID': 0,
-    'UNS_SUPPRESS_NOTIFICATIONS': True,
+    'UNS_SUPPRESS_NOTIFICATIONS': False,
     'ROLE_ADMIN': [],
     'CACHING': True,
     'ALLOW_PARCEL_DELETION': False,
