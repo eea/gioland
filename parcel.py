@@ -369,13 +369,17 @@ def comment(name):
     return flask.redirect(flask.url_for('parcel.view', name=name))
 
 
-def delete_parcel_chain(wh, name):
+def get_parcel_chain(wh, name):
     parcels = set()
     for p in walk_parcels(wh, name):
         parcels.add(p)
     for p in walk_parcels(wh, name, metadata_key='prev_parcel'):
         parcels.add(p)
-    for p in parcels:
+    return parcels
+
+
+def delete_parcel_chain(wh, name):
+    for p in get_parcel_chain(wh, name):
         wh.delete_parcel(p.name)
         parcel_deleted.send(p)
 
