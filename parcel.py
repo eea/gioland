@@ -384,6 +384,12 @@ def delete_parcel_chain(wh, name):
         parcel_deleted.send(p)
 
 
+def change_metadata(wh, name, new_meta):
+    for p in get_parcel_chain(wh, name):
+        p.save_metadata(new_meta)
+        p.link_in_tree()
+
+
 def walk_parcels(wh, name, metadata_key='next_parcel'):
     while True:
         parcel = wh.get_parcel(name)
