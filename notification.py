@@ -96,7 +96,10 @@ def prepare_notification_rdf(item, event_type):
 
 
 def notify(item, event_type):
-    rdf_triples = prepare_notification_rdf(item, event_type)
+    send_notification(prepare_notification_rdf(item, event_type))
+
+
+def send_notification(rdf_triples):
     app = flask.current_app
     channel_id = app.config['UNS_CHANNEL_ID']
     send_notifications = not (app.testing or
