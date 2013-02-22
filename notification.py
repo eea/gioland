@@ -108,4 +108,4 @@ def notify(item, event_type):
         uns.sendNotification(channel_id, rdf_triples)
     else:
         log.info("Notification via UNS for %s (not sent)", rdf_triples[0][0])
-    uns_notification_sent.send(app, item=item, rdf_triples=rdf_triples)
+    uns_notification_sent.send(app, rdf_triples=rdf_triples)

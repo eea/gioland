@@ -100,9 +100,9 @@ class NotificationDeliveryTest(AppTestCase):
         self.assertEqual(len(uns_calls), 1)
 
 
-def event_title(event):
-    item = event[1]['item']
-    return item.title
+def rdfdata(event):
+    (sender, extra) = event
+    return dict((p, o) for (s, p, o) in extra['rdf_triples'])
 
 
 class NotificationTriggerTest(AppTestCase):
@@ -119,6 +119,7 @@ class NotificationTriggerTest(AppTestCase):
             self.assertEqual(events, [])
 
     def test_notification_triggered_once_on_finalize_parcel(self):
+        from definitions import RDF_URI
         resp_1 = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
         self.assertEqual(resp_1.status_code, 302)
         parcel_name = resp_1.location.rsplit('/', 1)[-1]
@@ -126,8 +127,9 @@ class NotificationTriggerTest(AppTestCase):
         with record_events(notification.uns_notification_sent) as events:
             resp_2 = self.client.post('/parcel/%s/finalize' % parcel_name)
             self.assertEqual(resp_2.status_code, 302)
-            self.assertEqual([event_title(e) for e in events],
-                             ["Service provider upload finished"])
+            self.assertEqual([rdfdata(e)[RDF_URI['title']] for e in events],
+                             [("Service provider upload finished"
+                               " (stage reference: %s)" % parcel_name)])
 
 
 class NotificationSubscriptionTest(AppTestCase):
