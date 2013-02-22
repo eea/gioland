@@ -109,6 +109,7 @@ COUNTRIES_CC = [
     ('mk', "Macedonia, FYR of"),
     ('rs', "Serbia"),
     ('xk', "Kosovo"),
+    ('xt', "test"),
 ]
 
 
