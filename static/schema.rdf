@@ -44,4 +44,8 @@
         <rdfs:label>Event type</rdfs:label>
     </rdf:Property>
 
+    <rdf:Property rdf:ID="decision">
+        <rdfs:label>decision</rdfs:label>
+    </rdf:Property>
+
 </rdf:RDF>

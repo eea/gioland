@@ -160,6 +160,7 @@ RDF_URI = {
     'resolution': GIOLAND_SCHEMA + '#resolution',
     'extent': GIOLAND_SCHEMA + '#extent',
     'event_type': GIOLAND_SCHEMA + '#event_type',
+    'decision': GIOLAND_SCHEMA + '#decision',
 }
 
 
