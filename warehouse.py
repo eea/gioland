@@ -112,8 +112,8 @@ class Parcel(Persistent):
         else:
             raise RuntimeError("Unable to create symlink, tried 100 numbers")
 
-    def add_history_item(self, *args, **kwargs):
-        item = ParcelHistoryItem(self, *args, **kwargs)
+    def add_history_item(self, title, time, actor, description_html):
+        item = ParcelHistoryItem(self, title, time, actor, description_html)
         item.id_ = len(self.history) + 1
         self.history.append(item)
         return item

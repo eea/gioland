@@ -409,8 +409,9 @@ def get_parcels_by_stage(name):
     return stages_with_parcels
 
 
-def add_history_item_and_notify(parcel, event_type, *args, **kwargs):
-    item = parcel.add_history_item(*args, **kwargs)
+def add_history_item_and_notify(parcel, event_type,
+                                title, time, actor, description_html):
+    item = parcel.add_history_item(title, time, actor, description_html)
     notification.notify(item, event_type)
 
 
