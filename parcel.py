@@ -410,9 +410,10 @@ def get_parcels_by_stage(name):
 
 
 def add_history_item_and_notify(parcel, event_type,
-                                title, time, actor, description_html):
+                                title, time, actor, description_html,
+                                rejected=None):
     item = parcel.add_history_item(title, time, actor, description_html)
-    notification.notify(item, event_type)
+    notification.notify(item, event_type, rejected)
 
 
 @parcel_views.route('/parcel/<string:name>/chain')
@@ -534,7 +535,7 @@ def finalize_parcel(wh, parcel, reject):
 
     add_history_item_and_notify(
         parcel, 'stage_finished', title, datetime.utcnow(),
-        flask.g.username, description_html)
+        flask.g.username, description_html, rejected=reject)
 
     prev_url = flask.url_for('parcel.view', name=parcel.name)
     next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (

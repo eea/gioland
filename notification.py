@@ -57,7 +57,7 @@ def subscribe(user_id, filters):
     uns.makeSubscription(channel_id, user_id, rdf_filters)
 
 
-def prepare_notification_rdf(item, event_type):
+def prepare_notification_rdf(item, event_type, rejected=None):
     app = flask.current_app
 
     parcel = item.parcel
@@ -95,8 +95,8 @@ def prepare_notification_rdf(item, event_type):
     return [[event_id, pred, obj] for pred, obj in event_data]
 
 
-def notify(item, event_type):
-    send_notification(prepare_notification_rdf(item, event_type))
+def notify(item, event_type, rejected=None):
+    send_notification(prepare_notification_rdf(item, event_type, rejected))
 
 
 def send_notification(rdf_triples):
