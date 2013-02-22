@@ -88,6 +88,10 @@ def prepare_notification_rdf(item, event_type, rejected=None):
         (RDF_URI['event_type'], event_type),
     ]
 
+    if rejected is not None:
+        decision = 'rejected' if rejected else 'accepted'
+        event_data.append((RDF_URI['decision'], decision))
+
     for rdf_uri, metadata_name, value_map in metadata_rdf_fields:
         value = value_map.get(metadata[metadata_name], "")
         event_data.append((rdf_uri, value))
