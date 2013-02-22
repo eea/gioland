@@ -133,6 +133,27 @@ class NotificationTriggerTest(AppTestCase):
         self.assertEqual(event_rdf[RDF_URI['title']],
                          ("Service provider upload finished"
                           " (stage reference: %s)" % parcel_name))
+        self.assertNotIn(RDF_URI['decision'], event_rdf)
+
+    @patch('parcel.authorize_for_parcel', Mock(return_value=True))
+    def test_parcel_rejection_triggers_accept_notification(self):
+        from definitions import RDF_URI
+        resp_1 = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        self.assertEqual(resp_1.status_code, 302)
+        parcel1_name = resp_1.location.rsplit('/', 1)[-1]
+
+        resp_2 = self.client.post('/parcel/%s/finalize' % parcel1_name)
+        self.assertEqual(resp_2.status_code, 302)
+        with self.app.test_request_context():
+            parcel1 = self.wh.get_parcel(parcel1_name)
+            parcel2_name = parcel1.metadata['next_parcel']
+
+        with record_events(notification.uns_notification_sent) as events:
+            resp_3 = self.client.post('/parcel/%s/finalize' % parcel2_name)
+
+        self.assertEqual(resp_3.status_code, 302)
+        self.assertEqual(len(events), 1)
+        event_rdf = rdfdata(events[0])
         self.assertEqual(event_rdf[RDF_URI['decision']], "accepted")
 
     @patch('parcel.authorize_for_parcel', Mock(return_value=True))

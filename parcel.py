@@ -267,15 +267,21 @@ def create_file_from_chunks(parcel, temp, filename):
 def finalize(name):
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-    stage = STAGES[parcel.metadata['stage']]
+    stage_def = STAGES[parcel.metadata['stage']]
+
     if not authorize_for_parcel(parcel):
         return flask.abort(403)
-    if stage.get('last'):
+    if stage_def.get('last'):
         return flask.abort(403)
     if not parcel.uploading:
         return flask.abort(403)
 
-    reject = bool(flask.request.values.get('reject'))
+    if stage_def.get('reject'):
+        reject = bool(flask.request.values.get('reject'))
+    else:
+        reject = None
+        if flask.request.values.get('reject'):
+            flask.abort(403)
 
     if flask.request.method == "POST":
         finalize_parcel(wh, parcel, reject)
@@ -503,8 +509,6 @@ def clear_chunks(parcel_path):
 def finalize_parcel(wh, parcel, reject):
     stage = parcel.metadata['stage']
     stage_def = STAGES[stage]
-    if reject and not stage_def.get('reject'):
-        flask.abort(403)
 
     parcel.finalize()
     clear_chunks(parcel.get_path())
