@@ -36,6 +36,15 @@
       </tr>
 
     {% endfor %}
+
+      <tr>
+        {% set field_id = 'subscribe-decision' %}
+        {% set range = [('accepted', 'Accepted'),
+                        ('rejected', 'Rejected')] %}
+        <td><label for="{{ field_id }}">Decision</label></td>
+        <td>{{ pick_from_list(field_id, 'decision', range, any=True) }}</td>
+      </tr>
+
     </table>
 
     <button type="submit">Subscribe</button>

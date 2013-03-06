@@ -454,7 +454,7 @@ def subscribe():
     if flask.request.method == 'POST':
         filters = {}
         for name in ['country', 'extent', 'projection',
-                     'resolution', 'theme']:
+                     'resolution', 'theme', 'decision']:
             value = flask.request.form.get(name, '')
             if value:
                 filters[name] = value

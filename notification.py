@@ -46,6 +46,10 @@ def subscribe(user_id, filters):
         if metadata_name in filters:
             rdf_filters_map[rdf_uri] = value_map[filters[metadata_name]]
 
+    decision = filters.get('decision')
+    if decision is not None:
+        rdf_filters_map[RDF_URI['decision']] = decision
+
     rdf_filters = []
     if rdf_filters_map:
         rdf_filters.append(rdf_filters_map)
