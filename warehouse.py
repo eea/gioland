@@ -244,6 +244,7 @@ def _cleanup_warehouse(err=None):
     import flask
     if hasattr(flask.g, 'warehouse'):
         if err is None:
+            transaction.get().note(flask.request.url)
             transaction.commit()
         else:
             transaction.abort()
