@@ -252,11 +252,11 @@ class DeleteParcelTest(unittest.TestCase):
         self.assertRaises(KeyError, self.wh.get_parcel, parcel_name)
         self.assertEqual(list(self.wh.get_all_parcels()), [])
 
-    def test_delete_removes_folder(self):
+    def test_delete_does_not_remove_folder(self):
         parcel = self.wh.new_parcel()
         parcel_path = parcel.get_path()
         self.wh.delete_parcel(parcel.name)
-        self.assertFalse(parcel_path.isdir())
+        self.assertTrue(parcel_path.isdir())
 
 
 class ParcelHistoryTest(unittest.TestCase):

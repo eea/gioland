@@ -168,7 +168,6 @@ class Warehouse(Persistent):
     def delete_parcel(self, name):
         self.logger.info("Deleting parcel %r (user %s)", name, _current_user())
         parcel = self._parcels.pop(name)
-        parcel.get_path().rmtree()
 
     def get_parcel(self, name):
         return self._parcels[name]
