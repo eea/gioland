@@ -285,6 +285,11 @@ def initialize_app(app):
         db = connector._get_db()
 
         if flask.request.method == 'POST':
+            undo = flask.request.form.getlist('undo')
+            db.undoMultiple(undo)
+            transaction.get().note("undo %d" % len(undo))
+            transaction.commit()
+            flask.flash("Rolled back %d transactions" % len(undo), 'system')
             return flask.redirect(flask.request.url)
 
         count = flask.request.args.get('count', 20, type=int)
