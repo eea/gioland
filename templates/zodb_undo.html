@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+  <form>
+    <p>
+      <label>show <input name="count" value="{{ count }}"> entries</label>
+      <button type="submit">update</button>
+    </p>
+  </form>
+
+  <form method="post">
+    <table>
+      <thead>
+        <th></th>
+        <th>id</th>
+        <th>time</th>
+        <th>description</th>
+      </thead>
+    {% for tr in db.undoLog(last=-count) %}
+      {% set input_id = "undo-" + tr['id'] %}
+      <tr>
+        <td>
+          <input type="checkbox" id="{{ input_id }}"
+                 name="undo" value="{{ tr['id'] }}">
+        </td>
+        <td><label for="{{ input_id }}">{{ tr['id'] }}</label></td>
+        <td>
+          <label for="{{ input_id }}">
+            {{ tr['time']|to_datetime|datetime }}</label>
+        </td>
+        <td>
+          {{ tr['description'] }}
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+
+    <button type="submit">Undo selected transactions</button>
+  </form>
+
+{% endblock %}

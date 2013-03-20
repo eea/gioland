@@ -276,3 +276,20 @@ def initialize_app(app):
             return flask.redirect(flask.url_for('zodb_pack'))
 
         return flask.render_template('zodb_pack.html', db=db)
+
+    @app.route('/zodb_undo', methods=['GET', 'POST'])
+    def zodb_undo():
+        if not auth.authorize(['ROLE_ADMIN']):
+            return flask.abort(403)
+
+        db = connector._get_db()
+
+        if flask.request.method == 'POST':
+            return flask.redirect(flask.request.url)
+
+        count = flask.request.args.get('count', 20, type=int)
+        return flask.render_template('zodb_undo.html', db=db, count=count)
+
+    @app.template_filter('to_datetime')
+    def to_datetime(t):
+        return datetime.fromtimestamp(t)
