@@ -235,15 +235,16 @@ class UploadFinalizationTest(unittest.TestCase):
         self.assertIsInstance(parcel.checksum, list)
 
 
-class DeleteParcelTest(unittest.TestCase):
+class DeleteParcelTest(AppTestCase):
+
+    CREATE_WAREHOUSE = True
 
     def setUp(self):
-        self.tmp = path(tempfile.mkdtemp())
-        self.addCleanup(self.tmp.rmtree)
-        self.wh_path = self.tmp / 'warehouse'
-        self.wh_connector = warehouse.WarehouseConnector(self.wh_path)
-        self.wh, warehouse_cleanup = self.wh_connector.open_warehouse()
-        self.addCleanup(warehouse_cleanup)
+        import flask
+        reqctx = self.app.test_request_context()
+        reqctx.push()
+        flask.g.username = 'testuser'
+        self.addCleanup(reqctx.pop)
 
     def test_delete_removes_parcel_from_list(self):
         parcel = self.wh.new_parcel()
