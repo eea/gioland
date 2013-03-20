@@ -300,6 +300,15 @@ class DeleteParcelTest(AppTestCase):
         self.assertNotIn('next_parcel', parcel.metadata)
         self.assertNotIn('upload_time', parcel.metadata)
 
+    def test_delete_adds_comment_on_previous_parcel(self):
+        from parcel import finalize_parcel, delete_parcel_and_followers
+        parcel = self.create_initial_parcel()
+        finalize_parcel(self.wh, parcel, reject=False)
+        parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
+        delete_parcel_and_followers(self.wh, parcel2.name)
+        self.assertIn('deleted', parcel.history[-1].description_html)
+        self.assertIn(parcel2.name, parcel.history[-1].description_html)
+
 
 class ParcelHistoryTest(unittest.TestCase):
 

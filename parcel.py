@@ -398,6 +398,8 @@ def delete_parcel_and_followers(wh, name):
         prev = wh.get_parcel(parcel.metadata['prev_parcel'])
         del prev.metadata['upload_time']
         del prev.metadata['next_parcel']
+        prev.add_history_item("Next step deleted", datetime.utcnow(),
+            flask.g.username, "Next step deleted (%s)" % name)
     for p in walk_parcels(wh, name):
         wh.delete_parcel(p.name)
         parcel_deleted.send(p)
