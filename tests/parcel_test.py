@@ -194,7 +194,7 @@ class ParcelTest(AppTestCase):
         self.assertEqual(resp.status_code, 404)
 
         resp = self.client.get('/parcel/%s' % parcel_name_1)
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 200)
 
     def test_delete_parcel_link_if_allow_parcel_deletion(self):
         parcel_name = self.create_parcel_at_stage('ver')

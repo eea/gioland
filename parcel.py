@@ -326,7 +326,7 @@ def delete(name):
         return flask.abort(403)
 
     if flask.request.method == 'POST':
-        delete_parcel_chain(wh, parcel.name)
+        delete_parcel_and_followers(wh, parcel.name)
         flask.flash("Parcel %s was deleted." % name, 'system')
         return flask.redirect(flask.url_for('parcel.index'))
     else:
@@ -384,8 +384,13 @@ def get_parcel_chain(wh, name):
     return parcels
 
 
-def delete_parcel_chain(wh, name):
-    for p in get_parcel_chain(wh, name):
+def delete_parcel_and_followers(wh, name):
+    parcel = wh.get_parcel(name)
+    if 'prev_parcel' in parcel.metadata:
+        prev = wh.get_parcel(parcel.metadata['prev_parcel'])
+        del prev.metadata['upload_time']
+        del prev.metadata['next_parcel']
+    for p in walk_parcels(wh, name):
         wh.delete_parcel(p.name)
         parcel_deleted.send(p)
 

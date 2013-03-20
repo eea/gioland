@@ -259,6 +259,47 @@ class DeleteParcelTest(AppTestCase):
         self.wh.delete_parcel(parcel.name)
         self.assertTrue(parcel_path.isdir())
 
+    def create_initial_parcel(self):
+        parcel = self.wh.new_parcel()
+        parcel.save_metadata({
+            'stage': 'int',
+            'country': 'dk',
+            'theme': 'imp-deg',
+            'extent': 'full',
+            'projection': 'eur',
+            'resolution': '20m',
+            'coverage': '',
+        })
+        return parcel
+
+    def test_delete_removes_subsequent_parcels(self):
+        from parcel import finalize_parcel, delete_parcel_and_followers
+        parcel = self.create_initial_parcel()
+        finalize_parcel(self.wh, parcel, reject=False)
+        parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
+        delete_parcel_and_followers(self.wh, parcel2.name)
+        self.assertRaises(KeyError, self.wh.get_parcel, parcel2.name)
+
+    def test_delete_keeps_previous_parcels(self):
+        from parcel import finalize_parcel, delete_parcel_and_followers
+        parcel = self.create_initial_parcel()
+        finalize_parcel(self.wh, parcel, reject=False)
+        parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
+        finalize_parcel(self.wh, parcel2, reject=False)
+        parcel3 = self.wh.get_parcel(parcel2.metadata['next_parcel'])
+        delete_parcel_and_followers(self.wh, parcel2.name)
+        self.assertIs(self.wh.get_parcel(parcel.name), parcel)
+
+    def test_delete_leaves_previous_parcel_unfinalized(self):
+        from parcel import finalize_parcel, delete_parcel_and_followers
+        parcel = self.create_initial_parcel()
+        finalize_parcel(self.wh, parcel, reject=False)
+        parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
+        delete_parcel_and_followers(self.wh, parcel2.name)
+        self.assertTrue(parcel.uploading)
+        self.assertNotIn('next_parcel', parcel.metadata)
+        self.assertNotIn('upload_time', parcel.metadata)
+
 
 class ParcelHistoryTest(unittest.TestCase):
 
