@@ -329,8 +329,16 @@ def delete(name):
         delete_parcel_and_followers(wh, parcel.name)
         flask.flash("Parcel %s was deleted." % name, 'system')
         return flask.redirect(flask.url_for('parcel.index'))
+
     else:
-        return flask.render_template('parcel_delete.html', parcel=parcel)
+        will_remove = list(walk_parcels(wh, name))
+        will_not_remove = list(walk_parcels(wh, name, 'prev_parcel'))[1:]
+        will_not_remove.reverse()
+        return flask.render_template('parcel_delete.html', **{
+            'parcel': parcel,
+            'will_remove': will_remove,
+            'will_not_remove': will_not_remove,
+        })
 
 
 @parcel_views.route('/parcel/<string:name>/file/<string:filename>/delete',

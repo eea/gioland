@@ -12,11 +12,32 @@
 {% endblock %}
 
 
+{% macro parcel_link(parcel) -%}
+<a href="{{ url_for('parcel.view', name=parcel.name) }}">
+{{- STAGE_MAP[parcel.metadata['stage']] -}}
+</a>
+  {{ parcel.metadata['upload_time'] }}
+{%- endmacro %}
+
+
 {% block content %}
 
-<h2>Existing files</h2>
+{% if will_not_remove %}
+  <h2>Will be kept</h2>
+  <ul>
+    {% for p in will_not_remove %}
+      <li>{{ parcel_link(p) }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 
-<p>Delete parcel <em>{{ parcel.name }}</em>?</p>
+
+<h2>Will be removed</h2>
+<ul>
+  {% for p in will_remove %}
+    <li>{{ parcel_link(p) }}</li>
+  {% endfor %}
+</ul>
 
 <form method="post">
   <button type="submit">Yes, delete</button>
