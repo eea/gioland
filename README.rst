@@ -5,15 +5,16 @@ GioLand upload service
 The GioLand upload service is a platform where service providers can
 deliver large files containing GIS data. Deliveries are tagged with:
 country, theme, projection, spatial resolution, extent. Each delivery
-goes through a workflow of checks, resubmissions and enhancement.
+goes through a workflow of checks, resubmissions and enhancement. See
+`this issue`_ for the initial requirements.
 
 Website: https://gaur.eea.europa.eu/gioland/
 
 Issue tracker: http://taskman.eionet.europa.eu/projects/gioland
 
-Code repository:
-https://svn.eionet.europa.eu/repositories/GioLand/gioland/trunk
-(mirrored at https://github.com/eea/gioland)
+Code repository: https://github.com/eea/gioland
+
+.. _`this issue`: http://taskman.eionet.europa.eu/issues/2
 
 
 Data model
@@ -63,7 +64,9 @@ fields of each parcel.
 Notifications
 ~~~~~~~~~~~~~
 Uploads and other workflow steps trigger notifications to relevant
-people. They are sent via UNS.
+people. They are sent via UNS_.
+
+.. _UNS: http://uns.eionet.europa.eu/
 
 
 Large files
