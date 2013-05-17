@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% set title = "New country delivery" %}
+
+{% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
+
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GIO Land'),
+    (url_for('parcel.new_country_delivery'), title),
+  ]) }}
+{% endblock %}
+
+
+{% block page_heading %}<h1>{{ title }}</h1>{% endblock %}
+
+
+{% block content %}
+
+  {% from 'bits.html' import pick_from_list %}
+
+  <form id="country_form" method="post">
+
+    <table>
+    {% for name, label, items in [
+            ('country', "Country", COUNTRIES),
+            ('category', "Category", CATEGORIES),
+      ] %}
+
+      <tr>
+        {% set field_id = 'upload-meta-' + name %}
+        <td><label for="{{ field_id }}">{{ label }}</label></td>
+        <td>{{ pick_from_list(field_id, name, items) }}</td>
+      </tr>
+
+    {% endfor %}
+
+    </table>
+
+  </form>
+
+{% endblock %}

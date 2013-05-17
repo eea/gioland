@@ -11,7 +11,7 @@ from path import path
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
-                         UNS_FIELD_DEFS)
+                         UNS_FIELD_DEFS, CATEGORIES)
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
@@ -479,6 +479,14 @@ def subscribe():
 
     return flask.render_template('subscribe.html')
 
+@parcel_views.route('/country/report', methods=['GET', 'POST'])
+def new_country_delivery():
+    if not authorize_for_cdr():
+        return flask.abort(403)
+    if flask.request.method == 'POST':
+        pass
+    return flask.render_template('country_new.html')
+
 
 def get_or_404(func, *args, **kwargs):
     exc = kwargs.pop('_exc')
@@ -514,6 +522,10 @@ def authorize_for_upload(parcel):
     if stage.get('last'):
         return False
     return True
+
+
+def authorize_for_cdr():
+    return auth.authorize(['ROLE_ADMIN', 'ROLE_SP'])
 
 
 def clear_chunks(parcel_path):
@@ -594,6 +606,7 @@ def register_on(app):
     app.context_processor(lambda: {
         'authorize': auth.authorize,
         'authorize_for_parcel': authorize_for_parcel,
+        'authorize_for_cdr': authorize_for_cdr,
         'can_subscribe_to_notifications': notification.can_subscribe,
         'get_parcels_by_stage': get_parcels_by_stage,
     })
@@ -615,6 +628,7 @@ metadata_template_context = {
     'STAGES': STAGES,
     'STAGES_PICKLIST': STAGES_PICKLIST,
     'STAGE_MAP': dict(STAGES_PICKLIST),
+    'CATEGORIES': CATEGORIES,
     'COUNTRIES_MC': COUNTRIES_MC,
     'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,

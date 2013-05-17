@@ -218,3 +218,11 @@ DATE_FORMAT = {
     'long': '%d/%m/%Y %H:%M',
     'uns': '%Y-%b-%d %H:%M:%S',
 }
+
+
+CATEGORIES = [
+    ('for_v', 'Combining Tree Cover density and Forest Type products'),
+    ('imp_v', 'For imperviousness products'),
+    ('gra_v', 'For grassland products'),
+    ('waw_v', 'Combining Wetlands and Permanent Water Body products'),
+]
