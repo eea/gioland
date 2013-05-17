@@ -47,7 +47,7 @@
 {% endblock %}
 
 
-{% block page_heading %}<h1>{{ title }}</h1>{% endblock %}
+{% block page_heading %}<h1>Usage</h1>{% endblock %}
 
 
 {% block content %}
@@ -64,8 +64,8 @@
     <ul>
       <li>
         1. The Identifier field in an HRL process notificaion contains a link to the HRL parcel.<br />
-        - Click on this link.<br />
-        - Click on Next step: Service provider upload<br />
+        - Click on Identifier field link.<br />
+        - Click on Next step: Service provider upload.<br />
         - Use the dialogue to upload your data.<br />
       </li>
 
@@ -78,8 +78,10 @@
 
     <p>If an upload was made erroneously and you want to delete it, contact <a href="mailto:alan.steel@eea.europa.eu">alan.steel@eea.europa.eu</a></p>
 
-    Ensure that the delivered files stick to the file naming conventions in the following document (<a href="{{ url_for('static', filename='doc/filenameConvention.pdf') }}">Filename_convention.pdf</a>).
+    Please ensure that the delivered files conform to the file naming conventions in the following document (<a href="{{ url_for('static', filename='doc/filenameConvention.pdf') }}">Filename_convention.pdf</a>).
   </div>
+
+  <h1>{{ title }}</h1>
 
   <form id="parcel_form" method="post">
 

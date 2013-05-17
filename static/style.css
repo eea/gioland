@@ -149,6 +149,6 @@ a.delete-parcel {
     border: 1px outset #999966;
     background: #ffffdd;
     padding: 0.5em 1em;
-    margin: 1em auto;
+    margin-bottom: 1em;
     font-size: 95%;
 }
