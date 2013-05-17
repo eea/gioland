@@ -54,6 +54,33 @@
 
   {% from 'bits.html' import pick_from_list %}
 
+  <div class="tip">
+    <p>Use only for initial service provider uploads of intermediate HRLs.</p>
+
+    <p>Do not use this to re-submit corrected HRLs that have been rejected at the Semantic Check stage.</p>
+
+    <p>If instead you wish to re-submit a corrected intermediate HRL that was rejected at the Semantic Check stage, use either:</p>
+
+    <ul>
+      <li>
+        1. The Identifier field in an HRL process notificaion contains a link to the HRL parcel.<br />
+        - Click on this link.<br />
+        - Click on Next step: Service provider upload<br />
+        - Use the dialogue to upload your data.<br />
+      </li>
+
+      <li>
+        2. Use the Search deliveries tool.<br />
+        - Select the country, theme etc. to find the HRL of interest.<br />
+        - Click on the Stage link. This takes you to the upload page, as in 1) above.<br />
+      </li>
+    </ul>
+
+    <p>If an upload was made erroneously and you want to delete it, contact <a href="mailto:alan.steel@eea.europa.eu">alan.steel@eea.europa.eu</a></p>
+
+    Ensure that the delivered files stick to the file naming conventions in the following document (<a href="{{ url_for('static', filename='doc/filenameConvention.pdf') }}">Filename_convention.pdf</a>).
+  </div>
+
   <form id="parcel_form" method="post">
 
     <table>
