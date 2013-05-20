@@ -11,7 +11,7 @@ from path import path
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
-                         UNS_FIELD_DEFS, CATEGORIES)
+                         UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA)
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
@@ -22,6 +22,7 @@ parcel_views = flask.Blueprint('parcel', __name__)
 
 parcel_signals = blinker.Namespace()
 parcel_created = parcel_signals.signal('parcel-created')
+report_created = parcel_signals.signal('report-created')
 file_uploaded = parcel_signals.signal('file-uploaded')
 parcel_finalized = parcel_signals.signal('parcel-finalized')
 parcel_deleted = parcel_signals.signal('parcel-deleted')
@@ -90,14 +91,16 @@ def new():
 
         metadata = {k: form.get(k, '') for k in EDITABLE_METADATA}
         metadata['stage'] = INITIAL_STAGE
-
-        parcel = wh.new_parcel()
-        if not validate_metadata(metadata):
+        data_map = zip(
+            ['country', 'theme', 'projection', 'resolution', 'extent', 'stage'],
+            [COUNTRIES, THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, STAGES])
+        if not validate_metadata(metadata, data_map):
             flask.abort(400)
 
+        parcel = wh.new_parcel()
         parcel.save_metadata(metadata)
-        parcel.add_history_item(
-            "New upload", datetime.utcnow(), flask.g.username, "")
+        parcel.add_history_item("New upload", datetime.utcnow(),
+                                flask.g.username, "")
         parcel_created.send(parcel)
         url = flask.url_for('parcel.view', name=parcel.name)
         return flask.redirect(url)
@@ -479,13 +482,47 @@ def subscribe():
 
     return flask.render_template('subscribe.html')
 
-@parcel_views.route('/country/report', methods=['GET', 'POST'])
-def new_country_delivery():
+
+@parcel_views.route('/country/report/new', methods=['GET', 'POST'])
+def new_report():
     if not authorize_for_cdr():
         return flask.abort(403)
     if flask.request.method == 'POST':
-        pass
-    return flask.render_template('country_new.html')
+        wh = get_warehouse()
+        form = flask.request.form.to_dict()
+        metadata = {k: form.get(k, '') for k in REPORT_METADATA}
+        data_map = zip(['country', 'category'], [COUNTRIES, CATEGORIES])
+        if not validate_metadata(metadata, data_map):
+            flask.abort(400)
+        posted_file = flask.request.files.get('file')
+        if posted_file:
+            report = wh.new_report(**metadata)
+            save_report_file(reports_path=wh.reports_path,
+                             posted_file=posted_file,
+                             report=report)
+            report_created.send(report)
+            url = flask.url_for('parcel.report_view', report_id=report.pk)
+            return flask.redirect(url)
+        else:
+            flask.flash("File is required.", 'system')
+    return flask.render_template('report_new.html')
+
+
+@parcel_views.route('/country/report/<int:report_id>')
+def report_view(report_id):
+    return flask.render_template('report_view.html')
+
+
+def save_report_file(reports_path, posted_file, report):
+    filename = 'CDR_%s_%s_V%s' % (report.country, report.category,
+        report.pk if report.pk >= 10 else '0%s' % report.pk
+    )
+    file_path = reports_path / filename.upper()
+    if file_path.exists():
+        flask.flash("File %s already exists." % filename, 'system')
+    else:
+        posted_file.save(file_path)
+    report.filename = filename
 
 
 def get_or_404(func, *args, **kwargs):
@@ -582,13 +619,8 @@ def finalize_parcel(wh, parcel, reject):
     parcel_finalized.send(parcel, next_parcel=next_parcel)
 
 
-def validate_metadata(metadata):
-    data_map = dict(
-        zip(['country', 'theme', 'projection', 'resolution', 'extent',
-            'stage'],
-            [COUNTRIES, THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS,
-            STAGES])
-    )
+def validate_metadata(metadata, data_map):
+    data_map = dict(data_map)
     for key, value in metadata.items():
         if key == 'coverage':
             if metadata['extent'] == 'partial' and not value:
