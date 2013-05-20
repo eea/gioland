@@ -212,3 +212,23 @@
 {% endmacro %}
 
 
+{% macro report_overview(reports) %}
+
+  {% for group in reports|groupby('category') %}
+    <h2>{{ CATEGORIES_MAP[group.grouper] }}</h2>
+    <ul class="report-list">
+    {% for report in group.list %}
+      <li>
+        <a href="{{ url_for('parcel.download_report_file', report_id=report.pk) }}">
+          {{ report.filename }}</a> by {{ report.user }}
+          {% if authorize(['ROLE_ADMIN']) %}
+          <a href="{{ url_for('parcel.delete_report', report_id=report.pk) }}">Delete</a>
+          {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+
+  {% endfor %}
+
+{% endmacro %}
+

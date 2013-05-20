@@ -133,6 +133,17 @@ class ParcelHistoryItem(Persistent):
         self.description_html = description_html
 
 
+class Report(Persistent):
+
+    def __init__(self, country, category, filename=None):
+        self.country = country
+        self.category = category
+
+    @property
+    def name(self):
+        return '%s - %s' % (self.country, self.category)
+
+
 class Warehouse(Persistent):
 
     _volatile_attributes = {}
@@ -147,10 +158,15 @@ class Warehouse(Persistent):
 
     def __init__(self):
         self._parcels = OOBTree()
+        self._reports = OOBTree()
 
     @property
     def parcels_path(self):
         return self.fs_path / 'parcels'
+
+    @property
+    def reports_path(self):
+        return self.fs_path / 'reports'
 
     @property
     def tree_path(self):
@@ -174,6 +190,25 @@ class Warehouse(Persistent):
 
     def get_all_parcels(self):
         return iter(self._parcels.values())
+
+    def new_report(self, country, category):
+        report = Report(country, category)
+        pk = max(self._reports.keys() or [0]) + 1
+        report.pk = pk
+        report.user = _current_user()
+        self._reports[pk] = report
+        self.logger.info("New report for %r (user %s)",
+                         report.name, _current_user())
+        return report
+
+    def get_report(self, report_id):
+        return self._reports[report_id]
+
+    def get_all_reports(self):
+        return iter(self._reports.values())
+
+    def delete_report(self, report_id):
+        self._reports.pop(report_id)
 
 
 class WarehouseConnector(object):
@@ -220,6 +255,7 @@ class WarehouseConnector(object):
         log_number += 1
         warehouse.logger.addHandler(handler)
         _ensure_dir(warehouse.parcels_path)
+        _ensure_dir(warehouse.reports_path)
         _ensure_dir(warehouse.tree_path)
 
         return warehouse, cleanup

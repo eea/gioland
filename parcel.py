@@ -5,13 +5,15 @@ from itertools import groupby
 import flask
 import blinker
 from werkzeug.utils import secure_filename
+from werkzeug.security import safe_join
 from datetime import datetime
 import tempfile
 from path import path
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
-                         UNS_FIELD_DEFS, CATEGORIES)
+                         UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
+                         DOCUMENTS)
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
@@ -22,6 +24,7 @@ parcel_views = flask.Blueprint('parcel', __name__)
 
 parcel_signals = blinker.Namespace()
 parcel_created = parcel_signals.signal('parcel-created')
+report_created = parcel_signals.signal('report-created')
 file_uploaded = parcel_signals.signal('file-uploaded')
 parcel_finalized = parcel_signals.signal('parcel-finalized')
 parcel_deleted = parcel_signals.signal('parcel-deleted')
@@ -69,11 +72,13 @@ def country(code):
     wh = get_warehouse()
     all_parcels = [p for p in chain_tails(wh)
                    if p.metadata['country'] == code]
+    all_reports = [r for r in wh.get_all_reports()
+                   if r.country == code]
     grouped_parcels = group_parcels(all_parcels)
-
     return flask.render_template('country.html', **{
         'code': code,
         'grouped_parcels': grouped_parcels,
+        'all_reports': all_reports,
     })
 
 
@@ -90,14 +95,16 @@ def new():
 
         metadata = {k: form.get(k, '') for k in EDITABLE_METADATA}
         metadata['stage'] = INITIAL_STAGE
-
-        parcel = wh.new_parcel()
-        if not validate_metadata(metadata):
+        data_map = zip(
+            ['country', 'theme', 'projection', 'resolution', 'extent', 'stage'],
+            [COUNTRIES, THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, STAGES])
+        if not validate_metadata(metadata, data_map):
             flask.abort(400)
 
+        parcel = wh.new_parcel()
         parcel.save_metadata(metadata)
-        parcel.add_history_item(
-            "New upload", datetime.utcnow(), flask.g.username, "")
+        parcel.add_history_item("New upload", datetime.utcnow(),
+                                flask.g.username, "")
         parcel_created.send(parcel)
         url = flask.url_for('parcel.view', name=parcel.name)
         return flask.redirect(url)
@@ -302,7 +309,6 @@ def view(name):
 
 @parcel_views.route('/parcel/<string:name>/download/<string:filename>')
 def download(name, filename):
-    from werkzeug.security import safe_join
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
     file_path = safe_join(parcel.get_path(), filename)
@@ -479,13 +485,73 @@ def subscribe():
 
     return flask.render_template('subscribe.html')
 
-@parcel_views.route('/country/report', methods=['GET', 'POST'])
-def new_country_delivery():
+
+@parcel_views.route('/report/new', methods=['GET', 'POST'])
+def new_report():
     if not authorize_for_cdr():
         return flask.abort(403)
     if flask.request.method == 'POST':
-        pass
-    return flask.render_template('country_new.html')
+        wh = get_warehouse()
+        form = flask.request.form.to_dict()
+        metadata = {k: form.get(k, '') for k in REPORT_METADATA}
+        data_map = zip(['country', 'category'], [COUNTRIES, CATEGORIES])
+        if not validate_metadata(metadata, data_map):
+            flask.abort(400)
+        posted_file = flask.request.files.get('file')
+        if posted_file and extension(posted_file.filename) in DOCUMENTS:
+            report = wh.new_report(**metadata)
+            save_report_file(reports_path=wh.reports_path,
+                             posted_file=posted_file,
+                             report=report)
+            report_created.send(report)
+            url = flask.url_for('parcel.country', code=report.country)
+            return flask.redirect(url)
+        else:
+            flask.flash("File field is missing or it's not a document.", 'system')
+    return flask.render_template('report_new.html')
+
+
+@parcel_views.route('/report/<int:report_id>/download')
+def download_report_file(report_id):
+    wh = get_warehouse()
+    report = get_or_404(wh.get_report, report_id, _exc=KeyError)
+    file_path = safe_join(wh.reports_path, report.filename)
+    if not path(file_path).isfile():
+        flask.abort(404)
+    return flask.send_file(file_path, as_attachment=True,
+                           attachment_filename=report.filename)
+
+@parcel_views.route('/report/<int:report_id>/delete', methods=['GET','POST'])
+def delete_report(report_id):
+    if not auth.authorize(['ROLE_ADMIN']):
+        return flask.abort(403)
+    wh = get_warehouse()
+    report = get_or_404(wh.get_report, report_id, _exc=KeyError)
+    country_code = report.country
+    if flask.request.method == 'POST':
+        file_path = safe_join(wh.reports_path, report.filename)
+        if file_path.exists():
+            file_path.unlink()
+        wh.delete_report(report_id)
+        flask.flash('Report was deleted.', 'system')
+        url = flask.url_for('parcel.country', code=country_code)
+        return flask.redirect(url)
+
+    return flask.render_template('report_delete.html', report=report)
+
+
+def save_report_file(reports_path, posted_file, report):
+    # filename = 'CDR_%s_%s_V%s.%s' % (report.country.upper(), report.category.upper(),
+    #     report.pk if report.pk >= 10 else '0%s' % report.pk,
+    #     extension(posted_file.filename),
+    # )
+    filename = posted_file.filename
+    file_path = reports_path / filename
+    if file_path.exists():
+        flask.flash("File %s already exists." % filename, 'system')
+    else:
+        posted_file.save(file_path)
+    report.filename = filename
 
 
 def get_or_404(func, *args, **kwargs):
@@ -582,13 +648,8 @@ def finalize_parcel(wh, parcel, reject):
     parcel_finalized.send(parcel, next_parcel=next_parcel)
 
 
-def validate_metadata(metadata):
-    data_map = dict(
-        zip(['country', 'theme', 'projection', 'resolution', 'extent',
-            'stage'],
-            [COUNTRIES, THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS,
-            STAGES])
-    )
+def validate_metadata(metadata, data_map):
+    data_map = dict(data_map)
     for key, value in metadata.items():
         if key == 'coverage':
             if metadata['extent'] == 'partial' and not value:
@@ -622,6 +683,11 @@ def authorize_for_view():
         return flask.render_template('not_authorized.html')
 
 
+# parse extension from FileStorage object
+def extension(filename):
+    return filename.rsplit('.', 1)[-1]
+
+
 STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]
 
 metadata_template_context = {
@@ -629,6 +695,7 @@ metadata_template_context = {
     'STAGES_PICKLIST': STAGES_PICKLIST,
     'STAGE_MAP': dict(STAGES_PICKLIST),
     'CATEGORIES': CATEGORIES,
+    'CATEGORIES_MAP': dict(CATEGORIES),
     'COUNTRIES_MC': COUNTRIES_MC,
     'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,

@@ -14,6 +14,12 @@ EDITABLE_METADATA = [
 METADATA = EDITABLE_METADATA + ['stage']
 
 
+REPORT_METADATA = [
+    'country',
+    'category',
+]
+
+
 STAGES = OrderedDict([
     ('int', {
         'label': "Service provider upload",
@@ -221,8 +227,13 @@ DATE_FORMAT = {
 
 
 CATEGORIES = [
-    ('for_v', 'Combining Tree Cover density and Forest Type products'),
-    ('imp_v', 'For imperviousness products'),
-    ('gra_v', 'For grassland products'),
-    ('waw_v', 'Combining Wetlands and Permanent Water Body products'),
+    ('for', 'Tree Cover density and Forest Type'),
+    ('imp', 'Imperviousness'),
+    ('gra', 'Grassland'),
+    ('waw', 'Wetlands and Permanent Water Body'),
 ]
+
+
+DOCUMENTS = ('rtf', 'odf', 'ods', 'gnumeric', 'abw', 'doc', 'docx', 'xls',
+             'xlsx', 'pdf')
+

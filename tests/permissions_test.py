@@ -1,7 +1,7 @@
 from StringIO import StringIO
 from mock import patch, call
 import flask
-from common import AppTestCase, record_events
+from common import AppTestCase, record_events, select
 
 
 def setUpModule(self):
@@ -50,6 +50,21 @@ class PermisionsTest(AppTestCase):
             return True
         else:
             self.fail('unexpected http status code')
+
+    def try_new_report(self):
+        with record_events(parcel.report_created) as new_reports:
+            data = dict(self.REPORT_METADATA,
+                        file=(StringIO('ze file'), 'doc.pdf'))
+            resp = self.client.post('/report/new',
+                                    data=data)
+            if resp.status_code == 403:
+                self.assertEqual(len(new_reports), 0)
+                return False
+            elif resp.status_code == 302:
+                self.assertEqual(len(new_reports), 1)
+                return True
+            else:
+                self.fail('unexpected http status code')
 
     def try_upload(self, name):
         data = {
@@ -266,6 +281,32 @@ class PermisionsTest(AppTestCase):
         name = self.create_parcel()
         self.try_upload(name)
         self.assertTrue(self.try_delete_file(name))
+
+    def test_admin_user_allowed_to_upload_report(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        self.assertTrue(self.try_new_report())
+
+    def test_sp_user_allowed_to_upload_report(self):
+        self.add_to_role('somebody', 'ROLE_SP')
+        self.assertTrue(self.try_new_report())
+
+    def test_random_user_not_allowed_to_upload_report(self):
+        self.add_to_role('somebody', 'ROLE_NRC')
+        self.assertFalse(self.try_new_report())
+
+    def test_random_user_allowed_to_view_report(self):
+        self.add_to_role('somebody', 'ROLE_SP')
+        self.try_new_report()
+        self.app.config['ROLE_SP'] = []
+        resp = self.client.get('/country/be')
+        self.assertEqual(1, len(select(resp.data, '.report-list')))
+
+    def test_random_user_not_allowed_to_delete_report(self):
+        self.add_to_role('somebody', 'ROLE_SP')
+        self.try_new_report()
+        self.app.config["ROLE_SP"] = []
+        resp = self.client.post('/report/1/delete')
+        self.assertEqual(403, resp.status_code)
 
 
 class RolesTest(AppTestCase):

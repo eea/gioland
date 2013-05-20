@@ -80,6 +80,11 @@ class AppTestCase(unittest.TestCase):
         'coverage': '',
     })
 
+    REPORT_METADATA = ImmutableDict({
+        'country': 'be',
+        'category': 'for',
+    })
+
     def new_parcel(self, **extra_metadata):
         metadata = dict(self.PARCEL_METADATA)
         metadata.update(extra_metadata)
