@@ -232,3 +232,8 @@ CATEGORIES = [
     ('gra', 'For grassland products'),
     ('waw', 'Combining Wetlands and Permanent Water Body products'),
 ]
+
+
+DOCUMENTS = ('rtf', 'odf', 'ods', 'gnumeric', 'abw', 'doc', 'docx', 'xls',
+             'xlsx', 'pdf')
+

@@ -11,7 +11,8 @@ from path import path
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
                          THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
-                         UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA)
+                         UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
+                         DOCUMENTS)
 import notification
 import auth
 from warehouse import get_warehouse, _current_user
@@ -495,7 +496,7 @@ def new_report():
         if not validate_metadata(metadata, data_map):
             flask.abort(400)
         posted_file = flask.request.files.get('file')
-        if posted_file:
+        if posted_file and extension(posted_file.filename) in DOCUMENTS:
             report = wh.new_report(**metadata)
             save_report_file(reports_path=wh.reports_path,
                              posted_file=posted_file,
@@ -504,7 +505,7 @@ def new_report():
             url = flask.url_for('parcel.report_view', report_id=report.pk)
             return flask.redirect(url)
         else:
-            flask.flash("File is required.", 'system')
+            flask.flash("File field is missing or it's not a document.", 'system')
     return flask.render_template('report_new.html')
 
 
@@ -652,6 +653,11 @@ def authorize_for_view():
         return flask.redirect(flask.url_for('auth.login', next=url))
     if not auth.authorize(ALL_ROLES):
         return flask.render_template('not_authorized.html')
+
+
+# parse extension from FileStorage object
+def extension(filename):
+    return filename.rsplit('.', 1)[-1]
 
 
 STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]

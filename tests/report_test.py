@@ -1,4 +1,4 @@
-from common import AppTestCase, authorization_patch
+from common import AppTestCase, authorization_patch, select
 from StringIO import StringIO
 
 
@@ -51,3 +51,10 @@ class ReportTest(AppTestCase):
             [filename] = [str(i.splitext()[0].name)
                           for i in self.wh.reports_path.walk()]
             self.assertEqual('CDR_BE_FOR_V01', filename)
+
+    def test_report_upload_files_fails(self):
+        data = dict(self.REPORT_METADATA,
+                    file=(StringIO('ze file'), 'image.jpg'))
+        resp = self.client.post('/country/report/new', data=data)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(1, len(select(resp.data, '.system-msg')))
