@@ -5,6 +5,7 @@ from itertools import groupby
 import flask
 import blinker
 from werkzeug.utils import secure_filename
+from werkzeug.security import safe_join
 from datetime import datetime
 import tempfile
 from path import path
@@ -71,11 +72,13 @@ def country(code):
     wh = get_warehouse()
     all_parcels = [p for p in chain_tails(wh)
                    if p.metadata['country'] == code]
+    all_reports = [r for r in wh.get_all_reports()
+                   if r.country == code]
     grouped_parcels = group_parcels(all_parcels)
-
     return flask.render_template('country.html', **{
         'code': code,
         'grouped_parcels': grouped_parcels,
+        'all_reports': all_reports,
     })
 
 
@@ -306,7 +309,6 @@ def view(name):
 
 @parcel_views.route('/parcel/<string:name>/download/<string:filename>')
 def download(name, filename):
-    from werkzeug.security import safe_join
     wh = get_warehouse()
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
     file_path = safe_join(parcel.get_path(), filename)
@@ -502,23 +504,30 @@ def new_report():
                              posted_file=posted_file,
                              report=report)
             report_created.send(report)
-            url = flask.url_for('parcel.report_view', report_id=report.pk)
+            url = flask.url_for('parcel.country', code=report.country)
             return flask.redirect(url)
         else:
             flask.flash("File field is missing or it's not a document.", 'system')
     return flask.render_template('report_new.html')
 
 
-@parcel_views.route('/country/report/<int:report_id>')
-def report_view(report_id):
-    return flask.render_template('report_view.html')
+@parcel_views.route('/counte/report/<int:report_id>/download/')
+def download_report_file(report_id):
+    wh = get_warehouse()
+    report = get_or_404(wh.get_report, report_id, _exc=KeyError)
+    file_path = safe_join(wh.reports_path, report.filename)
+    if not path(file_path).isfile():
+        flask.abort(404)
+    return flask.send_file(file_path, as_attachment=True,
+                           attachment_filename=report.filename)
 
 
 def save_report_file(reports_path, posted_file, report):
-    filename = 'CDR_%s_%s_V%s' % (report.country, report.category,
-        report.pk if report.pk >= 10 else '0%s' % report.pk
+    filename = 'CDR_%s_%s_V%s.%s' % (report.country.upper(), report.category.upper(),
+        report.pk if report.pk >= 10 else '0%s' % report.pk,
+        extension(posted_file.filename),
     )
-    file_path = reports_path / filename.upper()
+    file_path = reports_path / filename
     if file_path.exists():
         flask.flash("File %s already exists." % filename, 'system')
     else:
@@ -667,6 +676,7 @@ metadata_template_context = {
     'STAGES_PICKLIST': STAGES_PICKLIST,
     'STAGE_MAP': dict(STAGES_PICKLIST),
     'CATEGORIES': CATEGORIES,
+    'CATEGORIES_MAP': dict(CATEGORIES),
     'COUNTRIES_MC': COUNTRIES_MC,
     'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,

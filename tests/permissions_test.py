@@ -1,7 +1,7 @@
 from StringIO import StringIO
 from mock import patch, call
 import flask
-from common import AppTestCase, record_events
+from common import AppTestCase, record_events, select
 
 
 def setUpModule(self):
@@ -293,6 +293,12 @@ class PermisionsTest(AppTestCase):
     def test_random_user_not_allowed_to_upload_report(self):
         self.add_to_role('somebody', 'ROLE_NRC')
         self.assertFalse(self.try_new_report())
+
+    def test_random_user_allowed_to_view_report(self):
+        self.add_to_role('somebody', 'ROLE_SP')
+        self.try_new_report()
+        resp = self.client.get('/country/be')
+        self.assertEqual(1, len(select(resp.data, '.report-list')))
 
 
 class RolesTest(AppTestCase):

@@ -15,13 +15,11 @@ class ReportTest(AppTestCase):
         resp = self.client.post('/country/report/new', data=data)
         self.assertEqual(302, resp.status_code)
         self.assertIsNotNone(resp.location)
-
-        report_id = int(resp.location.rsplit('/', 1)[-1])
         with self.app.test_request_context():
             try:
-                self.assertTrue(self.wh.get_report(report_id))
+                self.assertTrue(self.wh.get_report(1))
             except KeyError:
-                self.fail('Report with id %s not saved' % report_id)
+                self.fail('Report with id %s not saved' % 1)
 
     def test_report_saves_user_selected_metadata(self):
         data = dict(self.REPORT_METADATA,
@@ -30,9 +28,8 @@ class ReportTest(AppTestCase):
         resp = self.client.post('/country/report/new', data=data)
         self.assertEqual(302, resp.status_code)
 
-        report_id = int(resp.location.rsplit('/', 1)[-1])
         with self.app.test_request_context():
-            report = self.wh.get_report(report_id)
+            report = self.wh.get_report(1)
             self.assertFalse(getattr(report, 'bogus', False))
 
     def test_report_fail_if_corrupted_metadata(self):
@@ -48,9 +45,31 @@ class ReportTest(AppTestCase):
         self.assertEqual(302, resp.status_code)
 
         with self.app.test_request_context():
-            [filename] = [str(i.splitext()[0].name)
+            [filename] = [str(i.name)
                           for i in self.wh.reports_path.walk()]
-            self.assertEqual('CDR_BE_FOR_V01', filename)
+            self.assertEqual('CDR_BE_FOR_V01.pdf', filename)
+
+    def test_report_filename(self):
+        data = dict(self.REPORT_METADATA,
+                    file=(StringIO('ze file'), 'doc.pdf'))
+        resp = self.client.post('/country/report/new', data=data)
+        self.assertEqual(302, resp.status_code)
+
+        with self.app.test_request_context():
+            report = self.wh.get_report(1)
+            self.assertEqual('CDR_BE_FOR_V01.pdf', report.filename)
+
+    def test_report_filename_increment_version(self):
+        data = dict(self.REPORT_METADATA)
+        data['file'] = (StringIO('ze file'), 'doc.pdf')
+        self.client.post('/country/report/new', data=data)
+        data['file'] = (StringIO('ze file'), 'doc.pdf')
+        self.client.post('/country/report/new', data=data)
+        with self.app.test_request_context():
+            report_1 = self.wh.get_report(1)
+            report_2 = self.wh.get_report(2)
+            self.assertEqual('CDR_BE_FOR_V01.pdf', report_1.filename)
+            self.assertEqual('CDR_BE_FOR_V02.pdf', report_2.filename)
 
     def test_report_upload_files_fails(self):
         data = dict(self.REPORT_METADATA,
