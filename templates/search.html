@@ -59,7 +59,7 @@
       <th>Extent</th>
       <th>Projection</th>
       <th>Resolution</th>
-      <th>Stage</th>
+      <th>Workflow overview</th>
       <th>Updated</th>
     </thead>
 
@@ -67,6 +67,7 @@
     {% for parcel in parcels %}
       <tr>
         {% set url = url_for('parcel.view', name=parcel.name) %}
+        {% set overview_url = url_for('parcel.chain', name=parcel.name) %}
         {% set metadata = parcel.metadata %}
         <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
         <td>
@@ -78,7 +79,7 @@
         <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
         <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
-        <td><a href="{{ url }}">{{ STAGE_MAP[metadata['stage']] }}</a></td>
+        <td><a href="{{ overview_url }}">workflow overview</a></td>
         <td>{{ parcel.last_modified|datetime }}</td>
       </tr>
     {% endfor %}
