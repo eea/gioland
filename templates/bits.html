@@ -214,8 +214,9 @@
 
 {% macro report_overview(reports) %}
 
+  <h1>Country Delivery Reports</h1>
   {% for group in reports|groupby('category') %}
-    <h2>{{ CATEGORIES_MAP[group.grouper] }}</h2>
+    <h4 style="margin-bottom: 0">{{ CATEGORIES_MAP[group.grouper] }}</h4>
     <ul class="report-list">
     {% for report in group.list %}
       <li>
