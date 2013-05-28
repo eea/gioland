@@ -6,7 +6,7 @@
 {% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
 
 
-{% from 'bits.html' import breadcrumb_items %}
+{% from 'bits.html' import breadcrumb_items, report_overview with context %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GIO Land'),
@@ -86,5 +86,7 @@
     </tbody>
 
   </table>
+
+  {{ report_overview(all_reports) }}
 
 {% endblock %}

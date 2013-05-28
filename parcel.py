@@ -44,10 +44,16 @@ def get_filter_arguments():
 @parcel_views.route('/search')
 def search():
     wh = get_warehouse()
-    parcels = list(filter_parcels(chain_tails(wh), **get_filter_arguments()))
+    filter_arguments = get_filter_arguments()
+    all_reports = []
+    if 'country' in filter_arguments:
+        all_reports = [r for r in wh.get_all_reports()
+                      if r.country == filter_arguments['country']]
+    parcels = list(filter_parcels(chain_tails(wh), **filter_arguments))
     parcels.sort(key=lambda p: p.last_modified, reverse=True)
     return flask.render_template('search.html', **{
         'parcels': parcels,
+        'all_reports': all_reports,
     })
 
 
