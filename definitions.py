@@ -39,7 +39,7 @@ STAGES = OrderedDict([
 
     ('vch', {
         'label': "Verification check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN', 'ROLE_VEP'],
         'reject': True,
     }),
 
@@ -215,6 +215,7 @@ ALL_ROLES = [
     'ROLE_SP',
     'ROLE_ETC',
     'ROLE_NRC',
+    'ROLE_VEP',
     'ROLE_VIEWER',
     'ROLE_ADMIN',
 ]

@@ -105,6 +105,7 @@ def configuration_from_environ():
         'ROLE_SP': STRLIST,
         'ROLE_ETC': STRLIST,
         'ROLE_NRC': STRLIST,
+        'ROLE_VEP': STRLIST,
         'ROLE_ADMIN': STRLIST,
         'ROLE_VIEWER': STRLIST,
         'BASE_URL': STR,
