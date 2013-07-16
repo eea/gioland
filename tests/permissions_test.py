@@ -241,6 +241,21 @@ class PermisionsTest(AppTestCase):
         self.assertTrue(self.try_upload(name))
         self.assertTrue(self.try_upload_file(name))
 
+    def test_vep_user_not_allowed_to_upload_at_verification_check(self):
+        self.add_to_role('somebody', 'ROLE_VEP')
+        name = self.create_parcel(stage='vch')
+        self.assertFalse(self.try_upload(name))
+
+    def test_vep_user_allowed_to_finalize_at_verification_check(self):
+        self.add_to_role('somebody', 'ROLE_VEP')
+        name = self.create_parcel(stage='vch')
+        self.assertTrue(self.try_finalize(name))
+
+    def test_admin_user_not_allowed_to_upload_at_verification_check(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel(stage='vch')
+        self.assertFalse(self.try_upload(name))
+
     def test_random_user_not_allowed_to_finalize_at_enhancement_stage(self):
         name = self.create_parcel(stage='enh')
         self.assertFalse(self.try_finalize(name))

@@ -3,7 +3,9 @@
 {% from 'bits.html' import breadcrumb_items %}
 
 
-{% set file_authorize = (parcel.uploading and authorize_for_parcel(parcel)) %}
+{% set parcel_authorize = (parcel.uploading and authorize_for_parcel(parcel)) %}
+{% set file_authorize = authorize_for_upload(parcel) %}
+
 {% set metadata = parcel.metadata %}
 {% set country_code = metadata['country'] %}
 {% set title_bits = '%s, %s'|format(THEME_MAP[metadata['theme']],
@@ -85,21 +87,24 @@
 
 {% if not STAGES[parcel.metadata['stage']]['last'] %}
 
-<h2>Files</h2>
+{% if parcel.file_uploading %}
+  <h2>Files</h2>
+{% endif %}
 
 <div id="file-upload">
-  {{ files_table(parcel, delete_buttons=file_authorize) }}
+  {% if parcel.file_uploading %}
+    {{ files_table(parcel, delete_buttons=file_authorize) }}
+  {% endif %}
 
-  {% if file_authorize %}
+  {% if parcel_authorize %}
 
-    {% include "parcel_file_upload.html" %}
+    {% if file_authorize %}
+      {% include "parcel_file_upload.html" %}
+    {% endif %}
 
     <form method="get"
           action="{{ url_for('parcel.finalize', name=parcel.name) }}">
-      <p>
-        When all files are ready, finalize the parcel, which will trigger
-        the next workflow step.
-      </p>
+      <p>When ready, finalize the parcel, which will trigger the next workflow step.</p>
 
       <button type="submit">Finalize</button>
 

@@ -69,6 +69,11 @@ class Parcel(Persistent):
     def uploading(self):
         return 'upload_time' not in self.metadata
 
+    @property
+    def file_uploading(self):
+        # disable uploading files for verification check
+        return self.metadata.get('stage', '') != 'vch'
+
     def __init__(self, warehouse, name):
         self._warehouse = warehouse
         self.name = name

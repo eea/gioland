@@ -234,7 +234,8 @@ def files(name):
     parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
     app = flask.current_app
 
-    if parcel.uploading and authorize_for_parcel(parcel):
+    if (parcel.uploading and parcel.file_uploading and
+        authorize_for_parcel(parcel)):
         file_authorize = True
     else:
         file_authorize = False
@@ -591,6 +592,8 @@ def authorize_for_upload(parcel):
         return False
     if not parcel.uploading:
         return False
+    if not parcel.file_uploading:
+        return False
     if stage.get('last'):
         return False
     return True
@@ -673,6 +676,7 @@ def register_on(app):
     app.context_processor(lambda: {
         'authorize': auth.authorize,
         'authorize_for_parcel': authorize_for_parcel,
+        'authorize_for_upload': authorize_for_upload,
         'authorize_for_cdr': authorize_for_cdr,
         'can_subscribe_to_notifications': notification.can_subscribe,
         'get_parcels_by_stage': get_parcels_by_stage,
