@@ -84,6 +84,7 @@ COUNTRIES_MC = [
     ('de', "Germany"),
     ('gr', "Greece"),
     ('hu', "Hungary"),
+    ('hr', "Croatia"),
     ('is', "Iceland"),
     ('ie', "Ireland"),
     ('it', "Italy"),
@@ -110,7 +111,6 @@ COUNTRIES_MC = [
 COUNTRIES_CC = [
     ('al', "Albania"),
     ('ba', "Bosnia and Herzegovina"),
-    ('hr', "Croatia"),
     ('me', "Montenegro"),
     ('mk', "Macedonia, FYR of"),
     ('rs', "Serbia"),
