@@ -481,8 +481,8 @@ def group_parcels(parcels):
 def subscribe():
     if flask.request.method == 'POST':
         filters = {}
-        for name in ['country', 'extent', 'projection',
-                     'resolution', 'theme', 'decision']:
+        for name in ['country', 'extent', 'projection', 'resolution', 'theme',
+                     'decision', 'stage', 'event_type']:
             value = flask.request.form.get(name, '')
             if value:
                 filters[name] = value
