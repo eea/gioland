@@ -60,6 +60,7 @@
       <th>Projection</th>
       <th>Resolution</th>
       <th>Workflow overview</th>
+      <th>Stage</th>
       <th>Updated</th>
     </thead>
 
@@ -80,6 +81,7 @@
         <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
         <td><a href="{{ overview_url }}">workflow overview</a></td>
+        <td>{{ STAGE_MAP[metadata['stage']] }}</td>
         <td>{{ parcel.last_modified|datetime }}</td>
       </tr>
     {% endfor %}
