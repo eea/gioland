@@ -11,8 +11,8 @@ import tempfile
 from path import path
 from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
                          INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
-                         THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES,
-                         UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
+                         THEMES, THEMES_FILTER, PROJECTIONS, RESOLUTIONS, EXTENTS,
+                         ALL_ROLES, UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
                          DOCUMENTS)
 import notification
 import auth
@@ -711,6 +711,7 @@ metadata_template_context = {
     'COUNTRIES': COUNTRIES,
     'COUNTRY_MAP': dict(COUNTRIES),
     'THEMES': THEMES,
+    'THEMES_FILTER': THEMES_FILTER,
     'THEME_MAP': dict(THEMES),
     'RESOLUTIONS': RESOLUTIONS,
     'RESOLUTION_MAP': dict(RESOLUTIONS),

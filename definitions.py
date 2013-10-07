@@ -134,6 +134,17 @@ THEMES = [
     ('pwb',     "Permanent Water Bodies"),
 ]
 
+
+THEMES_FILTER = [
+    ('imp-deg', "Imperviousness Degree"),
+    ('tcd',     "Tree Cover Density"),
+    ('fty',     "Forest Type"),
+    ('grc',     "Grassland Cover"),
+    ('wet',     "Wetlands"),
+    ('pwb',     "Permanent Water Bodies"),
+]
+
+
 PROJECTIONS = [
     ('ntl', "National"),
     ('eur', "European"),
