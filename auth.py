@@ -27,7 +27,8 @@ def login():
         elif form['action'] == 'login':
             next = form['next'] or flask.url_for('parcel.index')
             ldapconn = LdapConnection(flask.current_app)
-            user_id = form['username']
+            username = form['username'] or ''
+            user_id = username.lower()
             if ldapconn.bind(user_id, form['password']):
                 flask.session['username'] = user_id
                 flask.flash("Login successful as %s" % ldap_full_name(user_id),
