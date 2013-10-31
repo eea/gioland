@@ -145,6 +145,9 @@ THEMES_FILTER = [
 ]
 
 
+THEMES_IDS = map(lambda x: x[0], THEMES)
+
+
 PROJECTIONS = [
     ('ntl', "National"),
     ('eur', "European"),

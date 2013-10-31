@@ -1,21 +1,26 @@
 import os
 import re
+import tempfile
+
 from cgi import escape
 from itertools import groupby
+from datetime import datetime
+
 import flask
 import blinker
+
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
-from datetime import datetime
-import tempfile
+
 from path import path
-from definitions import (EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER,
-                         INITIAL_STAGE, COUNTRIES_MC, COUNTRIES_CC, COUNTRIES,
-                         THEMES, THEMES_FILTER, PROJECTIONS, RESOLUTIONS, EXTENTS,
-                         ALL_ROLES, UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
-                         DOCUMENTS)
+
 import notification
 import auth
+from definitions import (
+    EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE, COUNTRIES_MC,
+    COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER, THEMES_IDS, PROJECTIONS,
+    RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
+    DOCUMENTS)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock
 
@@ -469,12 +474,11 @@ def chain(name):
 
 
 def group_parcels(parcels):
-    def grouper(parcel):
-        return {"country": parcel.metadata['country'],
-                "projection": parcel.metadata['projection'],
-                "resolution": parcel.metadata['resolution'],
-                "extent": parcel.metadata['extent']}
-    return groupby(parcels, key=grouper)
+    # order parcels based on THEMES order
+    def sort_parcels_key(parcel):
+        return THEMES_IDS.index(parcel.metadata['theme'])
+    sorted_parcels = sorted(parcels, key=sort_parcels_key)
+    return groupby(sorted_parcels, key=lambda p: p.metadata['theme'])
 
 
 @parcel_views.route('/subscribe', methods=['GET', 'POST'])

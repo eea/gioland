@@ -268,32 +268,27 @@ class ParcelTest(AppTestCase):
 
         data['extent'] = 'partial'
         data['coverage'] = 'Test coverage'
+        data['theme'] = 'grd'
         self.client.post('/parcel/new', data=data)
 
         resp = self.client.get('/country/be')
         table_headers = select(resp.data, '.title')
         self.assertEqual(2, len(table_headers))
 
-        table_headers_text = [''.join(t.text.split()) for t in table_headers]
-        self.assertIn('Belgium/European/20m/Full', table_headers_text)
-        self.assertIn('Belgium/European/20m/Partial', table_headers_text)
+        table_headers_text = [t.text for t in table_headers]
+        self.assertIn('Grassland Cover', table_headers_text)
+        self.assertIn('Grassland Density', table_headers_text)
 
     def test_country_workflow_overview_group_contain_correct_parcels(self):
         data = dict(self.PARCEL_METADATA)
         self.client.post('/parcel/new', data=data)
-
-        data['extent'] = 'partial'
-        data['theme'] = 'grd'
-        data['coverage'] = 'Test coverage'
         self.client.post('/parcel/new', data=data)
 
         resp = self.client.get('/country/be')
-        themes = select(resp.data, '.scope-row')
-        self.assertEqual(2, len(themes))
-
-        themes_text = [t.text.strip() for t in themes]
-        self.assertIn('Grassland Cover', ''.join(themes_text))
-        self.assertIn('Grassland Density', ''.join(themes_text))
+        table = select(resp.data, '.datatable')
+        self.assertEqual(1, len(table))
+        rows = select(resp.data, '.datatable tbody tr')
+        self.assertEqual(2, len(rows))
 
 
 class ParcelHistoryTest(AppTestCase):
