@@ -41,15 +41,51 @@
   </script>
   <script>
     $(document).ready(function () {
+
       {% if file_authorize %}
-        App.Upload({
+
+        var confirmFinalizeParcel = function (e) {
+          if(!e) e = window.event;
+
+          var message = "You uploaded files but you did not finalize the parcel. Please click on the 'Finalize' button after uploading your files.";
+
+            e.cancelBubble = true;
+            e.returnValue = message;
+
+            if (e.stopPropagation) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            return message;
+        };
+
+        var upload = App.Upload({
           upload_target: "{{ url_for('parcel.upload', name=parcel.name) }}",
           files_target: "{{ url_for('parcel.files', name=parcel.name) }}",
           finalize_upload_target: "{{ url_for('parcel.finalize_upload',
                                                name=parcel.name) }}",
           container: "#file-upload"
         });
+
+        if(upload.support) {
+          upload.on('fileSuccess', function () {
+            window.onbeforeunload = confirmFinalizeParcel;
+          });
+
+          $('#parcel-finalize-form').on('submit', function (e) {
+            window.onbeforeunload = null;
+          });
+        }
+
+       {% if parcel_authorize and parcel.get_files()|list %}
+         window.onbeforeunload = confirmFinalizeParcel;
+         $('#parcel-finalize-form').on('submit', function (e) {
+           window.onbeforeunload = null;
+         });
+       {% endif %}
+
       {% endif %}
+
     });
   </script>
 {% endblock %}
@@ -102,7 +138,7 @@
       {% include "parcel_file_upload.html" %}
     {% endif %}
 
-    <form method="get"
+    <form method="get" id="parcel-finalize-form"
           action="{{ url_for('parcel.finalize', name=parcel.name) }}">
       <p>When ready, finalize the parcel, which will trigger the next workflow step.</p>
 

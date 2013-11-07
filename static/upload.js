@@ -74,7 +74,7 @@
 		};
 
 		var complete = function () {
-			window.onbeforeunload = null;
+			// window.onbeforeunload = null;
 		};
 
 		var confirmPageLeave = function (e) {
@@ -106,6 +106,8 @@
 			$container.find('.upload-container').hide();
 			$container.find('.upload-container-not-supported').show();
 		}
+
+		return r;
 	};
 
 	App.Upload = Upload;
