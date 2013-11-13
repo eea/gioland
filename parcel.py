@@ -306,10 +306,8 @@ def finalize(name):
         finalize_parcel(wh, parcel, reject)
         url = flask.url_for('parcel.view', name=parcel.name)
         return flask.redirect(url)
-
     else:
-        return flask.render_template("parcel_confirm_finalize.html",
-                                     parcel=parcel, reject=reject)
+        flask.abort(405)
 
 
 @parcel_views.route('/parcel/<string:name>')

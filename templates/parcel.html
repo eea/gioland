@@ -138,7 +138,7 @@
       {% include "parcel_file_upload.html" %}
     {% endif %}
 
-    <form method="get" id="parcel-finalize-form"
+    <form method="post" id="parcel-finalize-form"
           action="{{ url_for('parcel.finalize', name=parcel.name) }}">
       <p>When ready, finalize the parcel, which will trigger the next workflow step.</p>
 
