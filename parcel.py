@@ -303,11 +303,23 @@ def finalize(name):
             flask.abort(403)
 
     if flask.request.method == "POST":
+        if flask.request.form.get('merge') == 'on':
+            merge_parcels(wh, parcel)
         finalize_parcel(wh, parcel, reject)
         url = flask.url_for('parcel.view', name=parcel.name)
         return flask.redirect(url)
     else:
         flask.abort(405)
+
+
+def merge_parcels(wh, parcel):
+    if parcel.metadata['extent'] != 'partial':
+        flask.abort(400)
+
+    def similar(parcel_item):
+        return parcel_item.metadata == parcel.metadata
+    partial_parcels = filter(similar, chain_tails(wh))
+    #TODO do merge here
 
 
 @parcel_views.route('/parcel/<string:name>')

@@ -144,6 +144,11 @@
 
       <button type="submit">Finalize</button>
 
+      {% if parcel.metadata['extent'] == 'partial' %}
+      <button type="submit" name="merge" value="on">
+        Finalize and merge</button>
+      {% endif %}
+
       {% if STAGES[parcel.metadata['stage']]['reject'] %}
         <button type="submit" name="reject" value="on">
           Finalize and reject</button>
