@@ -40,3 +40,4 @@ class ParcelMergeTests(AppTestCase):
 
         resp = self.client.post('/parcel/%s/finalize' % parcel_name,
                                 data={'merge': 'on'})
+

@@ -304,7 +304,7 @@ def finalize(name):
 
     if flask.request.method == "POST":
         if flask.request.form.get('merge') == 'on':
-            finalize_and_merge_parcels(wh, parcel)
+            finalize_and_merge_parcel(wh, parcel)
         else:
             finalize_parcel(wh, parcel, reject)
         url = flask.url_for('parcel.view', name=parcel.name)
@@ -635,15 +635,15 @@ def clear_chunks(parcel_path):
         d.rmtree()
 
 
-def create_next_parcel(wh, parcel, next_stage, stage_def, next_stage_def):
+def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
     next_parcel = wh.new_parcel()
     next_parcel.save_metadata({
-        'prev_parcel': parcel.name,
+        'prev_parcel_list': [p.name for p in parcels],
         'stage': next_stage,
     })
+    parcel = parcels[0]
     next_parcel.save_metadata({k: parcel.metadata.get(k, '')
                                for k in EDITABLE_METADATA})
-    parcel.save_metadata({'next_parcel': next_parcel.name})
 
     prev_url = flask.url_for('parcel.view', name=parcel.name)
     next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
@@ -653,11 +653,10 @@ def create_next_parcel(wh, parcel, next_stage, stage_def, next_stage_def):
         datetime.utcnow(),
         flask.g.username,
         next_description_html)
-
     return next_parcel
 
 
-def close_prev_parcel(parcel, reject):
+def close_prev_parcel(parcel, reject=False):
     parcel.finalize()
     clear_chunks(parcel.get_path())
     if reject:
@@ -666,10 +665,12 @@ def close_prev_parcel(parcel, reject):
 
 
 def link_to_next_parcel(next_parcel, parcel, stage_def, next_stage_def,
-                        reject):
+                        reject=False):
     next_url = flask.url_for('parcel.view', name=next_parcel.name)
     description_html = '<p>Next step: <a href="%s">%s</a></p>' % (
         next_url, next_stage_def['label'])
+
+    parcel.save_metadata({'next_parcel': next_parcel.name})
 
     title = "%s finished" % stage_def['label']
     if reject:
@@ -691,10 +692,32 @@ def finalize_parcel(wh, parcel, reject):
     next_stage_def = STAGES[next_stage]
 
     close_prev_parcel(parcel, reject)
-    next_parcel = create_next_parcel(wh, parcel, next_stage, stage_def,
+    next_parcel = create_next_parcel(wh, [parcel], next_stage, stage_def,
                                      next_stage_def)
     link_to_next_parcel(next_parcel, parcel, stage_def, next_stage_def, reject)
     parcel_finalized.send(parcel, next_parcel=next_parcel)
+
+
+def finalize_and_merge_parcel(wh, parcel):
+    if parcel.metadata['extent'] != 'partial':
+        flask.abort(400)
+
+    def similar(parcel_item):
+        return parcel_item.metadata == parcel.metadata
+    partial_parcels = filter(similar, chain_tails(wh))
+
+    stage = parcel.metadata['stage']
+    stage_def = STAGES[stage]
+    next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
+    next_stage_def = STAGES[next_stage]
+
+    for partial_parcel in partial_parcels:
+        close_prev_parcel(partial_parcel)
+    next_parcel = create_next_parcel(wh, partial_parcels, next_stage, stage_def,
+                                     next_stage_def)
+    for partial_parcel in partial_parcels:
+        link_to_next_parcel(next_parcel, partial_parcel, stage_def,
+                            next_stage_def)
 
 
 def validate_metadata(metadata, data_map):

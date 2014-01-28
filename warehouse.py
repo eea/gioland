@@ -84,7 +84,12 @@ class Parcel(Persistent):
         self._warehouse.logger.info("Metadata update for %r: %r (user %s)",
                                     self.name, new_metadata, _current_user())
         for key, value in new_metadata.iteritems():
-            self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
+            if key == 'prev_parcel_list':
+                self.metadata[_ensure_unicode(key)] = \
+                    [_ensure_unicode(v) for v in value]
+            else:
+                self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
+
 
     def get_path(self):
         return self._warehouse.parcels_path / self.name
