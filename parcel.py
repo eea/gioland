@@ -313,28 +313,6 @@ def finalize(name):
         flask.abort(405)
 
 
-def finalize_and_merge_parcels(wh, parcel):
-    # if parcel.metadata['extent'] != 'partial':
-    #     flask.abort(400)
-
-    # def similar(parcel_item):
-    #     return parcel_item.metadata == parcel.metadata
-    # partial_parcels = filter(similar, chain_tails(wh))
-
-    # # next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
-
-    # merge_parcel = wh.new_parcel()
-    # merge_parcel_metadata = parcel.metadata
-    # merge_parcel.save_metadata(parcel.metadata)
-    # merge_parcel.save_metadata({'stage': next_stage})
-    # merge_parcel.link_in_tree()
-    # parcel.save_metadata({'next_parcel': merge_parcel.name})
-    # parcel_created.send(merge_parcel)
-
-    #TODO do merge here
-    pass
-
-
 @parcel_views.route('/parcel/<string:name>')
 def view(name):
     wh = get_warehouse()
@@ -641,18 +619,18 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
         'prev_parcel_list': [p.name for p in parcels],
         'stage': next_stage,
     })
-    parcel = parcels[0]
-    next_parcel.save_metadata({k: parcel.metadata.get(k, '')
+    next_parcel.save_metadata({k: parcels[0].metadata.get(k, '')
                                for k in EDITABLE_METADATA})
 
-    prev_url = flask.url_for('parcel.view', name=parcel.name)
-    next_description_html = '<p>Previous step: <a href="%s">%s</a></p>' % (
-        prev_url, stage_def['label'])
-    next_parcel.add_history_item(
-        "Ready for %s" % next_stage_def['label'],
-        datetime.utcnow(),
-        flask.g.username,
-        next_description_html)
+    prev_urls = [flask.url_for('.view', name=p.name) for p in parcels]
+    links = ['<a href="%s">%s</a>' % (i, stage_def['label'])
+             for i in prev_urls]
+    next_description_html = '<p>Previous step: %s</p>' % ''.join(links)
+
+    next_parcel.add_history_item('Ready for %s' % next_stage_def['label'],
+                                 datetime.utcnow(),
+                                 flask.g.username,
+                                 next_description_html)
     return next_parcel
 
 
