@@ -93,7 +93,8 @@ class ParcelTest(AppTestCase):
             self.assertIn('next_parcel', parcel.metadata)
             next_parcel_name = parcel.metadata['next_parcel']
             next_parcel = self.wh.get_parcel(next_parcel_name)
-            self.assertEqual(next_parcel.metadata['prev_parcel'], parcel.name)
+            self.assertIn(parcel.name,
+                          next_parcel.metadata['prev_parcel_list'])
             # enhancement
             self.assertEqual(next_parcel.metadata['stage'], 'enh')
 
