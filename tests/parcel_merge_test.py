@@ -34,10 +34,42 @@ class ParcelMergeTests(AppTestCase):
     def test_merge_partials_parcels_creates_new_full_partial(self):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = data['coverage'] = 'partial'
+        # create a full parcel
         self._new_parcel(self.PARCEL_METADATA)
-        for i in range(5):
+        #create 2 partial parcels
+        for i in range(2):
             parcel_name = self._new_parcel(data)
+        self.client.post('/parcel/%s/finalize' % parcel_name,
+                         data={'merge': 'on'})
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertIn('next_parcel', parcel.metadata)
+            next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
+            self.assertDictContainsSubset(data, next_parcel.metadata)
 
-        resp = self.client.post('/parcel/%s/finalize' % parcel_name,
-                                data={'merge': 'on'})
+    def test_merge_partials_parcels_closes_all_merged_parcels(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = data['coverage'] = 'partial'
+        partial_parcels_names = [self._new_parcel(data) for i in range(2)]
+        parcel_name = partial_parcels_names[-1]
+        self.client.post('/parcel/%s/finalize' % parcel_name,
+                         data={'merge': 'on'})
+        with self.app.test_request_context():
+            for parcel_name in partial_parcels_names:
+                parcel = self.wh.get_parcel(parcel_name)
+                self.assertIn('upload_time', parcel.metadata)
 
+    def test_merge_partials_parcels_link_to_next_parcel(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = data['coverage'] = 'partial'
+        partial_parcels_names = [self._new_parcel(data) for i in range(3)]
+        parcel_name = partial_parcels_names[-1]
+        self.client.post('/parcel/%s/finalize' % parcel_name,
+                         data={'merge': 'on'})
+        with self.app.test_request_context():
+            next_parcel_name = self.wh.get_parcel(
+                partial_parcels_names.pop(0)).metadata['next_parcel']
+            for parcel_name in partial_parcels_names:
+                parcel = self.wh.get_parcel(parcel_name)
+                self.assertEqual(next_parcel_name,
+                                 parcel.metadata['next_parcel'])
