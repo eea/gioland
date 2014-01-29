@@ -431,18 +431,17 @@ def change_metadata(wh, name, new_meta):
 
 
 def walk_parcels(wh, name, metadata_key='next_parcel'):
-    while True:
-        parcel = wh.get_parcel(name)
+    items = name if isinstance(name, list) else [name]
+    for item in items:
+        parcel = wh.get_parcel(item)
         yield parcel
-        name = parcel.metadata.get(metadata_key)
-        if name is None:
-            return
+        items.extend(parcel.metadata.get(metadata_key) or [])
 
 
 def get_parcels_by_stage(name):
     wh = get_warehouse()
     stages_with_parcels = dict([(stage, None) for stage in STAGES])
-    for parcel in walk_parcels(wh, name, 'prev_parcel'):
+    for parcel in walk_parcels(wh, name, 'prev_parcel_list'):
         stage = parcel.metadata['stage']
         if not stages_with_parcels[stage]:
             stages_with_parcels[stage] = parcel
