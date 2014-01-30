@@ -351,7 +351,7 @@ def delete(name):
 
     else:
         will_remove = list(walk_parcels(wh, name))
-        will_not_remove = list(walk_parcels(wh, name, 'prev_parcel'))[1:]
+        will_not_remove = list(walk_parcels(wh, name, forward=False))[1:]
         will_not_remove.reverse()
         return flask.render_template('parcel_delete.html', **{
             'parcel': parcel,
@@ -406,7 +406,7 @@ def get_parcel_chain(wh, name):
     parcels = set()
     for p in walk_parcels(wh, name):
         parcels.add(p)
-    for p in walk_parcels(wh, name, metadata_key='prev_parcel'):
+    for p in walk_parcels(wh, name, forward=False):
         parcels.add(p)
     return parcels
 
@@ -430,18 +430,25 @@ def change_metadata(wh, name, new_meta):
         p.link_in_tree()
 
 
-def walk_parcels(wh, name, metadata_key='next_parcel'):
-    items = name if isinstance(name, list) else [name]
-    for item in items:
-        parcel = wh.get_parcel(item)
+def walk_parcels(wh, name, forward=True):
+    while True:
+        parcel = wh.get_parcel(name)
         yield parcel
-        items.extend(parcel.metadata.get(metadata_key) or [])
+        if forward:
+            name = parcel.metadata.get('next_parcel')
+        else:
+            values = parcel.metadata.get('prev_parcel_list', [])
+            if not values or len(values) > 1:
+                return
+            name = values[0]
+        if name is None:
+            return
 
 
 def get_parcels_by_stage(name):
     wh = get_warehouse()
     stages_with_parcels = dict([(stage, None) for stage in STAGES])
-    for parcel in walk_parcels(wh, name, 'prev_parcel_list'):
+    for parcel in walk_parcels(wh, name, forward=False):
         stage = parcel.metadata['stage']
         if not stages_with_parcels[stage]:
             stages_with_parcels[stage] = parcel
@@ -460,7 +467,7 @@ def chain(name):
     wh = get_warehouse()
     first_parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
 
-    previous_parcels = list(walk_parcels(wh, name, 'prev_parcel'))
+    previous_parcels = list(walk_parcels(wh, name, forward=False))
     if len(previous_parcels) > 1:
         first_parcel = previous_parcels[-1]
         url = flask.url_for('parcel.chain', name=first_parcel.name)
