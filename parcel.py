@@ -629,11 +629,17 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
     next_parcel.save_metadata({k: parcels[0].metadata.get(k, '')
                                for k in EDITABLE_METADATA})
 
-    prev_urls = [flask.url_for('.view', name=p.name) for p in parcels]
-    links = ['<a href="%s">%s</a>' % (i, stage_def['label'])
-             for i in prev_urls]
-    next_description_html = '<p>Previous step: %s</p>' % ''.join(links)
+    urls = links = []
+    for p in parcels:
+        url = flask.url_for('.view', name=p.name)
+        if p.metadata['extent'] == 'partial':
+            links.append('<a href="%s">%s (%s)</a>' % (
+                url, stage_def['label'], p.metadata['coverage']))
+        else:
+            links.append('<a href="%s">%s</a>' % (url, stage_def['label']))
+        urls.append(url)
 
+    next_description_html = '<p>Previous step: %s</p>' % ', '.join(links)
     next_parcel.add_history_item('Ready for %s' % next_stage_def['label'],
                                  datetime.utcnow(),
                                  flask.g.username,
