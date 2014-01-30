@@ -167,6 +167,20 @@ def shell(warehouse=False):
 
 
 @manager.command
+def migrate_prev_parcel_to_list():
+    from warehouse import get_warehouse
+
+    wh = get_warehouse()
+    parcels = wh.get_all_parcels()
+
+    for parcel in parcels:
+        prev_parcel = parcel.metadata.get('prev_parcel')
+        if prev_parcel:
+            parcel.save_metadata({'prev_parcel_list': [prev_parcel]})
+            del parcel.metadata['prev_parcel']
+
+
+@manager.command
 def fsck():
     from warehouse import get_warehouse, checksum
 
