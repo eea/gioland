@@ -53,7 +53,7 @@ def search():
     all_reports = []
     if 'country' in filter_arguments:
         all_reports = [r for r in wh.get_all_reports()
-                      if r.country == filter_arguments['country']]
+                       if r.country == filter_arguments['country']]
     parcels = list(filter_parcels(chain_tails(wh), **filter_arguments))
     parcels.sort(key=lambda p: p.last_modified, reverse=True)
     return flask.render_template('search.html', **{
@@ -540,7 +540,8 @@ def download_report_file(report_id):
     return flask.send_file(file_path, as_attachment=True,
                            attachment_filename=report.filename)
 
-@parcel_views.route('/report/<int:report_id>/delete', methods=['GET','POST'])
+
+@parcel_views.route('/report/<int:report_id>/delete', methods=['GET', 'POST'])
 def delete_report(report_id):
     if not auth.authorize(['ROLE_ADMIN']):
         return flask.abort(403)
@@ -629,7 +630,7 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
     next_parcel.save_metadata({k: parcels[0].metadata.get(k, '')
                                for k in EDITABLE_METADATA})
 
-    urls = links = []
+    links = []
     for p in parcels:
         url = flask.url_for('.view', name=p.name)
         if p.metadata['extent'] == 'partial':
@@ -637,7 +638,6 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
                 url, stage_def['label'], p.metadata['coverage']))
         else:
             links.append('<a href="%s">%s</a>' % (url, stage_def['label']))
-        urls.append(url)
 
     next_description_html = '<p>Previous step: %s</p>' % ', '.join(links)
     next_parcel.add_history_item('Ready for %s' % next_stage_def['label'],
