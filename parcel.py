@@ -704,8 +704,9 @@ def finalize_and_merge_parcel(wh, parcel):
 
     for partial_parcel in partial_parcels:
         close_prev_parcel(partial_parcel)
-    next_parcel = create_next_parcel(wh, partial_parcels, next_stage, stage_def,
-                                     next_stage_def)
+    next_parcel = create_next_parcel(wh, partial_parcels, next_stage,
+                                     stage_def, next_stage_def)
+    next_parcel.save_metadata({'extent': 'full'})
     for partial_parcel in partial_parcels:
         link_to_next_parcel(next_parcel, partial_parcel, stage_def,
                             next_stage_def)

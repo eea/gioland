@@ -45,7 +45,10 @@ class ParcelMergeTests(AppTestCase):
             parcel = self.wh.get_parcel(parcel_name)
             self.assertIn('next_parcel', parcel.metadata)
             next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
-            self.assertDictContainsSubset(data, next_parcel.metadata)
+            new_data = dict(data)
+            new_data['extent'] = 'full'
+            self.assertDictContainsSubset(new_data, next_parcel.metadata)
+            self.assertEqual('full', next_parcel.metadata['extent'])
 
     def test_merge_partials_parcels_closes_all_merged_parcels(self):
         data = dict(self.PARCEL_METADATA)
