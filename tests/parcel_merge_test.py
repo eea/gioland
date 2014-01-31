@@ -95,3 +95,23 @@ class ParcelMergeTests(AppTestCase):
             self.assertEqual(2, description_html.count('Service provider upload'))
             self.assertIn('(partial_0)', description_html)
             self.assertIn('(partial_1)', description_html)
+
+    def test_merge_partials_add_prev_parcel_list(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = 'partial'
+        #create 2 partial parcels
+        for i in range(2):
+            data['coverage'] = 'partial_%s' % i
+            parcel_name = self._new_parcel(data)
+
+        with self.app.test_request_context():
+            parcel_name_diff_stage = self.wh.get_parcel(self._new_parcel(data))
+            parcel_name_diff_stage.save_metadata({'stage': 'fin'})
+        self.client.post('/parcel/%s/finalize' % parcel_name,
+                         data={'merge': 'on'})
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertIn('next_parcel', parcel.metadata)
+            next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
+            self.assertEqual(2, len(next_parcel.metadata['prev_parcel_list']))
+

@@ -704,9 +704,11 @@ def finalize_and_merge_parcel(wh, parcel):
                                 for k in SIMILAR_METADATA}
         parcel_metadata = {k: parcel.metadata.get(k, '')
                            for k in SIMILAR_METADATA}
+        parcel_item_metadata['stage'] = parcel_item.metadata['stage']
+        parcel_metadata['stage'] = parcel.metadata['stage']
         return parcel_item_metadata == parcel_metadata
-    partial_parcels = filter(similar, chain_tails(wh))
 
+    partial_parcels = filter(similar, chain_tails(wh))
     stage = parcel.metadata['stage']
     stage_def = STAGES[stage]
     next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
