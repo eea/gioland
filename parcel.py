@@ -448,11 +448,16 @@ def walk_parcels(wh, name, forward=True):
 
 def get_parcels_by_stage(name):
     wh = get_warehouse()
-    stages_with_parcels = dict([(stage, None) for stage in STAGES])
+    stages_with_parcels = {stage: None for stage in STAGES}
     for parcel in walk_parcels(wh, name, forward=False):
         stage = parcel.metadata['stage']
         if not stages_with_parcels[stage]:
             stages_with_parcels[stage] = parcel
+    prev_parcel_list = parcel.metadata.get('prev_parcel_list', [])
+    if len(prev_parcel_list) > 1:
+        prev_parcel = wh.get_parcel(prev_parcel_list[0])
+        stages_with_parcels[prev_parcel.metadata['stage']] = \
+            'Merged with %s other parcels.' % len(prev_parcel_list)
     return stages_with_parcels
 
 
@@ -638,7 +643,6 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
                 url, stage_def['label'], p.metadata['coverage']))
         else:
             links.append('<a href="%s">%s</a>' % (url, stage_def['label']))
-
     next_description_html = '<p>Previous step: %s</p>' % ', '.join(links)
     next_parcel.add_history_item('Ready for %s' % next_stage_def['label'],
                                  datetime.utcnow(),
@@ -647,11 +651,13 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
     return next_parcel
 
 
-def close_prev_parcel(parcel, reject=False):
+def close_prev_parcel(parcel, reject=False, merged=False):
     parcel.finalize()
     clear_chunks(parcel.get_path())
     if reject:
         parcel.save_metadata({'rejection': 'true'})
+    if merged:
+        parcel.save_metadata({'merged': '1'})
     parcel.link_in_tree()
 
 
@@ -707,7 +713,7 @@ def finalize_and_merge_parcel(wh, parcel):
     next_stage_def = STAGES[next_stage]
 
     for partial_parcel in partial_parcels:
-        close_prev_parcel(partial_parcel)
+        close_prev_parcel(partial_parcel, merged=True)
     next_parcel = create_next_parcel(wh, partial_parcels, next_stage,
                                      stage_def, next_stage_def)
     next_parcel.save_metadata({'extent': 'full'})

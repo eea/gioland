@@ -61,6 +61,7 @@ class ParcelMergeTests(AppTestCase):
             for parcel_name in partial_parcels_names:
                 parcel = self.wh.get_parcel(parcel_name)
                 self.assertIn('upload_time', parcel.metadata)
+                self.assertTrue(parcel.metadata['merged'])
 
     def test_merge_partials_parcels_link_to_next_parcel(self):
         data = dict(self.PARCEL_METADATA)

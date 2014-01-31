@@ -170,21 +170,19 @@
       {% for parcel in parcels %}
 
       <tr>
- <!--        <th class="scope-row" scope="row">
-          {{ THEME_MAP[parcel.metadata['theme']] }}
-          {% if parcel.metadata['extent'] == 'partial' %}
-            ({{ parcel.metadata['coverage'] }})
-          {% endif %}
-        </th> -->
-
         {% set parcels_by_stage = get_parcels_by_stage(parcel.name) %}
 
         {% for stage in STAGES %}
+
           {% set parcel_by_stage = parcels_by_stage[stage] %}
 
           <td class="center">
             {% if parcel_by_stage %}
-              {{ parcel_status(parcel_by_stage) }}
+              {% if parcel_by_stage is string %}
+                {{ parcel_by_stage}}
+              {% else %}
+                {{ parcel_status(parcel_by_stage) }}
+              {% endif %}
             {% endif %}
           </td>
         {% endfor %}
