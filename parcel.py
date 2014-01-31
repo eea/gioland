@@ -20,7 +20,7 @@ from definitions import (
     EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE, COUNTRIES_MC,
     COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER, THEMES_IDS, PROJECTIONS,
     RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
-    DOCUMENTS)
+    DOCUMENTS, SIMILAR_METADATA)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock
 
@@ -694,7 +694,11 @@ def finalize_and_merge_parcel(wh, parcel):
         flask.abort(400)
 
     def similar(parcel_item):
-        return parcel_item.metadata == parcel.metadata
+        parcel_item_metadata = {k: parcel_item.metadata.get(k, '')
+                                for k in SIMILAR_METADATA}
+        parcel_metadata = {k: parcel.metadata.get(k, '')
+                           for k in SIMILAR_METADATA}
+        return parcel_item_metadata == parcel_metadata
     partial_parcels = filter(similar, chain_tails(wh))
 
     stage = parcel.metadata['stage']

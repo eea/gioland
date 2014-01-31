@@ -1,14 +1,16 @@
 from collections import OrderedDict
 
 
-EDITABLE_METADATA = [
+SIMILAR_METADATA = [
     'country',
     'theme',
     'projection',
     'resolution',
     'extent',
-    'coverage',
 ]
+
+
+EDITABLE_METADATA = SIMILAR_METADATA + ['coverage']
 
 
 METADATA = EDITABLE_METADATA + ['stage']
