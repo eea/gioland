@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% set title = "Finalize and merge parcels" %}
+{% set metadata = parcel.metadata %}
+{% set country_code = metadata['country'] %}
+{% set title_bits = '%s, %s'|format(THEME_MAP[metadata['theme']],
+                                    STAGE_MAP[metadata['stage']]) %}
+{% set country = COUNTRY_MAP[country_code] %}
+
+
+{% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
+
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GioLand'),
+    (url_for('parcel.country', code=country_code), COUNTRY_MAP[country_code]),
+    (url_for('parcel.view', name=parcel.name),
+        '%s (%s)'|format(title_bits, parcel.name)),
+    (url_for('parcel.finalize', name=parcel.name),
+             'Finalize ande merge %s' | format(parcel.name)),
+
+  ]) }}
+{% endblock %}
+
+
+{% block content %}
+{% endblock %}

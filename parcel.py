@@ -9,6 +9,7 @@ from datetime import datetime
 import flask
 import blinker
 
+from flask.views import MethodView
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
 
@@ -281,36 +282,44 @@ def create_file_from_chunks(parcel, temp, filename):
     temp.rmtree()
 
 
-@parcel_views.route('/parcel/<string:name>/finalize', methods=['GET', 'POST'])
-@exclusive_lock
-def finalize(name):
-    wh = get_warehouse()
-    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
-    stage_def = STAGES[parcel.metadata['stage']]
+class Finalize(MethodView):
 
-    if not authorize_for_parcel(parcel):
-        return flask.abort(403)
-    if stage_def.get('last'):
-        return flask.abort(403)
-    if not parcel.uploading:
-        return flask.abort(403)
+    decorators = (exclusive_lock,)
 
-    if stage_def.get('reject'):
-        reject = bool(flask.request.values.get('reject'))
-    else:
-        reject = None
-        if flask.request.values.get('reject'):
+    def dispatch_request(self, name, *args, **kwargs):
+        self.wh = get_warehouse()
+        self.parcel = get_or_404(self.wh.get_parcel, name, _exc=KeyError)
+        stage_def = STAGES[self.parcel.metadata['stage']]
+
+        if (not authorize_for_parcel(self.parcel) or stage_def.get('last') or
+            not self.parcel.uploading):
             flask.abort(403)
 
-    if flask.request.method == "POST":
-        if flask.request.form.get('merge') == 'on':
-            finalize_and_merge_parcel(wh, parcel)
+        if stage_def.get('reject'):
+            self.reject = bool(flask.request.values.get('reject'))
         else:
-            finalize_parcel(wh, parcel, reject)
-        url = flask.url_for('parcel.view', name=parcel.name)
+            self.reject = None
+            if flask.request.values.get('reject'):
+                flask.abort(403)
+        return super(Finalize, self).dispatch_request(name, *args, **kwargs)
+
+    def get(self, name):
+        if not flask.request.args.get('merge') == 'on':
+            flask.abort(405)
+        return flask.render_template('finalize_and_merge_parcel.html',
+                                     parcel=self.parcel)
+
+    def post(self, name):
+        if flask.request.form.get('merge') == 'on':
+            finalize_and_merge_parcel(self.wh, self.parcel)
+        else:
+            finalize_parcel(self.wh, self.parcel, self.reject)
+        url = flask.url_for('parcel.view', name=self.parcel.name)
         return flask.redirect(url)
-    else:
-        flask.abort(405)
+
+
+parcel_views.add_url_rule('/parcel/<string:name>/finalize',
+                          view_func=Finalize.as_view('finalize'))
 
 
 @parcel_views.route('/parcel/<string:name>')
