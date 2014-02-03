@@ -86,10 +86,6 @@
 
       {% endif %}
 
-      $('#finalize-and-merge').on('click', function () {
-        window.location.href = $(this).data('href');
-      });
-
     });
   </script>
 {% endblock %}
@@ -143,18 +139,11 @@
     {% endif %}
 
     <form method="post" id="parcel-finalize-form"
-          action="{{ url_for('parcel.finalize', name=parcel.name) }}">
+          action="{{ url_for('parcel.finalize', name=parcel.name) }}"
+          style="display: inline;">
       <p>When ready, finalize the parcel, which will trigger the next workflow step.</p>
 
       <button type="submit">Finalize</button>
-
-      {% if parcel.metadata['extent'] == 'partial' %}
-      {% set finalize_url = url_for('.finalize', name=parcel.name,
-                                    merge='on') %}
-      <button type="button" data-href="{{ finalize_url }}" name="merge"
-              id="finalize-and-merge">
-        Finalize and merge</button>
-      {% endif %}
 
       {% if STAGES[parcel.metadata['stage']]['reject'] %}
         <button type="submit" name="reject" value="on">
@@ -162,6 +151,14 @@
       {% endif %}
     </form>
 
+    {% if parcel.metadata['extent'] == 'partial' %}
+      {% set url = url_for('parcel.finalize', name=parcel.name) %}
+      <form action="{{ url }}" id="parcel-finalize-and-merge-form"
+            style="display: inline;">
+      <button type="submit" data-href="{{ finalize_url }}" name="merge"
+              value="on">Finalize and merge</button>
+      </form>
+    {% endif %}
   {% endif %}
 </div>
 
