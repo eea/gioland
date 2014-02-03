@@ -687,6 +687,16 @@ def link_to_next_parcel(next_parcel, parcel, stage_def, next_stage_def,
         flask.g.username, description_html, rejected=reject)
 
 
+def similar_parcel(parcel, parcel_item):
+    parcel_item_metadata = {k: parcel_item.metadata.get(k, '')
+                            for k in SIMILAR_METADATA}
+    parcel_metadata = {k: parcel.metadata.get(k, '')
+                       for k in SIMILAR_METADATA}
+    parcel_item_metadata['stage'] = parcel_item.metadata['stage']
+    parcel_metadata['stage'] = parcel.metadata['stage']
+    return parcel_item_metadata == parcel_metadata
+
+
 def finalize_parcel(wh, parcel, reject):
     stage = parcel.metadata['stage']
     stage_def = STAGES[stage]
@@ -708,16 +718,8 @@ def finalize_and_merge_parcel(wh, parcel):
     if parcel.metadata['extent'] != 'partial':
         flask.abort(400)
 
-    def similar(parcel_item):
-        parcel_item_metadata = {k: parcel_item.metadata.get(k, '')
-                                for k in SIMILAR_METADATA}
-        parcel_metadata = {k: parcel.metadata.get(k, '')
-                           for k in SIMILAR_METADATA}
-        parcel_item_metadata['stage'] = parcel_item.metadata['stage']
-        parcel_metadata['stage'] = parcel.metadata['stage']
-        return parcel_item_metadata == parcel_metadata
-
-    partial_parcels = filter(similar, chain_tails(wh))
+    partial_parcels = filter(lambda i: similar_parcel(parcel, i),
+                             chain_tails(wh))
     stage = parcel.metadata['stage']
     stage_def = STAGES[stage]
     next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
