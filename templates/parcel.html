@@ -86,6 +86,10 @@
 
       {% endif %}
 
+      $('#finalize-and-merge').on('click', function () {
+        window.location.href = $(this).data('href');
+      });
+
     });
   </script>
 {% endblock %}
@@ -145,7 +149,11 @@
       <button type="submit">Finalize</button>
 
       {% if parcel.metadata['extent'] == 'partial' %}
-      <button type="submit" name="merge" value="on">
+      {% set finalize_url = url_for('.finalize', name=parcel.name,
+                                    merge='on') %}
+      <button type="button" name="merge" value="on"
+              data-href="{{ finalize_url }}"
+              id="finalize-and-merge">
         Finalize and merge</button>
       {% endif %}
 
