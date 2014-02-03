@@ -151,8 +151,7 @@
       {% if parcel.metadata['extent'] == 'partial' %}
       {% set finalize_url = url_for('.finalize', name=parcel.name,
                                     merge='on') %}
-      <button type="button" name="merge" value="on"
-              data-href="{{ finalize_url }}"
+      <button type="button" data-href="{{ finalize_url }}" name="merge"
               id="finalize-and-merge">
         Finalize and merge</button>
       {% endif %}

@@ -18,12 +18,40 @@
     (url_for('parcel.country', code=country_code), COUNTRY_MAP[country_code]),
     (url_for('parcel.view', name=parcel.name),
         '%s (%s)'|format(title_bits, parcel.name)),
-    (url_for('parcel.finalize', name=parcel.name),
-             'Finalize ande merge %s' | format(parcel.name)),
+    (url_for('parcel.finalize', name=parcel.name, merge='on'),
+             'Finalize and merge (%s)' | format(parcel.name)),
 
   ]) }}
 {% endblock %}
 
 
+{% block page_heading %}
+  <h1>Finalize and merge <tt>{{ parcel.name }}</tt></h1>
+{% endblock %}
+
+
 {% block content %}
+
+  {% if partial_parcels and partial_parcels|count > 1 %}
+    <form method="post" action="{{ url_for('.finalize', name=parcel.name) }}"
+          id="parcel-finalize-and-merge-form">
+      <p>Merge <tt>{{ parcel.name }}</tt> with the following parcels:</p>
+      <ul>
+        {% for partial_parcel in partial_parcels %}
+          <li>
+            <a href="{{ url_for('.view', name=partial_parcel.name) }}">
+              {{ STAGE_MAP[partial_parcel.metadata['stage']] }}
+              ({{ partial_parcel.metadata['coverage'] }})
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p>
+        <button type="submit" name="merge" value="on">
+          Finalize and merge</button></p>
+    </form>
+  {% else %}
+    <p><b>Could not find other parcels to merge with.</b></p>
+  {% endif %}
+
 {% endblock %}

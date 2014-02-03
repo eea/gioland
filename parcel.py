@@ -306,8 +306,11 @@ class Finalize(MethodView):
     def get(self, name):
         if not flask.request.args.get('merge') == 'on':
             flask.abort(405)
+        partial_parcels = filter(lambda i: similar_parcel(self.parcel, i),
+                                 chain_tails(self.wh))
         return flask.render_template('finalize_and_merge_parcel.html',
-                                     parcel=self.parcel)
+                                     parcel=self.parcel,
+                                     partial_parcels=partial_parcels)
 
     def post(self, name):
         if flask.request.form.get('merge') == 'on':
