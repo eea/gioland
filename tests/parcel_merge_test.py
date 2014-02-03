@@ -50,6 +50,14 @@ class ParcelMergeTests(AppTestCase):
             self.assertDictContainsSubset(new_data, next_parcel.metadata)
             self.assertEqual('full', next_parcel.metadata['extent'])
 
+    def test_merge_partials_parcels_fail_if_only_one_parcel(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = data['coverage'] = 'partial'
+        parcel_name = self._new_parcel(data)
+        resp = self.client.post('/parcel/%s/finalize' % parcel_name,
+                         data={'merge': 'on'})
+        self.assertEqual(400, resp.status_code)
+
     def test_merge_partials_parcels_closes_all_merged_parcels(self):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = data['coverage'] = 'partial'

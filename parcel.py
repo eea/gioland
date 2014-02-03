@@ -723,6 +723,8 @@ def finalize_and_merge_parcel(wh, parcel):
 
     partial_parcels = filter(lambda i: similar_parcel(parcel, i),
                              chain_tails(wh))
+    if len(partial_parcels) <= 1:
+        flask.abort(400)
     stage = parcel.metadata['stage']
     stage_def = STAGES[stage]
     next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
