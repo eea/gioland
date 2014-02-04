@@ -23,7 +23,45 @@
   {% set metadata = first_parcel.metadata %}
   {{ metadata_table(metadata, show_stage=False) }}
 
-  <table class="datatable">
+
+  {% if prev_parcels %}
+
+  <table class="datatable" style="width: 290px;">
+
+    <thead>
+      <tr>
+        <th colspan="2">
+          Merged with {{ prev_parcels|count }} other parcels</th>
+      </tr>
+      <tr>
+        <th>Stage</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for prev_parcel in prev_parcels %}
+        <tr>
+          <td>
+            {% set prev_parcel_url = url_for('parcel.view',
+                                             name=prev_parcel.name) %}
+            {% set stage = STAGE_MAP[prev_parcel.metadata['stage']]  %}
+            <a href="{{ prev_parcel_url }}">
+              {{ stage  }} ({{ prev_parcel.metadata['coverage'] }})</a>
+          </td>
+          <td>
+            {{ prev_parcel.metadata['upload_time']|isoformat_to_datetime
+                                                  |datetime }}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+
+  </table>
+
+  {% endif %}
+
+  <table class="datatable" style="width: 290px;">
 
     <thead>
       <th>Stage</th>
@@ -38,7 +76,10 @@
         <td>
           {% set parcel_url = url_for('parcel.view', name=parcel.name) %}
           {% set stage = STAGE_MAP[parcel.metadata['stage']]  %}
-          <a href="{{ parcel_url }}">{{stage }}</a>
+          <a href="{{ parcel_url }}">
+            {{ stage }}
+            {% if parcel.metadata.get('merged') %}(merged){% endif %}
+          </a>
         </td>
 
         <td>
@@ -51,7 +92,7 @@
             {% endif %}
 
           {% else %}
-            {{ parcel.metadata['upload_time'] }}
+            {{ parcel.metadata['upload_time']|isoformat_to_datetime|datetime }}
           {% endif %}
         </td>
 

@@ -4,7 +4,7 @@ import logging
 from contextlib import contextmanager
 from werkzeug.contrib.cache import NullCache, SimpleCache
 import flask
-from dateutil import tz
+from dateutil import tz, parser
 from zc.lockfile import LockFile, LockError
 from definitions import DATE_FORMAT
 
@@ -52,6 +52,10 @@ def format_datetime(value, format_name='long'):
         # Convert time zone
         value = value.astimezone(to_zone)
     return value.strftime(DATE_FORMAT[format_name])
+
+
+def isoformat_to_datetime(value):
+    return parser.parse(value)
 
 
 LOCK_TIMEOUT = 5.0

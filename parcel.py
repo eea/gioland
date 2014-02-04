@@ -23,7 +23,7 @@ from definitions import (
     RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
     DOCUMENTS, SIMILAR_METADATA)
 from warehouse import get_warehouse, _current_user
-from utils import format_datetime, exclusive_lock
+from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -492,9 +492,16 @@ def chain(name):
         return flask.redirect(url)
 
     workflow_parcels = list(walk_parcels(wh, name))
+    prev_parcels = []
+    if workflow_parcels:
+        prev_parcel_list = workflow_parcels[0].metadata.get('prev_parcel_list', [])
+        if len(prev_parcel_list) > 1:
+            prev_parcels = [wh.get_parcel(p) for p in prev_parcel_list]
+
     return flask.render_template('parcel_chain.html', **{
         'first_parcel': first_parcel,
         'workflow_parcels': workflow_parcels,
+        'prev_parcels': prev_parcels,
     })
 
 
@@ -765,6 +772,7 @@ def register_on(app):
         'get_parcels_by_stage': get_parcels_by_stage,
     })
     app.jinja_env.filters["datetime"] = format_datetime
+    app.jinja_env.filters["isoformat_to_datetime"] = isoformat_to_datetime
 
 
 @parcel_views.before_request
