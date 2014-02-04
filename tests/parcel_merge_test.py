@@ -143,3 +143,24 @@ class ParcelMergeTests(AppTestCase):
         self.assertEqual(200, resp.status_code)
         count = len(select(resp.data, '#parcel-finalize-and-merge-form'))
         self.assertEqual(0, count)
+
+    def test_merge_partials_workflow_overview_history(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = 'partial'
+        #create 2 partial parcels
+        for i in range(2):
+            data['coverage'] = 'partial_%s' % i
+            parcel_name = self._new_parcel(data)
+        self.client.post('/parcel/%s/finalize' % parcel_name,
+                         data={'merge': 'on'})
+
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertIn('next_parcel', parcel.metadata)
+            next_parcel = parcel.metadata['next_parcel']
+            resp = self.client.get('/parcel/%s/chain' % next_parcel)
+            self.assertEqual(200, resp.status_code)
+            merged_table = select(resp.data, '#parcels-merged-history')
+            self.assertEqual(1, len(merged_table))
+            merged_table_rows = select(resp.data, '#parcels-merged-history tbody tr')
+            self.assertEqual(2, len(merged_table_rows))
