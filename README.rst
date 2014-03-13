@@ -58,6 +58,7 @@ Setup
 5. Start the application::
 
     $ cd /var/local/gioland-production/gioland
+    $ source ../venv/bin/activate
     $ honcho start
 
 
