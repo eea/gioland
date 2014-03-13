@@ -168,6 +168,7 @@ Contacts
 The project owner is Alan Steel (alan.steel at eaa.europa.eu)
 
 Other people involved in this project are:
+
 * Alex Morega (alex.morega at eaudeweb.ro)
 * Dragoș Catarahia (dragos.catarahia at eaudeweb.ro)
 
