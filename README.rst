@@ -83,6 +83,21 @@ dependencies are listed in ``requirements-dev.txt``. ``Procfile``
 contains the command to run the application in a format usable by tools
 like `honcho`. To run the unit tests simply run ``nosetests``.
 
+For local development, you can create an ``.env`` file::
+
+    DEBUG=on
+    WAREHOUSE_PATH=/var/local/gioland/instance/warehouse
+    LOCK_FILE_PATH=/var/local/gioland/instance/db.lock
+    SECRET_KEY=some random string here
+    ALLOW_PARCEL_DELETION=on
+
+Then run `honcho`, it will pick up the configuration and start the app::
+
+    $ honcho start
+
+
+Configuration variables
+~~~~~~~~~~~~~~~~~~~~~~~
 The application expects configuration via environment variables:
 
 ``DEBUG``
