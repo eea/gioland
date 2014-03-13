@@ -20,12 +20,15 @@ Code repository: https://github.com/eea/gioland
 Installation
 ============
 
-
 Prerequisites
 ~~~~~~~~~~~~~
+For RHEL systems::
+
+    $ yum install python-virtualenv python-devel git openldap-devel
+
 For debian systems::
 
-    $ apt-get install python2.7 python2.7-dev python-virtualenv git
+    $ apt-get install python-dev python-virtualenv git libldap2-dev libsasl2-dev
 
 
 Setup
