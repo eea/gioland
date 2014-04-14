@@ -52,7 +52,7 @@ STAGES = OrderedDict([
 
     ('ech', {
         'label': "Enhancement check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
         'reject': True,
     }),
 
