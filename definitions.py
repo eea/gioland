@@ -22,53 +22,63 @@ REPORT_METADATA = [
 ]
 
 
+STAGE_INT = 'int'
+STAGE_SCH = 'sch'
+STAGE_VER = 'ver'
+STAGE_VCH = 'vch'
+STAGE_ENH = 'enh'
+STAGE_ECH = 'ech'
+STAGE_FIN = 'fin'
+STAGE_FVA = 'fva'
+
+
 STAGES = OrderedDict([
-    ('int', {
+    (STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
     }),
 
-    ('sch', {
+    (STAGE_SCH, {
         'label': "Semantic check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'reject': True,
     }),
 
-    ('ver', {
+    (STAGE_VER, {
         'label': "Verification",
         'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
     }),
 
-    ('vch', {
+    (STAGE_VCH, {
         'label': "Verification check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN', 'ROLE_VEP'],
         'reject': True,
     }),
 
-    ('enh', {
+    (STAGE_ENH, {
         'label': "Enhancement",
         'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
     }),
 
-    ('ech', {
+    (STAGE_ECH, {
         'label': "Enhancement check",
         'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
         'reject': True,
     }),
 
-    ('fin', {
+    (STAGE_FIN, {
         'label': "Final integrated",
         'roles': ['ROLE_ADMIN'],
     }),
 
-    ('fva', {
+    (STAGE_FVA, {
         'label': "Final validated",
         'roles': ['ROLE_ADMIN'],
         'last': True,
     }),
 ])
 
-
+STAGES_FOR_MERGING = [STAGE_ENH]
 STAGE_ORDER = list(STAGES)
 INITIAL_STAGE = STAGE_ORDER[0]
 

@@ -811,4 +811,5 @@ metadata_template_context = {
     'EXTENTS': EXTENTS,
     'EXTENT_MAP': dict(EXTENTS),
     'UNS_FIELD_DEFS': UNS_FIELD_DEFS,
+    'STAGES_FOR_MERGING': STAGES_FOR_MERGING,
 }
