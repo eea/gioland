@@ -726,6 +726,8 @@ def finalize_parcel(wh, parcel, reject):
 def finalize_and_merge_parcel(wh, parcel):
     if parcel.metadata['extent'] != 'partial':
         flask.abort(400)
+    if parcel.metadata['stage'] not in STAGES_FOR_MERGING:
+        flask.abort(400)
 
     partial_parcels = filter(lambda i: similar_parcel(parcel, i),
                              chain_tails(wh))

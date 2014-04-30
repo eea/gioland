@@ -155,8 +155,10 @@
       {% set url = url_for('parcel.finalize', name=parcel.name) %}
       <form action="{{ url }}" id="parcel-finalize-and-merge-form"
             style="display: inline;">
-      <button type="submit" data-href="{{ finalize_url }}" name="merge"
-              value="on">Finalize and merge</button>
+      {% if parcel.metadata['stage'] in STAGES_FOR_MERGING %}
+        <button type="submit" data-href="{{ finalize_url }}" name="merge"
+                value="on">Finalize and merge</button>
+      {% endif %}
       </form>
     {% endif %}
   {% endif %}

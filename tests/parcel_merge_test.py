@@ -13,10 +13,19 @@ class ParcelMergeTests(AppTestCase):
         resp = self.client.post('/parcel/new', data=data)
         return resp.location.rsplit('/', 1)[-1]
 
+    def _set_metadata_to_parcel(self, parcel_name, metadata={}):
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            parcel.save_metadata(metadata)
+
+    def _set_parcel_to_merge_stage(self, parcel_name):
+        self._set_metadata_to_parcel(parcel_name, {'stage': 'enh'})
+
     def test_view_finalize_and_merge_btn_if_parcel_is_partial(self):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = data['coverage'] = 'partial'
         parcel_name = self._new_parcel(data)
+        self._set_parcel_to_merge_stage(parcel_name)
         resp = self.client.get('/parcel/' + parcel_name)
         self.assertEqual(1, len(select(resp.data, 'button[name=merge]')))
 
@@ -25,8 +34,38 @@ class ParcelMergeTests(AppTestCase):
         resp = self.client.get('/parcel/' + parcel_name)
         self.assertEqual(0, len(select(resp.data, 'button[name=merge]')))
 
+    def test_view_finalize_and_merge_btn_if_parcel_stage_in_stages_for_merging(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = data['coverage'] = 'partial'
+        parcel_name = self._new_parcel(data)
+        self._set_parcel_to_merge_stage(parcel_name)
+        resp = self.client.get('/parcel/' + parcel_name)
+        self.assertEqual(1, len(select(resp.data, 'button[name=merge]')))
+
+    def test_view_finalize_and_merge_btn_if_parcel_stage_not_in_stages_for_merging(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = data['coverage'] = 'partial'
+        parcel_name = self._new_parcel(data)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            parcel.save_metadata({'stage': 'ech'})
+        resp = self.client.get('/parcel/' + parcel_name)
+        self.assertEqual(0, len(select(resp.data, 'button[name=merge]')))
+
     def test_finalize_and_merge_fail_if_parcel_is_full(self):
         parcel_name = self._new_parcel(self.PARCEL_METADATA)
+        self._set_parcel_to_merge_stage(parcel_name)
+        resp = self.client.post('/parcel/%s/finalize' % parcel_name,
+                                data={'merge': 'on'})
+        self.assertEqual(400, resp.status_code)
+
+    def test_finalize_and_merge_fail_if_parcel_stage_not_in_stages_for_merging(self):
+        data = dict(self.PARCEL_METADATA)
+        data['extent'] = data['coverage'] = 'partial'
+        parcel_name = self._new_parcel(data)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            parcel.save_metadata({'stage': 'ech'})
         resp = self.client.post('/parcel/%s/finalize' % parcel_name,
                                 data={'merge': 'on'})
         self.assertEqual(400, resp.status_code)
@@ -39,6 +78,7 @@ class ParcelMergeTests(AppTestCase):
         #create 2 partial parcels
         for i in range(2):
             parcel_name = self._new_parcel(data)
+            self._set_parcel_to_merge_stage(parcel_name)
         self.client.post('/parcel/%s/finalize' % parcel_name,
                          data={'merge': 'on'})
         with self.app.test_request_context():
@@ -55,6 +95,10 @@ class ParcelMergeTests(AppTestCase):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = data['coverage'] = 'partial'
         parcel_name = self._new_parcel(data)
+        self._set_parcel_to_merge_stage(parcel_name)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            parcel.save_metadata({'stage': 'enh'})
         resp = self.client.post('/parcel/%s/finalize' % parcel_name,
                          data={'merge': 'on'})
         self.assertEqual(400, resp.status_code)
@@ -62,8 +106,12 @@ class ParcelMergeTests(AppTestCase):
     def test_merge_partials_parcels_closes_all_merged_parcels(self):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = data['coverage'] = 'partial'
-        partial_parcels_names = [self._new_parcel(data) for i in range(2)]
-        parcel_name = partial_parcels_names[-1]
+        partial_parcels_names = []
+        for i in range(2):
+            parcel_name = self._new_parcel(data)
+            partial_parcels_names.append(parcel_name)
+            self._set_parcel_to_merge_stage(parcel_name)
+
         self.client.post('/parcel/%s/finalize' % parcel_name,
                          data={'merge': 'on'})
         with self.app.test_request_context():
@@ -75,8 +123,11 @@ class ParcelMergeTests(AppTestCase):
     def test_merge_partials_parcels_link_to_next_parcel(self):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = data['coverage'] = 'partial'
-        partial_parcels_names = [self._new_parcel(data) for i in range(3)]
-        parcel_name = partial_parcels_names[-1]
+        partial_parcels_names = []
+        for i in range(3):
+            parcel_name = self._new_parcel(data)
+            partial_parcels_names.append(parcel_name)
+            self._set_parcel_to_merge_stage(parcel_name)
         self.client.post('/parcel/%s/finalize' % parcel_name,
                          data={'merge': 'on'})
         with self.app.test_request_context():
@@ -94,6 +145,7 @@ class ParcelMergeTests(AppTestCase):
         for i in range(2):
             data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
+            self._set_parcel_to_merge_stage(parcel_name)
         self.client.post('/parcel/%s/finalize' % parcel_name,
                          data={'merge': 'on'})
         with self.app.test_request_context():
@@ -101,7 +153,7 @@ class ParcelMergeTests(AppTestCase):
             self.assertIn('next_parcel', parcel.metadata)
             next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
             description_html = next_parcel.history[0].description_html
-            self.assertEqual(2, description_html.count('Service provider upload'))
+            self.assertEqual(2, description_html.count('Enhancement'))
             self.assertIn('(partial_0)', description_html)
             self.assertIn('(partial_1)', description_html)
 
@@ -112,6 +164,7 @@ class ParcelMergeTests(AppTestCase):
         for i in range(2):
             data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
+            self._set_parcel_to_merge_stage(parcel_name)
 
         with self.app.test_request_context():
             parcel_name_diff_stage = self.wh.get_parcel(self._new_parcel(data))
@@ -131,6 +184,7 @@ class ParcelMergeTests(AppTestCase):
         for i in range(2):
             data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
+            self._set_parcel_to_merge_stage(parcel_name)
         resp = self.client.get('/parcel/%s/finalize?merge=on' % parcel_name)
         self.assertEqual(200, resp.status_code)
         count = len(select(resp.data, '#parcel-finalize-and-merge-form'))
@@ -140,6 +194,7 @@ class ParcelMergeTests(AppTestCase):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = data['coverage'] = 'partial'
         parcel_name = self._new_parcel(data)
+        self._set_parcel_to_merge_stage(parcel_name)
         resp = self.client.get('/parcel/%s/finalize?merge=on' % parcel_name)
         self.assertEqual(200, resp.status_code)
         count = len(select(resp.data, '#parcel-finalize-and-merge-form'))
@@ -152,6 +207,8 @@ class ParcelMergeTests(AppTestCase):
         for i in range(2):
             data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
+            self._set_parcel_to_merge_stage(parcel_name)
+
         self.client.post('/parcel/%s/finalize' % parcel_name,
                          data={'merge': 'on'})
 
