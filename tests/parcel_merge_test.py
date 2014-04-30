@@ -47,6 +47,7 @@ class ParcelMergeTests(AppTestCase):
             next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
             new_data = dict(data)
             new_data['extent'] = 'full'
+            new_data['coverage'] = ''
             self.assertDictContainsSubset(new_data, next_parcel.metadata)
             self.assertEqual('full', next_parcel.metadata['extent'])
 
