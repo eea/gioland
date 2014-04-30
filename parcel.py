@@ -18,10 +18,11 @@ from path import path
 import notification
 import auth
 from definitions import (
-    EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE, COUNTRIES_MC,
-    COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER, THEMES_IDS, PROJECTIONS,
-    RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS, CATEGORIES, REPORT_METADATA,
-    DOCUMENTS, SIMILAR_METADATA)
+    EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE,
+    COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
+    THEMES_IDS, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS,
+    CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
+    STAGES_FOR_MERGING)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 
@@ -494,7 +495,8 @@ def chain(name):
     workflow_parcels = list(walk_parcels(wh, name))
     prev_parcels = []
     if workflow_parcels:
-        prev_parcel_list = workflow_parcels[0].metadata.get('prev_parcel_list', [])
+        prev_parcel_list = workflow_parcels[0].metadata.get(
+            'prev_parcel_list', [])
         if len(prev_parcel_list) > 1:
             prev_parcels = [wh.get_parcel(p) for p in prev_parcel_list]
 
@@ -550,7 +552,8 @@ def new_report():
             url = flask.url_for('parcel.country', code=report.country)
             return flask.redirect(url)
         else:
-            flask.flash("File field is missing or it's not a document.", 'system')
+            flask.flash("File field is missing or it's not a document.",
+                        'system')
     return flask.render_template('report_new.html')
 
 
@@ -585,10 +588,6 @@ def delete_report(report_id):
 
 
 def save_report_file(reports_path, posted_file, report):
-    # filename = 'CDR_%s_%s_V%s.%s' % (report.country.upper(), report.category.upper(),
-    #     report.pk if report.pk >= 10 else '0%s' % report.pk,
-    #     extension(posted_file.filename),
-    # )
     filename = posted_file.filename
     file_path = reports_path / filename
     if file_path.exists():
