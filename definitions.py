@@ -27,6 +27,7 @@ STAGE_SCH = 'sch'
 STAGE_VER = 'ver'
 STAGE_VCH = 'vch'
 STAGE_ENH = 'enh'
+STAGE_ERH = 'erh'
 STAGE_ECH = 'ech'
 STAGE_FIN = 'fin'
 STAGE_FVA = 'fva'
@@ -36,39 +37,54 @@ STAGES = OrderedDict([
     (STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
+        'file_uploading': True,
     }),
 
     (STAGE_SCH, {
         'label': "Semantic check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'reject': True,
+        'file_uploading': True,
     }),
 
     (STAGE_VER, {
         'label': "Verification",
         'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
+        'file_uploading': True,
     }),
 
     (STAGE_VCH, {
         'label': "Verification check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN', 'ROLE_VEP'],
         'reject': True,
+        'file_uploading': False,
     }),
 
     (STAGE_ENH, {
         'label': "Enhancement",
         'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
+        'file_uploading': True,
+    }),
+
+    (STAGE_ERH, {
+        'label': "Enhancement report check",
+        'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
+        'reject': True,
+        'file_uploading': False,
     }),
 
     (STAGE_ECH, {
-        'label': "Enhancement check",
+        'label': "Enhancement semantic check",
         'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
         'reject': True,
+        'file_uploading': True,
+        'reject_stage': STAGE_ENH,
     }),
 
     (STAGE_FIN, {
         'label': "Final integrated",
         'roles': ['ROLE_ADMIN'],
+        'file_uploading': True,
     }),
 
     (STAGE_FVA, {

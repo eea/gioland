@@ -133,6 +133,7 @@ class ParcelTest(AppTestCase):
     def test_finalize_with_reject_triggers_previous_step(self):
         for stage, prev_stage in [('sch', 'int'),
                                   ('vch', 'ver'),
+                                  ('erh', 'enh'),
                                   ('ech', 'enh')]:
             parcel_name = self.create_parcel_at_stage(stage)
             self.client.post('/parcel/%s/finalize' % parcel_name,

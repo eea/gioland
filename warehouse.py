@@ -9,7 +9,7 @@ from BTrees.OOBTree import OOBTree
 from persistent import Persistent
 import transaction
 from path import path
-from definitions import METADATA
+from definitions import METADATA, STAGES
 
 
 log = logging.getLogger(__name__)
@@ -65,6 +65,12 @@ def checksum(path):
 
 class Parcel(Persistent):
 
+    def __init__(self, warehouse, name):
+        self._warehouse = warehouse
+        self.name = name
+        self.metadata = PersistentMapping()
+        self.history = PersistentList()
+
     @property
     def uploading(self):
         return 'upload_time' not in self.metadata
@@ -72,13 +78,8 @@ class Parcel(Persistent):
     @property
     def file_uploading(self):
         # disable uploading files for verification check
-        return self.metadata.get('stage', '') != 'vch'
-
-    def __init__(self, warehouse, name):
-        self._warehouse = warehouse
-        self.name = name
-        self.metadata = PersistentMapping()
-        self.history = PersistentList()
+        stage = STAGES.get(self.metadata.get('stage'), {})
+        return stage.get('file_uploading', False)
 
     def save_metadata(self, new_metadata):
         self._warehouse.logger.info("Metadata update for %r: %r (user %s)",

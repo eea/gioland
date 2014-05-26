@@ -711,7 +711,11 @@ def finalize_parcel(wh, parcel, reject):
     stage_def = STAGES[stage]
 
     if reject:
-        next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) - 1]
+        reject_stage = stage_def.get('reject_stage', None)
+        if reject_stage:
+            next_stage = reject_stage
+        else:
+            next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) - 1]
     else:
         next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
     next_stage_def = STAGES[next_stage]
