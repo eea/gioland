@@ -67,14 +67,14 @@ STAGES = OrderedDict([
     }),
 
     (STAGE_ERH, {
-        'label': "Enhancement report check",
+        'label': "Enhancement Report Check",
         'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
         'reject': True,
         'file_uploading': False,
     }),
 
     (STAGE_ECH, {
-        'label': "Enhancement semantic check",
+        'label': "Enhancement Semantic Check",
         'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
         'reject': True,
         'file_uploading': True,
