@@ -1,7 +1,10 @@
 from datetime import datetime
 from StringIO import StringIO
 from mock import patch
+
+import string
 import flask
+
 from common import AppTestCase, authorization_patch, select
 
 
@@ -28,8 +31,8 @@ class ParcelTest(AppTestCase):
         self.assertTrue((self.parcels_path / parcel_name).isdir())
 
     def test_begin_parcel_saves_user_selected_metadata(self):
-        resp = self.client.post('/parcel/new',  data=dict(self.PARCEL_METADATA,
-                                                          bogus='not here'))
+        resp = self.client.post('/parcel/new', data=dict(self.PARCEL_METADATA,
+                                                         bogus='not here'))
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
@@ -141,7 +144,7 @@ class ParcelTest(AppTestCase):
             with self.app.test_request_context():
                 parcel = self.wh.get_parcel(parcel_name)
                 next_parcel = self.wh.get_parcel(
-                                parcel.metadata['next_parcel'])
+                    parcel.metadata['next_parcel'])
                 self.assertEqual(next_parcel.metadata['stage'], prev_stage)
 
     def test_finalize_with_reject_saves_rejected_metadata(self):
@@ -168,7 +171,7 @@ class ParcelTest(AppTestCase):
             self.assertEqual(2, len(parcels))
 
     def test_finalize_last_parcel_forbidden(self):
-        parcel_name = self.create_parcel_at_stage('fva')
+        parcel_name = self.create_parcel_at_stage('fih')
         resp = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(403, resp.status_code)
 
@@ -278,8 +281,10 @@ class ParcelTest(AppTestCase):
         self.assertEqual(2, len(table_headers))
 
         table_headers_text = [t.text for t in table_headers]
-        self.assertIn('Grassland Cover', table_headers_text)
-        self.assertIn('Grassland Density', table_headers_text)
+        self.assertIn('Grassland Cover',
+                      map(string.strip, table_headers_text))
+        self.assertIn('Grassland Density',
+                      map(string.strip, table_headers_text))
 
     def test_country_workflow_overview_group_contain_correct_parcels(self):
         data = dict(self.PARCEL_METADATA)
@@ -433,10 +438,10 @@ class ApiTest(AppTestCase):
         self.assertItemsEqual(resp['parcels'], [name1, name2])
 
     def test_search_with_country_argument_filters_by_country(self):
-        name1 = self.new_parcel()
-        name2 = self.new_parcel(country='dk')
+        self.new_parcel()
+        name = self.new_parcel(country='dk')
         resp = self.get_json('/api/find_parcels?country=dk')
-        self.assertItemsEqual(resp['parcels'], [name2])
+        self.assertItemsEqual(resp['parcels'], [name])
 
     def test_get_parcel_metadata(self):
         import warehouse

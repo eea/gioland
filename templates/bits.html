@@ -151,18 +151,13 @@
     <colgroup style="width: 11em;"></colgroup>
     <thead>
       <tr>
-        <th class="title" colspan="9">{{ THEME_MAP[grouper] }}</th>
+        <th class="title" colspan="{{ STAGES|length }}">
+          {{ THEME_MAP[grouper] }}</th>
       </tr>
       <tr>
-        <th>Intermediate</th>
-        <th>Semantic Check</th>
-        <th>Verification</th>
-        <th>Verification Check</th>
-        <th>Enhancement</th>
-        <th>Enhancement report check</th>
-        <th>Enhancement semantic check</th>
-        <th>Final Integrated</th>
-        <th>Final Validated</th>
+        {% for stage, data in STAGES.items() %}
+          <th>{{ data['label'] }}</th>
+        {% endfor %}
       </tr>
     </thead>
 

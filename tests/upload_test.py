@@ -88,7 +88,7 @@ class UploadTest(AppTestCase):
         self.assertEqual(1, len(select(resp.data, '.system-msg')))
 
     def test_upload_file_on_final_stage_forbidden(self):
-        parcel = self.create_parcel_at_stage(stage='fva')
+        parcel = self.create_parcel_at_stage(stage='fih')
         resp = self.try_upload_file(parcel.name)
         self.assertEqual(403, resp.status_code)
 
@@ -102,7 +102,7 @@ class UploadTest(AppTestCase):
         self.assertFalse(self.try_upload(parcel.name))
 
     def test_upload_chunk_on_final_stage_forbidden(self):
-        parcel = self.create_parcel_at_stage(stage='fva')
+        parcel = self.create_parcel_at_stage(stage='fih')
         self.assertFalse(self.try_upload(parcel.name))
 
     def test_delete_file(self):
@@ -114,7 +114,7 @@ class UploadTest(AppTestCase):
     def test_finalized_parcel_forbids_deletion(self):
         with self.app.test_request_context():
             parcel = self.wh.new_parcel()
-            parcel.save_metadata({'stage': 'fva'})
+            parcel.save_metadata({'stage': 'fih'})
             parcel.finalize()
         resp = self.client.post('/parcel/%s/file/%s/delete' % (parcel.name,
                                                                'data.gml'))

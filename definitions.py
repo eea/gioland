@@ -31,6 +31,7 @@ STAGE_ERH = 'erh'
 STAGE_ECH = 'ech'
 STAGE_FIN = 'fin'
 STAGE_FVA = 'fva'
+STAGE_FIH = 'fih'
 
 
 STAGES = OrderedDict([
@@ -85,14 +86,24 @@ STAGES = OrderedDict([
         'label': "Final integrated",
         'roles': ['ROLE_ADMIN'],
         'file_uploading': True,
+
     }),
 
     (STAGE_FVA, {
-        'label': "Final validated",
+        'label': "Final Semantic Check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'file_uploading': True,
+        'reject': True,
+        'reject_stage': STAGE_FIN,
+    }),
+
+    (STAGE_FIH, {
+        'label': "Final HRL",
         'roles': ['ROLE_ADMIN'],
         'last': True,
     }),
 ])
+
 
 STAGES_FOR_MERGING = [STAGE_ENH]
 STAGE_ORDER = list(STAGES)
