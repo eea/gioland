@@ -15,9 +15,6 @@ class PermisionsTest(AppTestCase):
 
     CREATE_WAREHOUSE = True
 
-    def add_to_role(self, username, role_name):
-        self.app.config.setdefault(role_name, []).append('user_id:' + username)
-
     def remove_from_role(self, username, role_name):
         if role_name in self.app.config:
             users = self.app.config[role_name]

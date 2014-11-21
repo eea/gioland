@@ -128,6 +128,7 @@
 {% endif %}
 
 <div id="file-upload">
+
   {% if parcel.file_uploading %}
     {{ files_table(parcel, delete_buttons=file_authorize) }}
   {% endif %}
@@ -162,6 +163,11 @@
     {% endif %}
   {% endif %}
 </div>
+
+{% else %}
+
+  <h2>Files</h2>
+  {{ files_table(parcel, delete_buttons=False) }}
 
 {% endif %}
 

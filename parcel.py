@@ -291,7 +291,6 @@ class Finalize(MethodView):
         self.wh = get_warehouse()
         self.parcel = get_or_404(self.wh.get_parcel, name, _exc=KeyError)
         stage_def = STAGES[self.parcel.metadata['stage']]
-
         if (not authorize_for_parcel(self.parcel) or stage_def.get('last') or
             not self.parcel.uploading):
             flask.abort(403)
@@ -679,6 +678,12 @@ def close_prev_parcel(parcel, reject=False, merged=False):
     parcel.link_in_tree()
 
 
+def copy_files_from_parcel(parcel_from, parcel_to):
+    files = parcel_from.get_files()
+    for f in files:
+        f.copyfile(parcel_to.get_path() / f.name)
+
+
 def link_to_next_parcel(next_parcel, parcel, stage_def, next_stage_def,
                         reject=False):
     next_url = flask.url_for('parcel.view', name=next_parcel.name)
@@ -723,6 +728,16 @@ def finalize_parcel(wh, parcel, reject):
     close_prev_parcel(parcel, reject)
     next_parcel = create_next_parcel(wh, [parcel], next_stage, stage_def,
                                      next_stage_def)
+
+    # if last stage, copy files from STAGE_FIN (Final integrated)
+    if next_parcel.metadata['stage'] == STAGE_ORDER[-1]:
+        try:
+            [final_int_parcel_name] = parcel.metadata['prev_parcel_list']
+            final_int_parcel = wh.get_parcel(final_int_parcel_name)
+        except ValueError:
+            final_int_parcel = None
+        copy_files_from_parcel(final_int_parcel, next_parcel)
+
     link_to_next_parcel(next_parcel, parcel, stage_def, next_stage_def, reject)
     parcel_finalized.send(parcel, next_parcel=next_parcel)
 

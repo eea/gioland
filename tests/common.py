@@ -85,6 +85,9 @@ class AppTestCase(unittest.TestCase):
         'category': 'for',
     })
 
+    def add_to_role(self, username, role_name):
+        self.app.config.setdefault(role_name, []).append('user_id:' + username)
+
     def new_parcel(self, **extra_metadata):
         metadata = dict(self.PARCEL_METADATA)
         metadata.update(extra_metadata)

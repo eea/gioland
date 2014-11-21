@@ -109,7 +109,6 @@ STAGES_FOR_MERGING = [STAGE_ENH]
 STAGE_ORDER = list(STAGES)
 INITIAL_STAGE = STAGE_ORDER[0]
 
-
 COUNTRIES_MC = [
     ('at', "Austria"),
     ('be', "Belgium"),
