@@ -84,7 +84,7 @@ STAGES = OrderedDict([
 
     (STAGE_FIN, {
         'label': "Final integrated",
-        'roles': ['ROLE_ADMIN'],
+        'roles': ['ROLE_ADMIN', 'ROLE_SP'],
         'file_uploading': True,
 
     }),
