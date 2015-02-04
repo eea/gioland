@@ -25,6 +25,7 @@ from definitions import (
     STAGES_FOR_MERGING)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
+from forms import CountryDeliveryForm, LotDeliveryForm
 
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -95,9 +96,18 @@ def country(code):
     })
 
 
-@parcel_views.route('/parcel/new', methods=['GET', 'POST'])
-def new():
-    if flask.request.method == 'POST':
+class Delivery(MethodView):
+
+    def get(self):
+        country_delivery_form = CountryDeliveryForm()
+        lot_delivery_form = LotDeliveryForm()
+        return flask.render_template(
+            'parcel_new.html',
+            country_delivery_form=country_delivery_form,
+            lot_delivery_form=lot_delivery_form)
+
+
+    def post(self):
         if not authorize_for_parcel(None):
             return flask.abort(403)
 
@@ -122,8 +132,8 @@ def new():
         url = flask.url_for('parcel.view', name=parcel.name)
         return flask.redirect(url)
 
-    else:
-        return flask.render_template('parcel_new.html')
+parcel_views.add_url_rule('/parcel/new',
+                          view_func=Delivery.as_view('delivery'))
 
 
 @parcel_views.route('/parcel/<string:name>/chunk', methods=['POST'])

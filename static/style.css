@@ -152,3 +152,11 @@ a.delete-parcel {
     margin-bottom: 1em;
     font-size: 95%;
 }
+
+.delivery_type {
+    margin-top: 15px;
+}
+
+.hide {
+    display: none;
+}
