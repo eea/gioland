@@ -160,7 +160,17 @@ COUNTRIES_CC = [
 COUNTRIES = COUNTRIES_MC + COUNTRIES_CC
 
 
-THEMES = [
+LOTS = (
+    ('lot 1', 'Lot 1'),
+    ('lot 2', 'Lot 2'),
+    ('lot 3', 'Lot 3'),
+    ('lot 4', 'Lot 4'),
+    ('lot 5', 'Lot 5'),
+    ('lot 6', 'Lot 6'),
+)
+
+
+THEMES = (
     ('imp-deg', "Imperviousness Degree"),
     ('imp-chg', "Imperviousness Change"),
     ('tcd',     "Tree Cover Density"),
@@ -170,7 +180,7 @@ THEMES = [
     ('grd',     "Grassland Density"),
     ('wet',     "Wetlands"),
     ('pwb',     "Permanent Water Bodies"),
-]
+)
 
 
 THEMES_FILTER = [
