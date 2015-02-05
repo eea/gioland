@@ -109,7 +109,8 @@
 
   <hr>
 
-  <form id="country_delivery_form" class="delivery_form" method="post">
+  <form id="country_delivery_form" class="delivery_form" method="post"
+        action="{{ url_for('parcel.country_delivery') }}">
 
     <table>
       <tr>
@@ -118,8 +119,8 @@
       </tr>
 
       <tr>
-        <td>{{ country_delivery_form.themes.label }}</td>
-        <td>{{ country_delivery_form.themes() }}</td>
+        <td>{{ country_delivery_form.theme.label }}</td>
+        <td>{{ country_delivery_form.theme() }}</td>
       </tr>
 
       <tr>
@@ -142,7 +143,8 @@
 
   </form>
 
-  <form id="lot_delivery_form" class="delivery_form hide" method="post">
+  <form id="lot_delivery_form" class="delivery_form hide" method="post"
+        action="{{ url_for('parcel.lot_delivery') }}">
 
     <table>
       <tr>
@@ -151,8 +153,8 @@
       </tr>
 
       <tr>
-        <td>{{ lot_delivery_form.themes.label }}</td>
-        <td>{{ lot_delivery_form.themes() }}</td>
+        <td>{{ lot_delivery_form.theme.label }}</td>
+        <td>{{ lot_delivery_form.theme() }}</td>
       </tr>
 
       <tr>

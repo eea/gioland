@@ -107,33 +107,41 @@ class Delivery(MethodView):
             lot_delivery_form=lot_delivery_form)
 
 
+class _BaseDelivery(MethodView):
+
     def post(self):
         if not authorize_for_parcel(None):
             return flask.abort(403)
-
-        wh = get_warehouse()
-        form = flask.request.form.to_dict()
-        if form['extent'] == 'full':
-            form['coverage'] = ''
-
-        metadata = {k: form.get(k, '') for k in EDITABLE_METADATA}
-        metadata['stage'] = INITIAL_STAGE
-        data_map = zip(
-            ['country', 'theme', 'projection', 'resolution', 'extent', 'stage'],
-            [COUNTRIES, THEMES, PROJECTIONS, RESOLUTIONS, EXTENTS, STAGES])
-        if not validate_metadata(metadata, data_map):
-            flask.abort(400)
-
-        parcel = wh.new_parcel()
-        parcel.save_metadata(metadata)
-        parcel.add_history_item("New upload", datetime.utcnow(),
-                                flask.g.username, "")
-        parcel_created.send(parcel)
-        url = flask.url_for('parcel.view', name=parcel.name)
+        Form = getattr(self, 'form_class', None)
+        form = Form(flask.request.form)
+        if form.validate():
+            parcel = form.save()
+            parcel_created.send(parcel)
+            url = flask.url_for('parcel.view', name=parcel.name)
+            return flask.redirect(url)
+        url = flask.url_for('.delivery')
         return flask.redirect(url)
 
-parcel_views.add_url_rule('/parcel/new',
-                          view_func=Delivery.as_view('delivery'))
+
+class CountryDelivery(_BaseDelivery):
+
+    form_class = CountryDeliveryForm
+
+
+class LotDelivery(_BaseDelivery):
+
+    form_class = LotDeliveryForm
+
+
+parcel_views.add_url_rule(
+    '/parcel/new',
+    view_func=Delivery.as_view('delivery'))
+parcel_views.add_url_rule(
+    '/parcel/new/country',
+    view_func=CountryDelivery.as_view('country_delivery'))
+parcel_views.add_url_rule(
+    '/parcel/new/lot',
+    view_func=LotDelivery.as_view('lot_delivery'))
 
 
 @parcel_views.route('/parcel/<string:name>/chunk', methods=['POST'])
@@ -252,7 +260,7 @@ def files(name):
     app = flask.current_app
 
     if (parcel.uploading and parcel.file_uploading and
-        authorize_for_parcel(parcel)):
+       authorize_for_parcel(parcel)):
         file_authorize = True
     else:
         file_authorize = False
@@ -302,7 +310,7 @@ class Finalize(MethodView):
         self.parcel = get_or_404(self.wh.get_parcel, name, _exc=KeyError)
         stage_def = STAGES[self.parcel.metadata['stage']]
         if (not authorize_for_parcel(self.parcel) or stage_def.get('last') or
-            not self.parcel.uploading):
+           not self.parcel.uploading):
             flask.abort(403)
 
         if stage_def.get('reject'):
