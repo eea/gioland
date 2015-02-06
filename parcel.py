@@ -112,15 +112,13 @@ class _BaseDelivery(MethodView):
     def post(self):
         if not authorize_for_parcel(None):
             return flask.abort(403)
-        Form = getattr(self, 'form_class', None)
-        form = Form(flask.request.form)
+        form = getattr(self, 'form_class')(flask.request.form)
         if form.validate():
             parcel = form.save()
             parcel_created.send(parcel)
             url = flask.url_for('parcel.view', name=parcel.name)
             return flask.redirect(url)
-        url = flask.url_for('.delivery')
-        return flask.redirect(url)
+        flask.abort(400)
 
 
 class CountryDelivery(_BaseDelivery):

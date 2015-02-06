@@ -206,10 +206,11 @@ RESOLUTIONS = [
     ('100m', "100m"),
 ]
 
-
+FULL = 'full'
+PARTIAL = 'partial'
 EXTENTS = [
-    ('full', "Full"),
-    ('partial', "Partial"),
+    (FULL, "Full"),
+    (PARTIAL, "Partial"),
 ]
 
 

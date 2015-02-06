@@ -114,13 +114,13 @@ class NotificationTriggerTest(AppTestCase):
 
     def test_notification_not_triggered_on_new_parcel(self):
         with record_events(notification.uns_notification_sent) as events:
-            resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+            resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
             self.assertEqual(resp.status_code, 302)
             self.assertEqual(events, [])
 
     def test_notification_triggered_once_on_finalize_parcel(self):
         from definitions import RDF_URI
-        resp_1 = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp_1 = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         self.assertEqual(resp_1.status_code, 302)
         parcel_name = resp_1.location.rsplit('/', 1)[-1]
 
@@ -138,7 +138,7 @@ class NotificationTriggerTest(AppTestCase):
     @patch('parcel.authorize_for_parcel', Mock(return_value=True))
     def test_parcel_rejection_triggers_accept_notification(self):
         from definitions import RDF_URI
-        resp_1 = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp_1 = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         self.assertEqual(resp_1.status_code, 302)
         parcel1_name = resp_1.location.rsplit('/', 1)[-1]
 
@@ -159,7 +159,7 @@ class NotificationTriggerTest(AppTestCase):
     @patch('parcel.authorize_for_parcel', Mock(return_value=True))
     def test_parcel_rejection_triggers_rejection_notification(self):
         from definitions import RDF_URI
-        resp_1 = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp_1 = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         self.assertEqual(resp_1.status_code, 302)
         parcel1_name = resp_1.location.rsplit('/', 1)[-1]
 

@@ -92,7 +92,7 @@ class AppTestCase(unittest.TestCase):
         metadata = dict(self.PARCEL_METADATA)
         metadata.update(extra_metadata)
         with patch('auth.authorize'):
-            resp = self.client.post('/parcel/new', data=metadata)
+            resp = self.client.post('/parcel/new/country', data=metadata)
         self.assertEqual(resp.status_code, 302)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         return parcel_name

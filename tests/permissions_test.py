@@ -23,7 +23,7 @@ class PermisionsTest(AppTestCase):
 
     def create_parcel(self, stage=None):
         with patch('auth.authorize'):
-            post_resp = self.client.post('/parcel/new',
+            post_resp = self.client.post('/parcel/new/country',
                                          data=self.PARCEL_METADATA)
             self.assertEqual(post_resp.status_code, 302)
             parcel_name = post_resp.location.rsplit('/', 1)[-1]
@@ -37,7 +37,7 @@ class PermisionsTest(AppTestCase):
 
     def try_new_parcel(self):
         with record_events(parcel.parcel_created) as new_parcels:
-            post_resp = self.client.post('/parcel/new',
+            post_resp = self.client.post('/parcel/new/country',
                                          data=self.PARCEL_METADATA)
         if post_resp.status_code == 403:
             self.assertEqual(len(new_parcels), 0)

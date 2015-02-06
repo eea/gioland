@@ -10,7 +10,7 @@ class ParcelMergeTests(AppTestCase):
         self.addCleanup(authorization_patch().stop)
 
     def _new_parcel(self, data):
-        resp = self.client.post('/parcel/new', data=data)
+        resp = self.client.post('/parcel/new/country', data=data)
         return resp.location.rsplit('/', 1)[-1]
 
     def _set_metadata_to_parcel(self, parcel_name, metadata={}):

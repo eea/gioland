@@ -145,7 +145,7 @@ class UploadTest(AppTestCase):
             self.assertEqual(1, len(dirs))
 
     def test_finalize_parcel_remove_temp_folders(self):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         self.try_upload_chunk(parcel_name)
@@ -185,7 +185,7 @@ class UploadTest(AppTestCase):
 
     def test_create_file_from_chunks(self):
         from parcel import create_file_from_chunks
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)

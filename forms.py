@@ -1,10 +1,11 @@
 from datetime import datetime
-from wtforms import Form, SelectField
+from wtforms import Form, SelectField, StringField
+from wtforms.validators import DataRequired
 from flask import g
 
 from warehouse import get_warehouse
 from definitions import COUNTRIES, LOTS, THEMES, PROJECTIONS, RESOLUTIONS
-from definitions import EXTENTS, INITIAL_STAGE
+from definitions import EXTENTS, PARTIAL, INITIAL_STAGE
 
 
 class _DeliveryForm(Form):
@@ -13,6 +14,11 @@ class _DeliveryForm(Form):
     projection = SelectField('Projection', choices=PROJECTIONS)
     resolution = SelectField('Spatial resolution', choices=RESOLUTIONS)
     extent = SelectField('Extent', choices=EXTENTS)
+    coverage = StringField('Coverage')
+
+    def validate_coverage(self, field):
+         if self.extent.data == PARTIAL:
+            return field.validate(self, [DataRequired()])
 
     def save(self):
         data = dict(self.data)

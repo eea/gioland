@@ -10,28 +10,18 @@
 
   <script>
     $(function() {
-      $('#upload-meta-extent').on('change', function () {
+      $('[name=extent]').on('change', function () {
         var val = $(this).val();
+        var coverage = $(this).parents('form').find('[name=coverage]');
         if(val == 'full') {
-          $('#coverage-container').hide();
-          $('#upload-meta-coverage').val('');
+          coverage.parents('tr').hide();
+          coverage.val('');
         }
         if(val == 'partial') {
-          $('#coverage-container').show();
-          $('#upload-meta-coverage').focus();
+          coverage.parents('tr').show();
+          coverage.focus();
         }
       }).change();
-
-      $('#parcel_form').on('submit', function (e) {
-        var coverage = $('#upload-meta-coverage');
-        var coverage_container = $('#coverage-container');
-        var extent = $('#upload-meta-extent');
-
-        if(extent.val() == 'partial' && $.trim(coverage.val()) == "") {
-          coverage_container.find('.err').show();
-          e.preventDefault();
-        }
-      });
 
       $('#delivery_type').on('change', 'input[type=radio]', function () {
         var val = $(this).val();
@@ -137,6 +127,13 @@
         <td>{{ country_delivery_form.extent.label }}</td>
         <td>{{ country_delivery_form.extent() }}</td>
       </tr>
+
+      <tr class="hide">
+        <td>{{ country_delivery_form.coverage.label }}</td>
+        <td>{{ country_delivery_form.coverage() }}
+            <span class="err">(required)</span>
+        </td>
+      </tr>
     </table>
 
     <button type="submit">Begin upload</button>
@@ -170,6 +167,12 @@
       <tr>
         <td>{{ lot_delivery_form.extent.label }}</td>
         <td>{{ lot_delivery_form.extent() }}</td>
+      </tr>
+
+      <tr class="hide">
+        <td>{{ lot_delivery_form.coverage.label }}</td>
+        <td>{{ lot_delivery_form.coverage() }}
+            <span class="err">(required)</span></td>
       </tr>
     </table>
 

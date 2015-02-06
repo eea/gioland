@@ -24,13 +24,13 @@ class ParcelTest(AppTestCase):
         self.assertEqual(flask.g.username, 'tester')
 
     def test_begin_parcel_creates_folder(self):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         self.assertIsNotNone(resp.location)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         self.assertTrue((self.parcels_path / parcel_name).isdir())
 
     def test_begin_parcel_saves_user_selected_metadata(self):
-        resp = self.client.post('/parcel/new', data=dict(self.PARCEL_METADATA,
+        resp = self.client.post('/parcel/new/country', data=dict(self.PARCEL_METADATA,
                                                          bogus='not here'))
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
@@ -40,14 +40,14 @@ class ParcelTest(AppTestCase):
             self.assertNotIn('bogus', parcel.metadata)
 
     def test_begin_parcel_saves_default_metadata(self):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
             self.assertEqual(parcel.metadata['stage'], 'int')
 
     def test_show_existing_files_in_parcel(self):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         parcel_path = self.parcels_path / parcel_name
         (parcel_path / 'some.txt').write_text('hello world')
@@ -56,7 +56,7 @@ class ParcelTest(AppTestCase):
         self.assertIn('some.txt', resp2.data)
 
     def test_finalize_changes_parceling_flag(self):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         with self.app.test_request_context():
@@ -71,7 +71,7 @@ class ParcelTest(AppTestCase):
             self.assertFalse(parcel.uploading)
 
     def test_uploading_in_finalized_parcel_is_not_allowed(self):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         parcel_path = self.parcels_path / parcel_name
         self.client.post('/parcel/%s/finalize' % parcel_name)
@@ -101,7 +101,7 @@ class ParcelTest(AppTestCase):
             self.assertEqual(next_parcel.metadata['stage'], 'enh')
 
     def test_finalize_preserves_metadata(self):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         self.client.post('/parcel/%s/finalize' % parcel_name)
 
@@ -114,11 +114,11 @@ class ParcelTest(AppTestCase):
     def test_parcel_with_corrupted_metadata_fails(self):
         metadata = dict(self.PARCEL_METADATA)
         metadata['country'] = 'country'
-        resp = self.client.post('/parcel/new', data=metadata)
+        resp = self.client.post('/parcel/new/country', data=metadata)
         self.assertEqual(400, resp.status_code)
 
     def create_parcel_at_stage(self, stage):
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
@@ -242,7 +242,7 @@ class ParcelTest(AppTestCase):
         data['extent'] = 'partial'
         data['coverage'] = 'Forest type 1/3'
 
-        resp = self.client.post('/parcel/new', data=data)
+        resp = self.client.post('/parcel/new/country', data=data)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
@@ -251,7 +251,7 @@ class ParcelTest(AppTestCase):
     def test_parcel_coverage_for_extent_partial_mandatory(self):
         data = dict(self.PARCEL_METADATA)
         data['extent'] = 'partial'
-        resp = self.client.post('/parcel/new', data=data)
+        resp = self.client.post('/parcel/new/country', data=data)
         self.assertEqual(400, resp.status_code)
 
     def test_coverage_for_full_extent_is_empty_string(self):
@@ -259,7 +259,7 @@ class ParcelTest(AppTestCase):
         data['extent'] = 'full'
         data['coverage'] = 'Forest type 1/3'
 
-        resp = self.client.post('/parcel/new', data=data)
+        resp = self.client.post('/parcel/new/country', data=data)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         with self.app.test_request_context():
@@ -268,12 +268,12 @@ class ParcelTest(AppTestCase):
 
     def test_country_workflow_overview_group(self):
         data = dict(self.PARCEL_METADATA)
-        self.client.post('/parcel/new', data=data)
+        self.client.post('/parcel/new/country', data=data)
 
         data['extent'] = 'partial'
         data['coverage'] = 'Test coverage'
         data['theme'] = 'grd'
-        self.client.post('/parcel/new', data=data)
+        self.client.post('/parcel/new/country', data=data)
 
         resp = self.client.get('/country/be')
         table_headers = select(resp.data, '.title')
@@ -287,8 +287,8 @@ class ParcelTest(AppTestCase):
 
     def test_country_workflow_overview_group_contain_correct_parcels(self):
         data = dict(self.PARCEL_METADATA)
-        self.client.post('/parcel/new', data=data)
-        self.client.post('/parcel/new', data=data)
+        self.client.post('/parcel/new/country', data=data)
+        self.client.post('/parcel/new/country', data=data)
 
         resp = self.client.get('/country/be')
         table = select(resp.data, '.datatable')
@@ -347,9 +347,12 @@ class ParcelHistoryTest(AppTestCase):
     CREATE_WAREHOUSE = True
 
     def setUp(self):
-        datetime_patch = patch('parcel.datetime')
+        datetime_patch = patch('forms.datetime')
+        datetime_parcel_patch = patch('parcel.datetime')
         self.mock_datetime = datetime_patch.start()
+        self.mock_parcel_datetime = datetime_parcel_patch.start()
         self.addCleanup(datetime_patch.stop)
+        self.addCleanup(datetime_parcel_patch.stop)
         self.addCleanup(authorization_patch().stop)
 
     def check_history_item(self, item, ok_item):
@@ -359,8 +362,7 @@ class ParcelHistoryTest(AppTestCase):
     def test_parcel_creation_is_logged_in_history(self):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
-
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         with self.app.test_request_context():
@@ -374,8 +376,9 @@ class ParcelHistoryTest(AppTestCase):
     def test_parcel_finalization_is_logged_in_history(self):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
+        self.mock_parcel_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         self.client.post('/parcel/%s/finalize' % parcel_name)
 
@@ -394,8 +397,9 @@ class ParcelHistoryTest(AppTestCase):
     def test_parcel_finalization_generates_message_on_next_parcel(self):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
+        self.mock_parcel_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel1_name = resp.location.rsplit('/', 1)[-1]
         self.client.post('/parcel/%s/finalize' % parcel1_name)
 
@@ -414,8 +418,9 @@ class ParcelHistoryTest(AppTestCase):
     def test_parcel_comment(self):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
-
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        self.mock_parcel_datetime.utcnow.return_value = utcnow
+        resp = self.client.post('/parcel/new/country',
+                                data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         comment = "test comment"
@@ -434,8 +439,9 @@ class ParcelHistoryTest(AppTestCase):
     def test_parcel_comment_by_anonymous_forbidden(self):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
+        self.mock_parcel_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         self.client.get('/test_logout')
@@ -447,8 +453,9 @@ class ParcelHistoryTest(AppTestCase):
     def test_parcel_comment_html_entities_escaped(self):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
+        self.mock_parcel_datetime.utcnow.return_value = utcnow
 
-        resp = self.client.post('/parcel/new', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         comment = "<html>"
