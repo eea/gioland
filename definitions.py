@@ -105,6 +105,24 @@ STAGES = OrderedDict([
 ])
 
 
+LOT_STAGES = (
+    (STAGE_INT, {
+        'label': "Service provider upload",
+        'roles': ['ROLE_SP', 'ROLE_ADMIN'],
+        'file_uploading': True,
+    }),
+
+    (STAGE_FVA, {
+        'label': "Final Semantic Check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'file_uploading': True,
+        'reject': True,
+        'reject_stage': STAGE_INT,
+        'last': True,
+    }),
+)
+
+
 STAGES_FOR_MERGING = [STAGE_ENH]
 STAGE_ORDER = list(STAGES)
 INITIAL_STAGE = STAGE_ORDER[0]
@@ -168,6 +186,10 @@ LOTS = (
     ('lot 5', 'Lot 5'),
     ('lot 6', 'Lot 6'),
 )
+
+
+COUNTRY = 'country'
+LOT = 'lot'
 
 
 THEMES = (

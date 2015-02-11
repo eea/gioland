@@ -22,7 +22,7 @@ from definitions import (
     COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
     THEMES_IDS, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS,
     CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
-    STAGES_FOR_MERGING)
+    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm
@@ -848,4 +848,8 @@ metadata_template_context = {
     'EXTENT_MAP': dict(EXTENTS),
     'UNS_FIELD_DEFS': UNS_FIELD_DEFS,
     'STAGES_FOR_MERGING': STAGES_FOR_MERGING,
+    'COUNTRY': COUNTRY,
+    'LOT': LOT,
+    'LOTS': LOTS,
+    'LOTS_MAP': dict(LOTS),
 }

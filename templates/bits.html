@@ -1,11 +1,21 @@
 {% macro metadata_table(metadata, show_stage=True) %}
 
-  <table class="datatable">
+  {% set delivery_type = metadata.get('delivery_type', COUNTRY) %}
 
-    <tr>
-      <th>Country</th>
-      <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
-    </tr>
+  <table class="datatable">
+    {% if delivery_type == COUNTRY %}
+      <tr>
+        <th>Country</th>
+        <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+      </tr>
+    {% endif %}
+
+    {% if delivery_type == LOT %}
+      <tr>
+        <th>LOT</th>
+        <td>{{ LOTS_MAP[metadata['lot']] }}</td>
+      </tr>
+    {% endif %}
 
     <tr>
       <th>Theme</th>
