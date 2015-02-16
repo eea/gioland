@@ -1,25 +1,20 @@
 from collections import OrderedDict
 
 
-SIMILAR_METADATA = [
+SIMILAR_METADATA = (
     'country',
     'theme',
     'projection',
     'resolution',
     'extent',
-]
+)
 
 
-EDITABLE_METADATA = SIMILAR_METADATA + ['coverage']
+EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
+METADATA = EDITABLE_METADATA + ('stage',)
 
 
-METADATA = EDITABLE_METADATA + ['stage']
-
-
-REPORT_METADATA = [
-    'country',
-    'category',
-]
+REPORT_METADATA = ('country', 'category',)
 
 
 STAGE_INT = 'int'
@@ -34,7 +29,7 @@ STAGE_FVA = 'fva'
 STAGE_FIH = 'fih'
 
 
-STAGES = OrderedDict([
+STAGES = OrderedDict((
     (STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
@@ -102,10 +97,10 @@ STAGES = OrderedDict([
         'roles': ['ROLE_ADMIN'],
         'last': True,
     }),
-])
+))
 
 
-LOT_STAGES = (
+LOT_STAGES = OrderedDict((
     (STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
@@ -120,11 +115,12 @@ LOT_STAGES = (
         'reject_stage': STAGE_INT,
         'last': True,
     }),
-)
+))
 
 
 STAGES_FOR_MERGING = [STAGE_ENH]
 STAGE_ORDER = list(STAGES)
+LOT_STAGE_ORDER = list(LOT_STAGES)
 INITIAL_STAGE = STAGE_ORDER[0]
 
 COUNTRIES_MC = [
@@ -193,25 +189,25 @@ LOT = 'lot'
 
 
 THEMES = (
-    ('imp-deg', "Imperviousness Degree"),
-    ('imp-chg', "Imperviousness Change"),
-    ('tcd',     "Tree Cover Density"),
-    ('fty',     "Forest Type"),
-    ('tnt',     "Tree / Non-tree"),
-    ('grc',     "Grassland Cover"),
-    ('grd',     "Grassland Density"),
-    ('wet',     "Wetlands"),
-    ('pwb',     "Permanent Water Bodies"),
+    ('imp-deg', 'Imperviousness Degree'),
+    ('imp-chg', 'Imperviousness Change'),
+    ('tcd', 'Tree Cover Density'),
+    ('fty', 'Forest Type'),
+    ('tnt', 'Tree / Non-tree'),
+    ('grc', 'Grassland Cover'),
+    ('grd', 'Grassland Density'),
+    ('wet', 'Wetlands'),
+    ('pwb', 'Permanent Water Bodies'),
 )
 
 
 THEMES_FILTER = [
-    ('imp-deg', "Imperviousness Degree"),
-    ('tcd',     "Tree Cover Density"),
-    ('fty',     "Forest Type"),
-    ('grc',     "Grassland Cover"),
-    ('wet',     "Wetlands"),
-    ('pwb',     "Permanent Water Bodies"),
+    ('imp-deg', 'Imperviousness Degree'),
+    ('tcd', 'Tree Cover Density'),
+    ('fty', 'Forest Type'),
+    ('grc', 'Grassland Cover'),
+    ('wet', 'Wetlands'),
+    ('pwb', 'Permanent Water Bodies'),
 ]
 
 
@@ -322,4 +318,3 @@ CATEGORIES = [
 
 DOCUMENTS = ('rtf', 'odf', 'ods', 'gnumeric', 'abw', 'doc', 'docx', 'xls',
              'xlsx', 'pdf')
-

@@ -50,4 +50,4 @@ class LotDeliveryForm(_DeliveryForm):
 
     DELIVERY_TYPE = LOT
 
-    lot = SelectField('Lot', choices=LOTS)
+    country = SelectField('Lot', choices=LOTS)

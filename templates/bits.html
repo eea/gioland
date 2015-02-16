@@ -3,19 +3,15 @@
   {% set delivery_type = metadata.get('delivery_type', COUNTRY) %}
 
   <table class="datatable">
-    {% if delivery_type == COUNTRY %}
-      <tr>
-        <th>Country</th>
-        <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
-      </tr>
-    {% endif %}
 
-    {% if delivery_type == LOT %}
-      <tr>
-        <th>LOT</th>
-        <td>{{ LOTS_MAP[metadata['lot']] }}</td>
-      </tr>
-    {% endif %}
+    <tr>
+      <th>
+        {% if delivery_type == COUNTRY %} Country
+        {% else %} Lot
+        {% endif %}
+      </th>
+      <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+    </tr>
 
     <tr>
       <th>Theme</th>

@@ -77,38 +77,38 @@ class UploadTest(AppTestCase):
         return parcel
 
     def test_upload_file(self):
-        parcel = self.create_parcel_at_stage()
-        resp = self.try_upload_file(parcel.name)
+        parcel_name = self.new_parcel()
+        resp = self.try_upload_file(parcel_name)
         self.assertTrue(302, resp.status_code)
 
     def test_reupload_file_not_allowed(self):
-        parcel = self.create_parcel_at_stage()
-        self.try_upload_file(parcel.name)
-        resp = self.try_upload_file(parcel.name)
+        parcel_name = self.new_parcel()
+        self.try_upload_file(parcel_name)
+        resp = self.try_upload_file(parcel_name)
         self.assertEqual(1, len(select(resp.data, '.system-msg')))
 
     def test_upload_file_on_final_stage_forbidden(self):
-        parcel = self.create_parcel_at_stage(stage='fih')
-        resp = self.try_upload_file(parcel.name)
+        parcel_name = self.new_parcel(stage='fih')
+        resp = self.try_upload_file(parcel_name)
         self.assertEqual(403, resp.status_code)
 
     def test_upload_chunks(self):
-        parcel = self.create_parcel_at_stage()
-        self.assertTrue(self.try_upload(parcel.name))
+        parcel_name = self.new_parcel()
+        self.assertTrue(self.try_upload(parcel_name))
 
     def test_reupload_chunk_not_allowed(self):
-        parcel = self.create_parcel_at_stage()
-        self.try_upload(parcel.name)
-        self.assertFalse(self.try_upload(parcel.name))
+        parcel_name = self.new_parcel()
+        self.try_upload(parcel_name)
+        self.assertFalse(self.try_upload(parcel_name))
 
     def test_upload_chunk_on_final_stage_forbidden(self):
-        parcel = self.create_parcel_at_stage(stage='fih')
-        self.assertFalse(self.try_upload(parcel.name))
+        parcel_name = self.new_parcel(stage='fih')
+        self.assertFalse(self.try_upload(parcel_name))
 
     def test_delete_file(self):
-        parcel = self.create_parcel_at_stage()
+        parcel_name = self.new_parcel()
         resp = self.client.post('/parcel/%s/file/%s/delete' %
-                                (parcel.name, 'data.gml'))
+                                (parcel_name, 'data.gml'))
         self.assertEqual(302, resp.status_code)
 
     def test_finalized_parcel_forbids_deletion(self):
@@ -121,26 +121,26 @@ class UploadTest(AppTestCase):
         self.assertEqual(403, resp.status_code)
 
     def test_files_view(self):
-        parcel = self.create_parcel_at_stage()
-        self.try_upload(parcel.name)
-        resp = self.client.get('/parcel/%s/files' % parcel.name)
+        parcel_name = self.new_parcel()
+        self.try_upload(parcel_name)
+        resp = self.client.get('/parcel/%s/files' % parcel_name)
         self.assertEqual(1, len(select(resp.data, 'ul li')))
 
     def test_check_chunk_view(self):
-        parcel = self.create_parcel_at_stage()
-        self.try_upload_chunk(parcel.name)
+        parcel_name = self.new_parcel()
+        self.try_upload_chunk(parcel_name)
         url = '/parcel/%s/chunk?resumableFilename=data.gml'\
               '&resumableIdentifier=data_gml&resumableTotalSize=11'\
-              '&resumableChunkNumber=1&resumableChunkSize=3' % parcel.name
+              '&resumableChunkNumber=1&resumableChunkSize=3' % parcel_name
         resp = self.client.get(url)
         self.assertEqual(200, resp.status_code)
 
     def test_upload_chunk_create_temp_folder(self):
-        parcel = self.create_parcel_at_stage()
-        self.try_upload_chunk(parcel.name)
+        parcel_name = self.new_parcel()
+        self.try_upload_chunk(parcel_name)
 
         with self.app.test_request_context():
-            parcel = self.wh.get_parcel(parcel.name)
+            parcel = self.wh.get_parcel(parcel_name)
             dirs = parcel.get_path().dirs()
             self.assertEqual(1, len(dirs))
 
@@ -163,7 +163,7 @@ class UploadTest(AppTestCase):
             'resumableTotalSize': '11',
         }
 
-        parcel = self.create_parcel_at_stage()
+        parcel = self.new_parcel()
         self.try_upload_chunk(parcel.name)
         resp = self.client.post('/parcel/%s/finalize_upload' % parcel.name,
                                 data=data)

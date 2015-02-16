@@ -22,7 +22,7 @@ from definitions import (
     COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
     THEMES_IDS, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS,
     CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
-    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS)
+    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm
@@ -306,7 +306,15 @@ class Finalize(MethodView):
     def dispatch_request(self, name, *args, **kwargs):
         self.wh = get_warehouse()
         self.parcel = get_or_404(self.wh.get_parcel, name, _exc=KeyError)
-        stage_def = STAGES[self.parcel.metadata['stage']]
+
+        delivery_type = self.parcel.metadata.get('delivery_type', COUNTRY)
+        if delivery_type == COUNTRY:
+            stage_def = STAGES[self.parcel.metadata['stage']]
+        elif delivery_type == LOT:
+            stage_def = LOT_STAGES[self.parcel.metadata['stage']]
+        else:
+            flask.abort(400)
+
         if (not authorize_for_parcel(self.parcel) or stage_def.get('last') or
            not self.parcel.uploading):
             flask.abort(403)
@@ -728,18 +736,19 @@ def similar_parcel(parcel, parcel_item):
 
 
 def finalize_parcel(wh, parcel, reject):
-    stage = parcel.metadata['stage']
-    stage_def = STAGES[stage]
+    stages, stage_order = _get_stages_for_parcel(parcel)
 
+    stage = parcel.metadata['stage']
+    stage_def = stages[stage]
     if reject:
         reject_stage = stage_def.get('reject_stage', None)
         if reject_stage:
             next_stage = reject_stage
         else:
-            next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) - 1]
+            next_stage = stage_order[stage_order.index(stage) - 1]
     else:
-        next_stage = STAGE_ORDER[STAGE_ORDER.index(stage) + 1]
-    next_stage_def = STAGES[next_stage]
+        next_stage = stage_order[stage_order.index(stage) + 1]
+    next_stage_def = stages[next_stage]
 
     close_prev_parcel(parcel, reject)
     next_parcel = create_next_parcel(wh, [parcel], next_stage, stage_def,
@@ -823,6 +832,15 @@ def authorize_for_view():
 # parse extension from FileStorage object
 def extension(filename):
     return filename.rsplit('.', 1)[-1]
+
+
+def _get_stages_for_parcel(parcel):
+    delivery_type = parcel.metadata.get('delivery_type', COUNTRY)
+    if delivery_type == COUNTRY:
+        return STAGES, STAGE_ORDER
+    elif delivery_type == LOT:
+        return LOT_STAGES, LOT_STAGE_ORDER
+    flask.abort(400)
 
 
 STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]

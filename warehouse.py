@@ -9,7 +9,10 @@ from BTrees.OOBTree import OOBTree
 from persistent import Persistent
 import transaction
 from path import path
-from definitions import METADATA, STAGES
+
+from definitions import METADATA, STAGES, LOT_STAGES
+from definitions import STAGE_ORDER, LOT_STAGE_ORDER
+from definitions import LOT, COUNTRY
 
 
 log = logging.getLogger(__name__)
@@ -90,7 +93,6 @@ class Parcel(Persistent):
                     [_ensure_unicode(v) for v in value]
             else:
                 self.metadata[_ensure_unicode(key)] = _ensure_unicode(value)
-
 
     def get_path(self):
         return self._warehouse.parcels_path / self.name
@@ -194,7 +196,7 @@ class Warehouse(Persistent):
 
     def delete_parcel(self, name):
         self.logger.info("Deleting parcel %r (user %s)", name, _current_user())
-        parcel = self._parcels.pop(name)
+        self._parcels.pop(name)
 
     def get_parcel(self, name):
         return self._parcels[name]

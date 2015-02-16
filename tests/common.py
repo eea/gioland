@@ -5,6 +5,7 @@ import flask
 from mock import patch
 from path import path
 from werkzeug.datastructures import ImmutableDict
+from definitions import COUNTRY
 
 
 def create_mock_app(warehouse_path=None):
@@ -78,6 +79,17 @@ class AppTestCase(unittest.TestCase):
         'resolution': '20m',
         'extent': 'full',
         'coverage': '',
+        'delivery_type': 'country',
+    })
+
+    LOT_METADATA = ImmutableDict({
+        'country': 'lot 1',
+        'theme': 'grc',
+        'projection': 'eur',
+        'resolution': '20m',
+        'extent': 'full',
+        'coverage': '',
+        'delivery_type': 'lot',
     })
 
     REPORT_METADATA = ImmutableDict({
@@ -88,13 +100,21 @@ class AppTestCase(unittest.TestCase):
     def add_to_role(self, username, role_name):
         self.app.config.setdefault(role_name, []).append('user_id:' + username)
 
-    def new_parcel(self, **extra_metadata):
-        metadata = dict(self.PARCEL_METADATA)
-        metadata.update(extra_metadata)
+    def new_parcel(self, delivery_type=COUNTRY, **extra_metadata):
+        if delivery_type == COUNTRY:
+            metadata = dict(self.PARCEL_METADATA)
+            url = '/parcel/new/country'
+        else:
+            metadata = dict(self.LOT_METADATA)
+            url = '/parcel/new/lot'
         with patch('auth.authorize'):
-            resp = self.client.post('/parcel/new/country', data=metadata)
+            resp = self.client.post(url, data=metadata)
         self.assertEqual(resp.status_code, 302)
         parcel_name = resp.location.rsplit('/', 1)[-1]
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            parcel.save_metadata(extra_metadata)
+            print
         return parcel_name
 
     def _pre_setup(self):
