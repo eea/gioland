@@ -4,14 +4,20 @@
 
   <table class="datatable">
 
-    <tr>
-      <th>
-        {% if delivery_type == COUNTRY %} Country
-        {% else %} Lot
-        {% endif %}
-      </th>
-      <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
-    </tr>
+    {% if delivery_type == COUNTRY %}
+      <tr>
+        <th>Country</th>
+        <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+      </tr>
+    {% endif %}
+
+    {% if delivery_type == LOT %}
+      <tr>
+        <th>Lot</th>
+        <td>{{ LOTS_MAP[metadata['country']] }}</td>
+      </tr>
+    {% endif %}
+
 
     <tr>
       <th>Theme</th>

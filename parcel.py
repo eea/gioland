@@ -96,18 +96,14 @@ def country(code):
     })
 
 
-class Delivery(MethodView):
+class _BaseDelivery(MethodView):
 
     def get(self):
-        country_delivery_form = CountryDeliveryForm()
-        lot_delivery_form = LotDeliveryForm()
+        form = getattr(self, 'form_class')()
         return flask.render_template(
             'parcel_new.html',
-            country_delivery_form=country_delivery_form,
-            lot_delivery_form=lot_delivery_form)
-
-
-class _BaseDelivery(MethodView):
+            form=form,
+            delivery_type=getattr(self, 'delivery_type'))
 
     def post(self):
         if not authorize_for_parcel(None):
@@ -124,16 +120,15 @@ class _BaseDelivery(MethodView):
 class CountryDelivery(_BaseDelivery):
 
     form_class = CountryDeliveryForm
+    delivery_type = COUNTRY
 
 
 class LotDelivery(_BaseDelivery):
 
     form_class = LotDeliveryForm
+    delivery_type = LOT
 
 
-parcel_views.add_url_rule(
-    '/parcel/new',
-    view_func=Delivery.as_view('delivery'))
 parcel_views.add_url_rule(
     '/parcel/new/country',
     view_func=CountryDelivery.as_view('country_delivery'))

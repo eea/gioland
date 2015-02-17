@@ -24,10 +24,8 @@
       }).change();
 
       $('#delivery_type').on('change', 'input[type=radio]', function () {
-        var val = $(this).val();
-        $('.delivery_form').hide();
-        $(val).show();
-      }).change();
+        window.location.href = $(this).val();
+      });
 
     });
   </script>
@@ -39,7 +37,7 @@
 {% block breadcrumb %}
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GIO Land'),
-    (url_for('parcel.delivery'), title),
+    (url_for('parcel.country_delivery'), title),
   ]) }}
 {% endblock %}
 
@@ -82,15 +80,17 @@
     <tr>
       <td>
         <label>
-            <input type="radio" name="delivery_type" checked="checked"
-                   value="#country_delivery_form">
+            <input type="radio" name="delivery_type"
+            {% if delivery_type == COUNTRY %}checked="checked"{% endif %}
+                   value="{{ url_for('parcel.country_delivery') }}">
             Country-based delivery
         </label>
       </td>
       <td>
         <label>
             <input type="radio" name="delivery_type"
-                   value="#lot_delivery_form">
+            {% if delivery_type == LOT %}checked="checked"{% endif %}
+                   value="{{ url_for('parcel.lot_delivery') }}">
             Lot delivery
         </label>
       </td>
@@ -99,38 +99,37 @@
 
   <hr>
 
-  <form id="country_delivery_form" class="delivery_form" method="post"
-        action="{{ url_for('parcel.country_delivery') }}">
+  <form class="delivery_form" method="post">
 
     <table>
       <tr>
-        <td>{{ country_delivery_form.country.label }}</td>
-        <td>{{ country_delivery_form.country() }}</td>
+        <td>{{ form.country.label }}</td>
+        <td>{{ form.country() }}</td>
       </tr>
 
       <tr>
-        <td>{{ country_delivery_form.theme.label }}</td>
-        <td>{{ country_delivery_form.theme() }}</td>
+        <td>{{ form.theme.label }}</td>
+        <td>{{ form.theme() }}</td>
       </tr>
 
       <tr>
-        <td>{{ country_delivery_form.projection.label }}</td>
-        <td>{{ country_delivery_form.projection() }}</td>
+        <td>{{ form.projection.label }}</td>
+        <td>{{ form.projection() }}</td>
       </tr>
 
       <tr>
-        <td>{{ country_delivery_form.resolution.label }}</td>
-        <td>{{ country_delivery_form.resolution() }}</td>
+        <td>{{ form.resolution.label }}</td>
+        <td>{{ form.resolution() }}</td>
       </tr>
 
       <tr>
-        <td>{{ country_delivery_form.extent.label }}</td>
-        <td>{{ country_delivery_form.extent() }}</td>
+        <td>{{ form.extent.label }}</td>
+        <td>{{ form.extent() }}</td>
       </tr>
 
       <tr class="hide">
-        <td>{{ country_delivery_form.coverage.label }}</td>
-        <td>{{ country_delivery_form.coverage() }}
+        <td>{{ form.coverage.label }}</td>
+        <td>{{ form.coverage() }}
             <span class="err">(required)</span>
         </td>
       </tr>
@@ -140,44 +139,5 @@
 
   </form>
 
-  <form id="lot_delivery_form" class="delivery_form hide" method="post"
-        action="{{ url_for('parcel.lot_delivery') }}">
-
-    <table>
-      <tr>
-        <td>{{ lot_delivery_form.lot.label }}</td>
-        <td>{{ lot_delivery_form.lot() }}</td>
-      </tr>
-
-      <tr>
-        <td>{{ lot_delivery_form.theme.label }}</td>
-        <td>{{ lot_delivery_form.theme() }}</td>
-      </tr>
-
-      <tr>
-        <td>{{ lot_delivery_form.projection.label }}</td>
-        <td>{{ lot_delivery_form.projection() }}</td>
-      </tr>
-
-      <tr>
-        <td>{{ lot_delivery_form.resolution.label }}</td>
-        <td>{{ lot_delivery_form.resolution() }}</td>
-      </tr>
-
-      <tr>
-        <td>{{ lot_delivery_form.extent.label }}</td>
-        <td>{{ lot_delivery_form.extent() }}</td>
-      </tr>
-
-      <tr class="hide">
-        <td>{{ lot_delivery_form.coverage.label }}</td>
-        <td>{{ lot_delivery_form.coverage() }}
-            <span class="err">(required)</span></td>
-      </tr>
-    </table>
-
-    <button type="submit">Begin upload</button>
-
-  </form>
 
 {% endblock %}
