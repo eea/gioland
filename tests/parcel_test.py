@@ -508,10 +508,22 @@ class LotTest(AppTestCase):
             # Final Semantic Check
             self.assertEqual(next_parcel.metadata['stage'], 'fva')
 
-    def test_finalze_lot_final_stage_forbidden(self):
+    def test_finalize_with_reject_triggers_previous_step(self):
         parcel_name = self.new_parcel(stage='fva', delivery_type=LOT)
+        resp = self.client.post('/parcel/%s/finalize' % parcel_name,
+                                data={'reject': 'on'})
+        self.assertEqual(302, resp.status_code)
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            next_parcel = self.wh.get_parcel(
+                    parcel.metadata['next_parcel'])
+            self.assertEqual(next_parcel.metadata['stage'], 'int')
+
+    def test_finalze_lot_final_stage_forbidden(self):
+        parcel_name = self.new_parcel(stage='fih', delivery_type=LOT)
         resp = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(403, resp.status_code)
+
 
 
 class ApiTest(AppTestCase):

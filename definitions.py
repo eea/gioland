@@ -113,8 +113,14 @@ LOT_STAGES = OrderedDict((
         'file_uploading': True,
         'reject': True,
         'reject_stage': STAGE_INT,
+    }),
+
+    (STAGE_FIH, {
+        'label': "Final HRL",
+        'roles': ['ROLE_ADMIN'],
         'last': True,
     }),
+
 ))
 
 
