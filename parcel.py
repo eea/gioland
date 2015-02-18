@@ -49,8 +49,9 @@ def get_filter_arguments():
             if k in METADATA and v}
 
 
-@parcel_views.route('/search')
-def search():
+@parcel_views.route('/search', defaults={'delivery_type': COUNTRY})
+@parcel_views.route('/search/<string:delivery_type>')
+def search(delivery_type):
     wh = get_warehouse()
     filter_arguments = get_filter_arguments()
     all_reports = []
@@ -58,6 +59,8 @@ def search():
         all_reports = [r for r in wh.get_all_reports()
                        if r.country == filter_arguments['country']]
     parcels = list(filter_parcels(chain_tails(wh), **filter_arguments))
+    parcels = [p for p in parcels
+               if p.metadata.get('delivery_type', COUNTRY) == delivery_type]
     parcels.sort(key=lambda p: p.last_modified, reverse=True)
     return flask.render_template('search.html', **{
         'parcels': parcels,
