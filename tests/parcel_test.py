@@ -5,9 +5,8 @@ from mock import patch
 import string
 import flask
 
-from definitions import LOT
+from definitions import COUNTRY, LOT
 from common import AppTestCase, authorization_patch, select
-
 
 
 class ParcelTest(AppTestCase):
@@ -524,6 +523,27 @@ class LotTest(AppTestCase):
         resp = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(403, resp.status_code)
 
+    def test_search_country_deliveries(self):
+        self.new_parcel(stage='fih', delivery_type=COUNTRY)
+        resp = self.client.get('/search')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(1, len(select(resp.data, '.datatable tbody tr')))
+
+    def test_search_lot_deliveries(self):
+        self.new_parcel(stage='fih', delivery_type=LOT)
+        self.new_parcel(stage='fih', delivery_type=LOT)
+        resp = self.client.get('/search/lot')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(2, len(select(resp.data, '.datatable tbody tr')))
+
+    def test_search_lot_deliveries_filter_by_lot(self):
+        self.new_parcel(stage='fih', delivery_type=LOT)
+        resp = self.client.get('/search/lot?country=lot 1')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(1, len(select(resp.data, '.datatable tbody tr')))
+        resp = self.client.get('/search/lot?country=lot 2')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(0, len(select(resp.data, '.datatable tbody tr')))
 
 
 class ApiTest(AppTestCase):
