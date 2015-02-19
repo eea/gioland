@@ -116,7 +116,7 @@ LOT_STAGES = OrderedDict((
     }),
 
     (STAGE_FIH, {
-        'label': "Final HRL",
+        'label': "Final HRL Lot Mosaic",
         'roles': ['ROLE_ADMIN'],
         'last': True,
     }),
