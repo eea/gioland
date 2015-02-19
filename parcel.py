@@ -65,6 +65,7 @@ def search(delivery_type):
     return flask.render_template('search.html', **{
         'parcels': parcels,
         'all_reports': all_reports,
+        'delivery_type': delivery_type,
     })
 
 

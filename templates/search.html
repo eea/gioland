@@ -49,12 +49,26 @@
 
 {% block content %}
 
+  <ul class="tabs">
+    <li {% if delivery_type == COUNTRY %}class="active"{% endif %}>
+      <a href="{{ url_for('.search') }}" >
+      Country deliveries</a></li>
+    <li {% if delivery_type == LOT %}class="active"{% endif %}>
+      <a href="{{ url_for('.search', delivery_type=LOT) }}">
+      Lot deliveries</a></li>
+  </ul>
+
   {% include "search_filter.html" %}
 
   <table class="datatable">
 
     <thead>
-      <th>Country</th>
+      {% if delivery_type == COUNTRY %}
+        <th>Country</th>
+      {% endif %}
+      {% if delivery_type == LOT %}
+        <th>Lot</th>
+      {% endif %}
       <th>Theme</th>
       <th>Extent</th>
       <th>Projection</th>
@@ -70,7 +84,15 @@
         {% set url = url_for('parcel.view', name=parcel.name) %}
         {% set overview_url = url_for('parcel.chain', name=parcel.name) %}
         {% set metadata = parcel.metadata %}
-        <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+
+        {% if delivery_type == COUNTRY %}
+          <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+        {% endif %}
+
+        {% if delivery_type == LOT %}
+          <td>{{ LOTS_MAP[metadata['country']] }}</td>
+        {% endif %}
+
         <td>
           {{ THEME_MAP[metadata['theme']] }}
           {% if parcel.metadata['extent'] == 'partial' %}

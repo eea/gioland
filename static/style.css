@@ -160,3 +160,42 @@ a.delete-parcel {
 .hide {
     display: none;
 }
+
+
+.tabs {
+    padding-bottom: 25px;
+}
+
+.tabs,
+.tabs li {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+.tabs {
+    border-bottom: 1px solid #ccc;
+    margin: 25px 0!important;
+}
+.tabs li {
+    margin-right: 6px;
+    padding: 10px;
+    display: inline;
+    position: relative;
+    top: -5px;
+}
+.tabs li a {
+    text-decoration: none;
+    color: #2a6495;
+}
+.tabs li.active {
+    position: relative;
+    top: -6px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-bottom-color: transparent;
+}
+.tabs li.active a {
+    cursor: default;
+    color: #555;
+}
+

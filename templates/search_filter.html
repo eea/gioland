@@ -1,7 +1,16 @@
 {% from 'bits.html' import pick_from_list %}
 
 <div class="filters">
-  {{ pick_from_list('filter-country', 'country', COUNTRIES, any=True) }}
+
+  {% if delivery_type == COUNTRY %}
+    {{ pick_from_list('filter-country', 'country', COUNTRIES, any=True) }}
+  {% endif %}
+
+  {% if delivery_type == LOT %}
+    {{ pick_from_list('filter-country', 'country', LOTS, any=True,
+                      label='Lot') }}
+  {% endif %}
+
   {{ pick_from_list('filter-theme', 'theme', THEMES_FILTER, any=True) }}
   {{ pick_from_list('filter-projection', 'projection', PROJECTIONS, any=True) }}
   {{ pick_from_list('filter-resolution', 'resolution', RESOLUTIONS, any=True) }}
