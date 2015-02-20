@@ -111,7 +111,8 @@ class Parcel(Persistent):
     def link_in_tree(self):
         symlink_path = self._warehouse.tree_path
         for name in METADATA:
-            symlink_path = symlink_path / self.metadata[name]
+            if name in self.metadata:
+                symlink_path = symlink_path / self.metadata[name]
         symlink_path.makedirs_p()
         target_path = self.get_path()
         for c in xrange(1, 101):

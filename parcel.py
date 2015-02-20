@@ -672,8 +672,10 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
         'prev_parcel_list': [p.name for p in parcels],
         'stage': next_stage,
     })
-    next_parcel.save_metadata({k: parcels[0].metadata.get(k, '')
-                               for k in EDITABLE_METADATA})
+    metadata = {k: parcels[0].metadata.get(k, '') for k in EDITABLE_METADATA}
+    metadata['delivery_type'] = parcels[0].metadata.get('delivery_type',
+                                                        COUNTRY)
+    next_parcel.save_metadata(metadata)
 
     links = []
     for p in parcels:
