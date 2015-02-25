@@ -129,7 +129,7 @@ STAGE_ORDER = list(STAGES)
 LOT_STAGE_ORDER = list(LOT_STAGES)
 INITIAL_STAGE = STAGE_ORDER[0]
 
-COUNTRIES_MC = [
+COUNTRIES_MC = (
     ('at', "Austria"),
     ('be', "Belgium"),
     ('bg', "Bulgaria"),
@@ -163,10 +163,9 @@ COUNTRIES_MC = [
     ('ch', "Switzerland"),
     ('tr', "Turkey"),
     ('gb', "United Kingdom"),
-]
+)
 
-
-COUNTRIES_CC = [
+COUNTRIES_CC = (
     ('al', "Albania"),
     ('ba', "Bosnia and Herzegovina"),
     ('me', "Montenegro"),
@@ -174,7 +173,7 @@ COUNTRIES_CC = [
     ('rs', "Serbia"),
     ('xk', "Kosovo"),
     ('xt', "test"),
-]
+)
 
 
 COUNTRIES = COUNTRIES_MC + COUNTRIES_CC
@@ -261,9 +260,9 @@ RDF_URI = {
 UNS_FIELD_DEFS = [
 
     {'name': 'country',
-     'label': "Country",
+     'label': "Country / Lots",
      'rdf_uri': RDF_URI['locality'],
-     'range': COUNTRIES},
+     'range': COUNTRIES + LOTS},
 
     {'name': 'theme',
      'label': "Theme",

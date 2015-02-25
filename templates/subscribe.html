@@ -32,7 +32,8 @@
         {% set field_id = 'subscribe-meta-' + field['name'] %}
         <td><label for="{{ field_id }}">{{ field['label'] }}</label></td>
         <td>{{ pick_from_list(field_id, field['name'],
-                              field['range'], any=True) }}</td>
+                              field['range'], any=True,
+                              label=label) }}</td>
       </tr>
 
     {% endfor %}
