@@ -203,6 +203,7 @@ THEMES = (
     ('grd', 'Grassland Density'),
     ('wet', 'Wetlands'),
     ('pwb', 'Permanent Water Bodies'),
+    ('ngr', 'New grassland - NGR'),
 )
 
 
@@ -213,6 +214,7 @@ THEMES_FILTER = [
     ('grc', 'Grassland Cover'),
     ('wet', 'Wetlands'),
     ('pwb', 'Permanent Water Bodies'),
+    ('ngr', 'New grassland - NGR'),
 ]
 
 
