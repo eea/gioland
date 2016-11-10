@@ -1,4 +1,4 @@
--f http://eggshop.eaudeweb.ro/
+-f http://eggshop.eaudeweb.ro/ --trusted-host eggshop.eaudeweb.ro
 blinker==1.2
 CherryPy==3.2.3
 colander==0.9.9
