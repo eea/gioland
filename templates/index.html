@@ -10,34 +10,57 @@
 
 
 {% block page_heading %}
-  <h1>High Resolution Layers</h1>
+  <h1>Copernicus land services High Resolution Layers – 2015 reference year</h1>
 {% endblock %}
 
 
 {% block content %}
+  <ul class="tabs">
+    <li {% if delivery == 'lots' %}class="active"{% endif %}>
+      <a href="{{url_for('.switch_delivery', delivery='lots') }}" >
+      Lots</a></li>
+    <li {% if delivery == 'country' %}class="active"{% endif %}>
+      <a href="{{ url_for('.switch_delivery', delivery='country') }}">
+      Country deliveries</a></li>
+  </ul>
 
-  <h2>EEA Member countries</h2>
+  {% if delivery == 'lots' %}
+    <h2>Lots</h2>
 
-  <div class="countrybox-container">
-    {% for key, label in COUNTRIES_MC %}
+    <div>
+      {% for key, label in LOTS %}
 
-    <div class="countrybox">
-      <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+      <div>
+        <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+      </div>
+
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if delivery == 'country' %}
+    <h2>EEA Member countries</h2>
+
+    <div class="countrybox-container">
+      {% for key, label in COUNTRIES_MC %}
+
+      <div class="countrybox">
+        <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+      </div>
+
+      {% endfor %}
     </div>
 
-    {% endfor %}
-  </div>
+    <h2>Cooperating countries</h2>
 
-  <h2>Cooperating countries</h2>
+    <div class="countrybox-container">
+      {% for key, label in COUNTRIES_CC %}
 
-  <div class="countrybox-container">
-    {% for key, label in COUNTRIES_CC %}
+      <div class="countrybox">
+        <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+      </div>
 
-    <div class="countrybox">
-      <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+      {% endfor %}
     </div>
-
-    {% endfor %}
-  </div>
-
+  {% endif %}
 {% endblock %}

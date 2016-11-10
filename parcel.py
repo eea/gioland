@@ -39,14 +39,21 @@ parcel_deleted = parcel_signals.signal('parcel-deleted')
 parcel_file_deleted = parcel_signals.signal('parcel-file-deleted')
 
 
-@parcel_views.route('/')
-def index():
-    return flask.render_template('index.html')
+@parcel_views.route('/', defaults={'delivery': 'lots'})
+def index(delivery):
+    return flask.render_template('index.html', **{'delivery': delivery})
 
 
 def get_filter_arguments():
     return {k: v for k, v in flask.request.args.items()
             if k in METADATA and v}
+
+
+@parcel_views.route('/<string:delivery>')
+def switch_delivery(delivery):
+    return flask.render_template('index.html', **{
+        'delivery': delivery,
+    })
 
 
 @parcel_views.route('/search', defaults={'delivery_type': COUNTRY})

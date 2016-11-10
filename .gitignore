@@ -1,3 +1,4 @@
 *.pyc
 /.env
 gioland-docs
+.idea/
