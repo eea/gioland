@@ -91,14 +91,20 @@
             <input type="radio" name="delivery_type"
             {% if delivery_type == LOT %}checked="checked"{% endif %}
                    value="{{ url_for('parcel.lot_delivery') }}">
-            Lot delivery
+            LAEA mosaic delivery
+        </label>
+        <label>
+            <input type="radio" name="delivery_type"
+            {% if delivery_type == STREAM %}checked="checked"{% endif %}
+                   value="{{ url_for('parcel.stream_delivery') }}">
+            Streamlining delivery
         </label>
       </td>
     </tr>
   </table>
 
   <hr>
-
+  {% if delivery_type != STREAM  %}
   <form class="delivery_form" method="post">
 
     <table>
@@ -138,6 +144,6 @@
     <button type="submit">Begin upload</button>
 
   </form>
-
+  {% endif %}
 
 {% endblock %}

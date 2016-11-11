@@ -51,3 +51,8 @@ class LotDeliveryForm(_DeliveryForm):
     DELIVERY_TYPE = LOT
 
     country = SelectField('Lot', choices=LOTS)
+
+
+class StreamDeliveryForm(Form):
+
+    pass

@@ -22,11 +22,10 @@ from definitions import (
     COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
     THEMES_IDS, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS,
     CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
-    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER)
+    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER, STREAM)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
-from forms import CountryDeliveryForm, LotDeliveryForm
-
+from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
 
 parcel_views = flask.Blueprint('parcel', __name__)
 
@@ -146,12 +145,20 @@ class LotDelivery(_BaseDelivery):
     delivery_type = LOT
 
 
+class StreamDelivery(_BaseDelivery):
+
+    form_class = StreamDeliveryForm
+    delivery_type = STREAM
+
 parcel_views.add_url_rule(
     '/parcel/new/country',
     view_func=CountryDelivery.as_view('country_delivery'))
 parcel_views.add_url_rule(
     '/parcel/new/lot',
     view_func=LotDelivery.as_view('lot_delivery'))
+parcel_views.add_url_rule(
+    '/parcel/new/stream',
+    view_func=StreamDelivery.as_view('stream_delivery'))
 
 
 @parcel_views.route('/parcel/<string:name>/chunk', methods=['POST'])
@@ -883,6 +890,7 @@ metadata_template_context = {
     'STAGES_FOR_MERGING': STAGES_FOR_MERGING,
     'COUNTRY': COUNTRY,
     'LOT': LOT,
+    'STREAM': STREAM,
     'LOTS': LOTS,
     'LOTS_MAP': dict(LOTS),
 }

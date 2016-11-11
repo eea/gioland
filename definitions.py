@@ -191,7 +191,7 @@ LOTS = (
 
 COUNTRY = 'country'
 LOT = 'lot'
-
+STREAM = 'stream'
 
 THEMES = (
     ('imp-deg', 'Imperviousness Degree'),
