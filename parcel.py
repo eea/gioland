@@ -39,9 +39,10 @@ parcel_deleted = parcel_signals.signal('parcel-deleted')
 parcel_file_deleted = parcel_signals.signal('parcel-file-deleted')
 
 
-@parcel_views.route('/')
-def index():
-    return flask.render_template('index.html')
+@parcel_views.route('/', defaults={'delivery': 'lots'})
+@parcel_views.route('/<string:delivery>', endpoint='switch_delivery')
+def index(delivery):
+    return flask.render_template('index.html', **{'delivery': delivery})
 
 
 def get_filter_arguments():
@@ -97,6 +98,18 @@ def country(code):
         'code': code,
         'grouped_parcels': grouped_parcels,
         'all_reports': all_reports,
+    })
+
+
+@parcel_views.route('/lot/<string:code>')
+def lot(code):
+    wh = get_warehouse()
+    all_parcels = [p for p in chain_tails(wh)
+                   if p.metadata['country'] == code]
+    grouped_parcels = group_parcels(all_parcels)
+    return flask.render_template('lot.html', **{
+        'code': code,
+        'grouped_parcels': grouped_parcels,
     })
 
 
@@ -850,6 +863,7 @@ metadata_template_context = {
     'STAGES': STAGES,
     'STAGES_PICKLIST': STAGES_PICKLIST,
     'STAGE_MAP': dict(STAGES_PICKLIST),
+    'LOT_STAGES': LOT_STAGES,
     'CATEGORIES': CATEGORIES,
     'CATEGORIES_MAP': dict(CATEGORIES),
     'COUNTRIES_MC': COUNTRIES_MC,
