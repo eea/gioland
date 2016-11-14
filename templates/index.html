@@ -17,7 +17,7 @@
 {% block content %}
   <ul class="tabs">
     <li {% if delivery == 'lots' %}class="active"{% endif %}>
-      <a href="{{url_for('.switch_delivery', delivery='lots') }}" >
+      <a href="{{ url_for('.switch_delivery', delivery='lots') }}" >
       Lots</a></li>
     <li {% if delivery == 'country' %}class="active"{% endif %}>
       <a href="{{ url_for('.switch_delivery', delivery='country') }}">
