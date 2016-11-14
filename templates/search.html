@@ -76,6 +76,7 @@
       <th>Workflow overview</th>
       <th>Stage</th>
       <th>Updated</th>
+      <th>Reference year</th>
     </thead>
 
     <tbody>
@@ -105,6 +106,7 @@
         <td><a href="{{ overview_url }}">workflow overview</a></td>
         <td>{{ STAGE_MAP[metadata['stage']] }}</td>
         <td>{{ parcel.last_modified|datetime }}</td>
+        <td>{{ REFERENCE_MAP[metadata['reference']] }}</td>
       </tr>
     {% endfor %}
     </tbody>

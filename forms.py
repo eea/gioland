@@ -5,7 +5,7 @@ from flask import g
 
 from warehouse import get_warehouse
 from definitions import COUNTRIES, LOTS, THEMES, PROJECTIONS, RESOLUTIONS
-from definitions import EXTENTS, PARTIAL, INITIAL_STAGE
+from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
 from definitions import COUNTRY, LOT
 
 
@@ -18,6 +18,7 @@ class _DeliveryForm(Form):
                              choices=RESOLUTIONS)
     extent = SelectField('Extent', [DataRequired()], choices=EXTENTS)
     coverage = StringField('Coverage')
+    reference = SelectField('Reference year', [DataRequired()], choices=REFERENCES)
 
     def validate_coverage(self, field):
         if self.extent.data == PARTIAL:
