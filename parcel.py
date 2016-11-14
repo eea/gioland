@@ -101,6 +101,18 @@ def country(code):
     })
 
 
+@parcel_views.route('/lot/<string:code>')
+def lot(code):
+    wh = get_warehouse()
+    all_parcels = [p for p in chain_tails(wh)
+                   if p.metadata['country'] == code]
+    grouped_parcels = group_parcels(all_parcels)
+    return flask.render_template('lot.html', **{
+        'code': code,
+        'grouped_parcels': grouped_parcels,
+    })
+
+
 class _BaseDelivery(MethodView):
 
     def get(self):
@@ -851,6 +863,7 @@ metadata_template_context = {
     'STAGES': STAGES,
     'STAGES_PICKLIST': STAGES_PICKLIST,
     'STAGE_MAP': dict(STAGES_PICKLIST),
+    'LOT_STAGES': LOT_STAGES,
     'CATEGORIES': CATEGORIES,
     'CATEGORIES_MAP': dict(CATEGORIES),
     'COUNTRIES_MC': COUNTRIES_MC,
