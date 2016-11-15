@@ -5,7 +5,6 @@ import itertools
 SIMILAR_METADATA = (
     'country',
     'theme',
-    'projection',
     'resolution',
     'extent',
     'reference',
@@ -256,11 +255,6 @@ THEMES_FILTER = [
 THEMES_IDS = map(lambda x: x[0], THEMES)
 
 
-PROJECTIONS = [
-    ('ntl', "National"),
-    ('eur', "European"),
-]
-
 RESOLUTIONS = [
     ('20m', "20 m"),
     ('100m', "100 m"),
@@ -286,7 +280,6 @@ RDF_URI = {
     'actor_name': GIOLAND_SCHEMA + '#actor_name',
     'stage': GIOLAND_SCHEMA + '#stage',
     'theme': GIOLAND_SCHEMA + '#theme',
-    'projection': GIOLAND_SCHEMA + '#projection',
     'resolution': GIOLAND_SCHEMA + '#resolution',
     'extent': GIOLAND_SCHEMA + '#extent',
     'event_type': GIOLAND_SCHEMA + '#event_type',
@@ -310,11 +303,6 @@ UNS_FIELD_DEFS = [
      'label': "Extent",
      'rdf_uri': RDF_URI['extent'],
      'range': EXTENTS},
-
-    {'name': 'projection',
-     'label': "Projection",
-     'rdf_uri': RDF_URI['projection'],
-     'range': PROJECTIONS},
 
     {'name': 'resolution',
      'label': "Spatial resolution",

@@ -21,12 +21,12 @@ import auth
 from definitions import (
     EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE,
     COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
-    THEMES_IDS, PROJECTIONS, RESOLUTIONS, EXTENTS, REFERENCES, ALL_ROLES, UNS_FIELD_DEFS,
-    CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA, LOT_THEMES,
+    THEMES_IDS, RESOLUTIONS, EXTENTS, REFERENCES, ALL_ROLES, UNS_FIELD_DEFS,
+    CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
     STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER, STREAM)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
-from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm, _DeliveryForm
+from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
 from forms import get_lot_theme
 
 parcel_views = flask.Blueprint('parcel', __name__)
@@ -563,7 +563,7 @@ def group_parcels(parcels):
 def subscribe():
     if flask.request.method == 'POST':
         filters = {}
-        for name in ['country', 'extent', 'projection', 'resolution', 'theme',
+        for name in ['country', 'extent', 'resolution', 'theme',
                      'decision', 'stage', 'event_type']:
             value = flask.request.form.get(name, '')
             if value:
@@ -893,8 +893,6 @@ metadata_template_context = {
     'THEME_MAP': dict(THEMES),
     'RESOLUTIONS': RESOLUTIONS,
     'RESOLUTION_MAP': dict(RESOLUTIONS),
-    'PROJECTIONS': PROJECTIONS,
-    'PROJECTION_MAP': dict(PROJECTIONS),
     'EXTENTS': EXTENTS,
     'EXTENT_MAP': dict(EXTENTS),
     'REFERENCES': REFERENCES,

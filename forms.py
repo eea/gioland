@@ -3,7 +3,7 @@ from wtforms import Form, SelectField, StringField
 from wtforms.validators import DataRequired, ValidationError
 from flask import g
 from warehouse import get_warehouse
-from definitions import COUNTRIES, LOTS, THEMES, PROJECTIONS, RESOLUTIONS, LOT_THEMES
+from definitions import COUNTRIES, LOTS, THEMES, RESOLUTIONS, LOT_THEMES
 from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
 from definitions import COUNTRY, LOT
 
@@ -17,8 +17,6 @@ def get_lot_theme(id_lot):
 class _DeliveryForm(Form):
 
     theme = SelectField('Product', [DataRequired()], choices=THEMES)
-    projection = SelectField('Projection', [DataRequired()],
-                             choices=PROJECTIONS)
     resolution = SelectField('Spatial resolution', [DataRequired()],
                              choices=RESOLUTIONS)
     extent = SelectField('Extent', [DataRequired()], choices=EXTENTS)

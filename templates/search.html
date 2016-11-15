@@ -89,7 +89,6 @@
       {% endif %}
       <th>Product</th>
       <th>Extent</th>
-      <th>Projection</th>
       <th>Resolution</th>
       <th>Workflow overview</th>
       <th>Stage</th>
@@ -119,7 +118,6 @@
           {% endif %}
         </td>
         <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
-        <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
         <td><a href="{{ overview_url }}">workflow overview</a></td>
         <td>{{ STAGE_MAP[metadata['stage']] }}</td>
