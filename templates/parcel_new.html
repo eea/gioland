@@ -27,6 +27,19 @@
         window.location.href = $(this).val();
       });
 
+      $('#country').on('change', function() {
+        var idLot = $(this).val()
+        $.getJSON('/pick_themes', {
+          id: idLot,
+        }, function(data) {
+             var select = $("#theme");
+             select.html('');
+             $.each(data, function() {
+               select.append($("<option />").val(this[0]).text(this[1]));
+             });
+        });
+
+      }).change();
     });
   </script>
 

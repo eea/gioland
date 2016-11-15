@@ -64,7 +64,7 @@ class NotificationDeliveryTest(AppTestCase):
             RDF_URI['identifier']: "http://example.com/parcel/asdf",
             RDF_URI['theme']: "Grassland Cover",
             RDF_URI['projection']: "National",
-            RDF_URI['resolution']: "20m",
+            RDF_URI['resolution']: "20 m",
             RDF_URI['extent']: "Partial",
             RDF_URI['event_type']: "comment",
         }, rdf_data)

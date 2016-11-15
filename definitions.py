@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+import itertools
 
 SIMILAR_METADATA = (
     'country',
@@ -181,12 +182,11 @@ COUNTRIES = COUNTRIES_MC + COUNTRIES_CC
 
 
 LOTS = (
-    ('lot 1', 'Lot 1'),
-    ('lot 2', 'Lot 2'),
-    ('lot 3', 'Lot 3'),
-    ('lot 4', 'Lot 4'),
-    ('lot 5', 'Lot 5'),
-    ('lot 6', 'Lot 6'),
+    ('lot1', 'Lot 1 Imperviousness'),
+    ('lot2', 'Lot 2 Forest'),
+    ('lot3', 'Lot 3 Grassland'),
+    ('lot4', 'Lot 4 Wetness and water'),
+    ('lot5', 'Lot 5 Small woody features'),
 )
 
 
@@ -194,19 +194,53 @@ COUNTRY = 'country'
 LOT = 'lot'
 STREAM = 'stream'
 
-THEMES = (
+
+LOT1_THEMES = (
     ('imp-deg', 'Imperviousness Degree'),
     ('imp-chg', 'Imperviousness Change'),
-    ('tcd', 'Tree Cover Density'),
-    ('fty', 'Forest Type'),
-    ('tnt', 'Tree / Non-tree'),
-    ('grc', 'Grassland Cover'),
-    ('grd', 'Grassland Density'),
-    ('wet', 'Wetlands'),
-    ('pwb', 'Permanent Water Bodies'),
-    ('ngr', 'New grassland - NGR'),
+    ('imp-chg-cls', 'Imperviousness Change classified'),
+    ('imp-deg-prd', 'Imperviousness degree reference product (vector)'),
+    ('imp-deg-grd', 'Imperviousness degree reference (grid)'),
+    ('bvd', 'Biophysical variables delivery'),
 )
 
+LOT2_THEMES = (
+    ('bvd', 'Biophysical variables delivery'),
+    ('tcd', 'Tree Cover Density'),
+    ('dlt', 'Dominant Leaf Type'),
+    ('fty', 'Forest Type'),
+    ('fsl', 'Forest Additional Support Layer'),
+    ('dlt-chg', 'Dominant Leaf Type Change'),
+    ('tcd-chg', 'Tree Cover Density Change'),
+    ('tcd-prd', 'Tree Cover Density Reference Product (Vector data)'),
+    ('tcd-grd', 'Tree Cover Density Reference Grid'),
+)
+
+LOT3_THEMES = (
+    ('grl', 'Grassland'),
+    ('gvp', 'Grassland Vegetation Probability'),
+    ('pgi', 'Ploughing Indicator'),
+)
+
+LOT4_THEMES = (
+    ('wwp', 'Wetness and Water product'),
+    ('wwp-idx', 'Wetness and Water Probability Index'),
+)
+
+LOT5_THEMES = (
+    ('swf', 'Small woody features'),
+)
+
+
+LOT_THEMES = [
+    LOT1_THEMES,
+    LOT2_THEMES,
+    LOT3_THEMES,
+    LOT4_THEMES,
+    LOT5_THEMES,
+]
+
+THEMES = set(list(itertools.chain.from_iterable(LOT_THEMES)))
 
 THEMES_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),
@@ -228,8 +262,8 @@ PROJECTIONS = [
 ]
 
 RESOLUTIONS = [
-    ('20m', "20m"),
-    ('100m', "100m"),
+    ('20m', "20 m"),
+    ('100m', "100 m"),
 ]
 
 FULL = 'full'

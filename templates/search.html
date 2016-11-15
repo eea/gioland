@@ -25,6 +25,10 @@
 
           uri.removeSearch(name);
           if(val) { uri.addSearch(name, val); }
+          var id = $(this).attr("id")
+          if ( id == "filter-country"){
+            uri.removeSearch("theme");
+          }
           document.location = uri.href();
       }
 
@@ -40,6 +44,20 @@
       $(document).ready(function () {
         $(".filters").on("change", "select", filter);
         default_select_filters();
+        lotSelected = $('#filter-country').val();
+        if (lotSelected){
+          $.getJSON('/pick_themes', {
+              id: lotSelected,
+          }, function(data) {
+               var select = $("#filter-theme");
+               select.html('');
+               select.append($("<option />").val(null).text("Any Product"));
+               $.each(data, function(){
+                 select.append($("<option />").val(this[0]).text(this[1]));
+               });
+               default_select_filters();
+          });
+        }
       });
     </script>
 {% endblock %}
@@ -69,7 +87,7 @@
       {% if delivery_type == LOT %}
         <th>Lot</th>
       {% endif %}
-      <th>Theme</th>
+      <th>Product</th>
       <th>Extent</th>
       <th>Projection</th>
       <th>Resolution</th>

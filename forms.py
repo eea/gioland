@@ -1,17 +1,22 @@
 from datetime import datetime
 from wtforms import Form, SelectField, StringField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, ValidationError
 from flask import g
-
 from warehouse import get_warehouse
-from definitions import COUNTRIES, LOTS, THEMES, PROJECTIONS, RESOLUTIONS
+from definitions import COUNTRIES, LOTS, THEMES, PROJECTIONS, RESOLUTIONS, LOT_THEMES
 from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
 from definitions import COUNTRY, LOT
 
 
+def get_lot_theme(id_lot):
+    theme_idx = [LOTS.index(x) for x in LOTS if x[0] == id_lot][0]
+    if theme_idx is not None:
+        return LOT_THEMES[theme_idx]
+
+
 class _DeliveryForm(Form):
 
-    theme = SelectField('Theme', [DataRequired()], choices=THEMES)
+    theme = SelectField('Product', [DataRequired()], choices=THEMES)
     projection = SelectField('Projection', [DataRequired()],
                              choices=PROJECTIONS)
     resolution = SelectField('Spatial resolution', [DataRequired()],
@@ -23,6 +28,15 @@ class _DeliveryForm(Form):
     def validate_coverage(self, field):
         if self.extent.data == PARTIAL:
             return field.validate(self, [DataRequired()])
+
+    def validate_theme(self, field):
+        id_lot = self.data['country']
+        theme = get_lot_theme(id_lot)
+        if theme is not None:
+            if field.data in [x[0] for x in theme]:
+                return field.validate(self)
+        else:
+            raise ValidationError('This lot does not have the product provided.')
 
     def save(self):
         data = dict(self.data)

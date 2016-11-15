@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import tempfile
@@ -21,11 +22,12 @@ from definitions import (
     EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE,
     COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
     THEMES_IDS, PROJECTIONS, RESOLUTIONS, EXTENTS, REFERENCES, ALL_ROLES, UNS_FIELD_DEFS,
-    CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
+    CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA, LOT_THEMES,
     STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER, STREAM)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
-from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
+from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm, _DeliveryForm
+from forms import get_lot_theme
 
 parcel_views = flask.Blueprint('parcel', __name__)
 
@@ -863,6 +865,15 @@ def _get_stages_for_parcel(parcel):
         return LOT_STAGES, LOT_STAGE_ORDER
     flask.abort(400)
 
+
+@parcel_views.route('/pick_themes', methods=['GET'])
+def pick_themes():
+    if flask.request.method == "GET":
+        id_lot = flask.request.args.get('id', 'lot1')
+        theme = get_lot_theme(id_lot)
+        if theme:
+            return json.dumps(theme)
+    flask.abort(400)
 
 STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]
 
