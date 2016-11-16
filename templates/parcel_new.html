@@ -27,7 +27,7 @@
         window.location.href = $(this).val();
       });
 
-      $('#country').on('change', function() {
+      $('#lot').on('change', function() {
         var idLot = $(this).val()
         $.getJSON('/pick_themes', {
           id: idLot,
@@ -121,9 +121,15 @@
   <form class="delivery_form" method="post">
 
     <table>
+      {% if delivery_type == COUNTRY %}
       <tr>
         <td>{{ form.country.label }}</td>
         <td>{{ form.country() }}</td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td>{{ form.lot.label }}</td>
+        <td>{{ form.lot() }}</td>
       </tr>
 
       <tr>

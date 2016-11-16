@@ -16,6 +16,7 @@ def get_lot_theme(id_lot):
 
 class _DeliveryForm(Form):
 
+    lot = SelectField('Lot', choices=LOTS)
     theme = SelectField('Product', [DataRequired()], choices=THEMES)
     resolution = SelectField('Spatial resolution', [DataRequired()],
                              choices=RESOLUTIONS)
@@ -28,7 +29,7 @@ class _DeliveryForm(Form):
             return field.validate(self, [DataRequired()])
 
     def validate_theme(self, field):
-        id_lot = self.data['country']
+        id_lot = self.data['lot']
         theme = get_lot_theme(id_lot)
         if theme is not None:
             if field.data in [x[0] for x in theme]:
@@ -62,8 +63,6 @@ class CountryDeliveryForm(_DeliveryForm):
 class LotDeliveryForm(_DeliveryForm):
 
     DELIVERY_TYPE = LOT
-
-    country = SelectField('Lot', choices=LOTS)
 
 
 class StreamDeliveryForm(Form):

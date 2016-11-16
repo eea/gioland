@@ -26,7 +26,7 @@
           uri.removeSearch(name);
           if(val) { uri.addSearch(name, val); }
           var id = $(this).attr("id")
-          if ( id == "filter-country"){
+          if ( id == "filter-lot"){
             uri.removeSearch("theme");
           }
           document.location = uri.href();
@@ -44,7 +44,7 @@
       $(document).ready(function () {
         $(".filters").on("change", "select", filter);
         default_select_filters();
-        lotSelected = $('#filter-country').val();
+        lotSelected = $('#filter-lot').val();
         if (lotSelected){
           $.getJSON('/pick_themes', {
               id: lotSelected,
@@ -108,7 +108,7 @@
         {% endif %}
 
         {% if delivery_type == LOT %}
-          <td>{{ LOTS_MAP[metadata['country']] }}</td>
+          <td>{{ LOTS_MAP[metadata['lot']] }}</td>
         {% endif %}
 
         <td>

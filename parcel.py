@@ -91,7 +91,9 @@ def parcel_metadata(name):
 def country(code):
     wh = get_warehouse()
     all_parcels = [p for p in chain_tails(wh)
-                   if p.metadata['country'] == code]
+                   if p.metadata['delivery_type'] != LOT and
+                   p.metadata['country'] == code]
+
     all_reports = [r for r in wh.get_all_reports()
                    if r.country == code]
     grouped_parcels = group_parcels(all_parcels)
@@ -106,7 +108,7 @@ def country(code):
 def lot(code):
     wh = get_warehouse()
     all_parcels = [p for p in chain_tails(wh)
-                   if p.metadata['country'] == code]
+                   if p.metadata['lot'] == code]
     grouped_parcels = group_parcels(all_parcels)
     return flask.render_template('lot.html', **{
         'code': code,
@@ -563,7 +565,7 @@ def group_parcels(parcels):
 def subscribe():
     if flask.request.method == 'POST':
         filters = {}
-        for name in ['country', 'extent', 'resolution', 'theme',
+        for name in ['country', 'lot', 'extent', 'resolution', 'theme',
                      'decision', 'stage', 'event_type']:
             value = flask.request.form.get(name, '')
             if value:

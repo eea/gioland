@@ -4,6 +4,7 @@ import itertools
 
 SIMILAR_METADATA = (
     'country',
+    'lot',
     'theme',
     'resolution',
     'extent',
@@ -15,7 +16,7 @@ EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
 METADATA = EDITABLE_METADATA + ('stage',)
 
 
-REPORT_METADATA = ('country', 'category',)
+REPORT_METADATA = ('country', 'category')
 
 
 STAGE_INT = 'int'
@@ -276,6 +277,7 @@ RDF_URI = {
     'date': 'http://purl.org/dc/elements/1.1/date',
     'parcel_event': GIOLAND_SCHEMA + '#parcelevent',
     'locality': GIOLAND_SCHEMA + '#locality',
+    'lot': GIOLAND_SCHEMA + '#lot',
     'actor': GIOLAND_SCHEMA + '#actor',
     'actor_name': GIOLAND_SCHEMA + '#actor_name',
     'stage': GIOLAND_SCHEMA + '#stage',
@@ -290,9 +292,14 @@ RDF_URI = {
 UNS_FIELD_DEFS = [
 
     {'name': 'country',
-     'label': "Country / Lots",
+     'label': "Country",
      'rdf_uri': RDF_URI['locality'],
-     'range': COUNTRIES + LOTS},
+     'range': COUNTRIES},
+
+    {'name': 'lot',
+     'label': "Lot",
+     'rdf_uri': RDF_URI['lot'],
+     'range': LOTS},
 
     {'name': 'theme',
      'label': "Theme",
