@@ -29,10 +29,12 @@
 
       $('#lot').on('change', function() {
         var idLot = $(this).val()
+        var delivery_type = $('#delivery').val()
         $.getJSON('/pick_themes', {
           id: idLot,
+          delivery_type: delivery_type,
         }, function(data) {
-             var select = $("#theme");
+             var select = $('#theme');
              select.html('');
              $.each(data, function() {
                select.append($("<option />").val(this[0]).text(this[1]));
@@ -115,7 +117,7 @@
       </td>
     </tr>
   </table>
-
+  <input id="delivery"hidden value="{{delivery_type}}"/>
   <hr>
   {% if delivery_type != STREAM  %}
   <form class="delivery_form" method="post">

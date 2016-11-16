@@ -45,9 +45,11 @@
         $(".filters").on("change", "select", filter);
         default_select_filters();
         lotSelected = $('#filter-lot').val();
+        var delivery_type = $('#delivery').val()
         if (lotSelected){
           $.getJSON('/pick_themes', {
               id: lotSelected,
+              delivery_type: delivery_type,
           }, function(data) {
                var select = $("#filter-theme");
                select.html('');
@@ -97,7 +99,7 @@
       <th>Updated</th>
       <th>Reference year</th>
     </thead>
-
+    <input id="delivery"hidden value="{{delivery_type}}"/>
     <tbody>
     {% for parcel in parcels %}
       <tr>

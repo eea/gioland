@@ -23,7 +23,7 @@ from definitions import (
     COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
     THEMES_IDS, RESOLUTIONS, EXTENTS, REFERENCES, ALL_ROLES, UNS_FIELD_DEFS,
     CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
-    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER, STREAM)
+    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER, STREAM, COUNTRY_THEMES)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
@@ -873,7 +873,8 @@ def _get_stages_for_parcel(parcel):
 def pick_themes():
     if flask.request.method == "GET":
         id_lot = flask.request.args.get('id', 'lot1')
-        theme = get_lot_theme(id_lot)
+        delivery_type = flask.request.args.get('delivery_type', 'lot')
+        theme = get_lot_theme(id_lot, delivery_type)
         if theme:
             return json.dumps(theme)
     flask.abort(400)
@@ -891,6 +892,7 @@ metadata_template_context = {
     'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,
     'COUNTRY_MAP': dict(COUNTRIES),
+    'COUNTRY_THEMES': COUNTRY_THEMES,
     'THEMES': THEMES,
     'THEMES_FILTER': THEMES_FILTER,
     'THEME_MAP': dict(THEMES),

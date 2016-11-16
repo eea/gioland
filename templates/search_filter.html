@@ -2,13 +2,21 @@
 
 <div class="filters">
 
+  {% if delivery_type == LOT %}
+    {% set theme = THEMES %}
+  {% elif delivery_type == COUNTRY %}
+    {% set theme = COUNTRY_THEMES %}
+  {% endif %}
+
   {% if delivery_type == COUNTRY %}
     {{ pick_from_list('filter-country', 'country', COUNTRIES, any=True) }}
   {% endif %}
 
 
   {{ pick_from_list('filter-lot', 'lot', LOTS, any=True, label='Lot') }}
-  {{ pick_from_list('filter-theme', 'theme', THEMES, any=True, label='Product') }}
+
+    {{ pick_from_list('filter-theme', 'theme', theme, any=True, label='Product') }}
+
   {{ pick_from_list('filter-resolution', 'resolution', RESOLUTIONS, any=True) }}
 
   {% if delivery_type == LOT %}

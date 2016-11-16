@@ -196,9 +196,9 @@ STREAM = 'stream'
 
 
 LOT1_THEMES = (
-    ('imp-deg', 'Imperviousness Degree'),
-    ('imp-chg', 'Imperviousness Change'),
-    ('imp-chg-cls', 'Imperviousness Change classified'),
+    ('imp-deg', 'Imperviousness degree'),
+    ('imp-chg', 'Imperviousness change'),
+    ('imp-chg-cls', 'Imperviousness change classified'),
     ('imp-deg-prd', 'Imperviousness degree reference product (vector)'),
     ('imp-deg-grd', 'Imperviousness degree reference (grid)'),
     ('bvd', 'Biophysical variables delivery'),
@@ -231,6 +231,39 @@ LOT5_THEMES = (
     ('swf', 'Small woody features'),
 )
 
+COUNTRY_LOT1_THEMES = (
+    ('imp-deg', 'Imperviousness degree'),
+    ('imp-chg', 'Imperviousness change'),
+    ('imp-chg-cls', 'Imperviousness change classified'),
+)
+
+COUNTRY_LOT2_THEMES = (
+    ('dlt', 'Dominant Leaf Type'),
+    ('fty', 'Forest Type'),
+    ('fty', 'Forest Type'),
+    ('dlt-chg', 'Dominant Leaf Type Change'),
+    ('tcd-chg', 'Tree Cover Density Change'),
+)
+
+COUNTRY_LOT3_THEMES = (
+    ('grl', 'Grassland'),
+)
+
+COUNTRY_LOT4_THEMES = (
+    ('wwp', 'Wetness and Water product'),
+)
+
+COUNTRY_LOT5_THEMES = (
+    ('swf', 'Small woody features'),
+)
+
+COUNTRY_LOT_THEMES = [
+    COUNTRY_LOT1_THEMES,
+    COUNTRY_LOT2_THEMES,
+    COUNTRY_LOT3_THEMES,
+    COUNTRY_LOT4_THEMES,
+    COUNTRY_LOT5_THEMES,
+]
 
 LOT_THEMES = [
     LOT1_THEMES,
@@ -241,6 +274,7 @@ LOT_THEMES = [
 ]
 
 THEMES = set(list(itertools.chain.from_iterable(LOT_THEMES)))
+COUNTRY_THEMES = set(list(itertools.chain.from_iterable(COUNTRY_LOT_THEMES)))
 
 THEMES_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),
