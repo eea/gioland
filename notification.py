@@ -2,7 +2,8 @@ import logging
 from xmlrpclib import ServerProxy
 import flask
 import blinker
-from definitions import RDF_URI, UNS_FIELD_DEFS, METADATA, LOT, COUNTRY
+from definitions import RDF_URI, UNS_FIELD_DEFS, METADATA, LOT, COUNTRY, COUNTRY_EXCLUDE_METADATA, LOT_EXCLUDE_METADATA, \
+    STREAM_EXCLUDE_METADATA
 import auth
 from utils import format_datetime
 
@@ -96,11 +97,17 @@ def prepare_notification_rdf(item, event_type, rejected=None):
         decision = 'rejected' if rejected else 'accepted'
         event_data.append((RDF_URI['decision'], decision))
 
-    for rdf_uri, metadata_name, value_map in metadata_rdf_fields:
-        exclude_country = metadata['delivery_type'] != LOT or metadata_name != COUNTRY
-        exclude_extent = metadata['delivery_type'] == LOT or metadata_name != 'extent'
+    if metadata['delivery_type'] == COUNTRY:
+        EXCLUDE_METADATA = COUNTRY_EXCLUDE_METADATA
+    elif metadata['delivery_type'] == LOT:
+        EXCLUDE_METADATA = LOT_EXCLUDE_METADATA
+    else:
+        EXCLUDE_METADATA = STREAM_EXCLUDE_METADATA
 
-        if exclude_country and exclude_extent:
+    filtered_metadata = [x for x in metadata_rdf_fields if x[1] not in EXCLUDE_METADATA]
+
+    for rdf_uri, metadata_name, value_map in filtered_metadata:
+
             value = value_map.get(metadata[metadata_name], "")
             event_data.append((rdf_uri, value))
 

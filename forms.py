@@ -3,10 +3,11 @@ from wtforms import Form, SelectField, StringField
 from wtforms.validators import DataRequired, ValidationError
 from flask import g
 from warehouse import get_warehouse
-from definitions import COUNTRIES, LOTS, THEMES, COUNTRY_THEMES, \
-    RESOLUTIONS, LOT_THEMES, COUNTRY_LOT_THEMES
+from definitions import COUNTRIES, LOTS, STREAM_LOTS,\
+    THEMES, COUNTRY_THEMES, RESOLUTIONS, LOT_THEMES, \
+    COUNTRY_LOT_THEMES
 from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
-from definitions import COUNTRY, LOT
+from definitions import COUNTRY, LOT, STREAM
 
 
 def get_lot_theme(id_lot, delivery_type):
@@ -15,17 +16,14 @@ def get_lot_theme(id_lot, delivery_type):
     if theme_idx is not None:
         if delivery_type == COUNTRY:
             return COUNTRY_LOT_THEMES[theme_idx]
-        elif delivery_type == LOT:
+        else:
             return LOT_THEMES[theme_idx]
 
 
-class _DeliveryForm(Form):
+class _BaseDeliveryForm(Form):
 
     lot = SelectField('Lot', choices=LOTS)
     theme = SelectField('Product', [DataRequired()], choices=THEMES)
-    resolution = SelectField('Spatial resolution', [DataRequired()],
-                             choices=RESOLUTIONS)
-    reference = SelectField('Reference year', [DataRequired()], choices=REFERENCES)
 
     def validate_theme(self, field):
         id_lot = self.data['lot']
@@ -53,6 +51,13 @@ class _DeliveryForm(Form):
         return parcel
 
 
+class _DeliveryForm(_BaseDeliveryForm):
+
+    resolution = SelectField('Spatial resolution', [DataRequired()],
+                             choices=RESOLUTIONS)
+    reference = SelectField('Reference year', [DataRequired()], choices=REFERENCES)
+
+
 class CountryDeliveryForm(_DeliveryForm):
 
     DELIVERY_TYPE = COUNTRY
@@ -73,6 +78,7 @@ class LotDeliveryForm(_DeliveryForm):
             return field.validate(self, [DataRequired()])
 
 
-class StreamDeliveryForm(Form):
+class StreamDeliveryForm(_BaseDeliveryForm):
 
-    pass
+    lot = SelectField('Lot', choices=STREAM_LOTS)
+    DELIVERY_TYPE = STREAM

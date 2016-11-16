@@ -11,6 +11,22 @@ SIMILAR_METADATA = (
     'reference',
 )
 
+LOT_EXCLUDE_METADATA = [
+    'country',
+]
+
+COUNTRY_EXCLUDE_METADATA = [
+    'coverage',
+    'extent',
+]
+
+STREAM_EXCLUDE_METADATA = [
+    'coverage',
+    'extent',
+    'country',
+    'resolution',
+    'reference'
+]
 
 EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
 METADATA = EDITABLE_METADATA + ('stage',)
@@ -189,7 +205,7 @@ LOTS = (
     ('lot5', 'Lot 5 Small woody features'),
 )
 
-
+STREAM_LOTS = LOTS[2:5]
 COUNTRY = 'country'
 LOT = 'lot'
 STREAM = 'stream'
@@ -273,8 +289,11 @@ LOT_THEMES = [
     LOT5_THEMES,
 ]
 
+STREAM_LOT_THEMES = LOT_THEMES[3:5]
+
 THEMES = set(list(itertools.chain.from_iterable(LOT_THEMES)))
 COUNTRY_THEMES = set(list(itertools.chain.from_iterable(COUNTRY_LOT_THEMES)))
+STREAM_THEMES = set(list(itertools.chain.from_iterable(STREAM_LOT_THEMES)))
 
 THEMES_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),

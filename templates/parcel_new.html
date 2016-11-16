@@ -119,7 +119,7 @@
   </table>
   <input id="delivery"hidden value="{{delivery_type}}"/>
   <hr>
-  {% if delivery_type != STREAM  %}
+
   <form class="delivery_form" method="post">
 
     <table>
@@ -138,32 +138,33 @@
         <td>{{ form.theme.label }}</td>
         <td>{{ form.theme() }}</td>
       </tr>
-
-      <tr>
-        <td>{{ form.resolution.label }}</td>
-        <td>{{ form.resolution() }}</td>
-      </tr>
-      {% if delivery_type == LOT %}
+      {% if delivery_type != STREAM  %}
         <tr>
-          <td>{{ form.extent.label }}</td>
-          <td>{{ form.extent() }}</td>
+          <td>{{ form.resolution.label }}</td>
+          <td>{{ form.resolution() }}</td>
         </tr>
-        <tr class="hide">
-          <td>{{ form.coverage.label }}</td>
-          <td>{{ form.coverage() }}
-              <span class="err">(required)</span>
-          </td>
+        {% if delivery_type == LOT %}
+          <tr>
+            <td>{{ form.extent.label }}</td>
+            <td>{{ form.extent() }}</td>
+          </tr>
+          <tr class="hide">
+            <td>{{ form.coverage.label }}</td>
+            <td>{{ form.coverage() }}
+                <span class="err">(required)</span>
+            </td>
+          </tr>
+        {% endif %}
+        <tr>
+          <td>{{ form.reference.label }}</td>
+          <td>{{ form.reference() }}</td>
         </tr>
       {% endif %}
-      <tr>
-        <td>{{ form.reference.label }}</td>
-        <td>{{ form.reference() }}</td>
-      </tr>
-    </table>
-
-    <button type="submit">Begin upload</button>
-
+      </table>
+    {% if delivery_type != STREAM %}
+      <button type="submit">Begin upload</button>
+    {% else %}
+      <button type="submit" disabled>Begin upload</button>
+    {% endif %}
   </form>
-  {% endif %}
-
 {% endblock %}

@@ -11,36 +11,33 @@
       </tr>
     {% endif %}
 
-    {% if delivery_type == LOT %}
-      <tr>
-        <th>Lot</th>
-        <td>{{ LOTS_MAP[metadata['lot']] }}</td>
-      </tr>
-    {% endif %}
-
-
+    <tr>
+      <th>Lot</th>
+      <td>{{ LOTS_MAP[metadata['lot']] }}</td>
+    </tr>
     <tr>
       <th>Product</th>
       <td>{{ THEME_MAP[metadata['theme']] }}</td>
     </tr>
-
-    <tr>
-      <th>Spatial resolution</th>
-      <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
-    </tr>
-    {% if delivery_type == LOT %}
+    {%if delivery_type != STREAM %}
       <tr>
-        <th>Extent</th>
-        <td>
-          {{ EXTENT_MAP[metadata['extent']] }} <br>
-          <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
-        </td>
+        <th>Spatial resolution</th>
+        <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
+      </tr>
+      {% if delivery_type == LOT %}
+        <tr>
+          <th>Extent</th>
+          <td>
+            {{ EXTENT_MAP[metadata['extent']] }} <br>
+            <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
+          </td>
+        </tr>
+      {% endif %}
+      <tr>
+        <th>Reference year</th>
+        <td>{{ REFERENCE_MAP[metadata['reference']] }}</td>
       </tr>
     {% endif %}
-    <tr>
-      <th>Reference year</th>
-      <td>{{ REFERENCE_MAP[metadata['reference']] }}</td>
-    </tr>
     {% if show_stage %}
     <tr>
       <th>Processing stage</th>
