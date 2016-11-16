@@ -28,15 +28,15 @@
       <th>Spatial resolution</th>
       <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
     </tr>
-
-    <tr>
-      <th>Extent</th>
-      <td>
-        {{ EXTENT_MAP[metadata['extent']] }} <br>
-        <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
-      </td>
-    </tr>
-
+    {% if delivery_type == LOT %}
+      <tr>
+        <th>Extent</th>
+        <td>
+          {{ EXTENT_MAP[metadata['extent']] }} <br>
+          <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
+        </td>
+      </tr>
+    {% endif %}
     <tr>
       <th>Reference year</th>
       <td>{{ REFERENCE_MAP[metadata['reference']] }}</td>

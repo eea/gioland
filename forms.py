@@ -20,13 +20,7 @@ class _DeliveryForm(Form):
     theme = SelectField('Product', [DataRequired()], choices=THEMES)
     resolution = SelectField('Spatial resolution', [DataRequired()],
                              choices=RESOLUTIONS)
-    extent = SelectField('Extent', [DataRequired()], choices=EXTENTS)
-    coverage = StringField('Coverage')
     reference = SelectField('Reference year', [DataRequired()], choices=REFERENCES)
-
-    def validate_coverage(self, field):
-        if self.extent.data == PARTIAL:
-            return field.validate(self, [DataRequired()])
 
     def validate_theme(self, field):
         id_lot = self.data['lot']
@@ -40,8 +34,6 @@ class _DeliveryForm(Form):
     def save(self):
         data = dict(self.data)
         data['stage'] = INITIAL_STAGE
-        if data['extent'] == 'full':
-            data['coverage'] = ''
         data['delivery_type'] = self.DELIVERY_TYPE
         wh = get_warehouse()
         parcel = wh.new_parcel()
@@ -63,6 +55,19 @@ class CountryDeliveryForm(_DeliveryForm):
 class LotDeliveryForm(_DeliveryForm):
 
     DELIVERY_TYPE = LOT
+
+    extent = SelectField('Extent', [DataRequired()], choices=EXTENTS)
+    coverage = StringField('Coverage')
+
+    def validate_coverage(self, field):
+        if self.extent.data == PARTIAL:
+            return field.validate(self, [DataRequired()])
+
+    def save(self):
+        data = dict(self.data)
+        if data['extent'] == 'full':
+            data['coverage'] = ''
+        super(LotDeliveryForm).save(self)
 
 
 class StreamDeliveryForm(Form):

@@ -88,7 +88,9 @@
         <th>Lot</th>
       {% endif %}
       <th>Product</th>
-      <th>Extent</th>
+      {% if delivery_type == LOT %}
+        <th>Extent</th>
+      {% endif %}
       <th>Resolution</th>
       <th>Workflow overview</th>
       <th>Stage</th>
@@ -113,11 +115,15 @@
 
         <td>
           {{ THEME_MAP[metadata['theme']] }}
-          {% if parcel.metadata['extent'] == 'partial' %}
-            ({{ parcel.metadata['coverage'] }})
+          {% if delivery_type == LOT %}
+            {% if parcel.metadata['extent'] == 'partial' %}
+              ({{ parcel.metadata['coverage'] }})
+            {% endif %}
           {% endif %}
         </td>
-        <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
+        {% if delivery_type == LOT %}
+          <td>{{ EXTENT_MAP[metadata['extent']] }}</td>
+        {% endif %}
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
         <td><a href="{{ overview_url }}">workflow overview</a></td>
         <td>{{ STAGE_MAP[metadata['stage']] }}</td>

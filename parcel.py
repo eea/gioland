@@ -704,7 +704,8 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
     links = []
     for p in parcels:
         url = flask.url_for('.view', name=p.name)
-        if p.metadata['extent'] == 'partial':
+        if p.metadata['delivery_type'] == LOT and \
+           p.metadata['extent'] == 'partial':
             links.append('<a href="%s">%s (%s)</a>' % (
                 url, stage_def['label'], p.metadata['coverage']))
         else:

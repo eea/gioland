@@ -141,19 +141,18 @@
         <td>{{ form.resolution.label }}</td>
         <td>{{ form.resolution() }}</td>
       </tr>
-
-      <tr>
-        <td>{{ form.extent.label }}</td>
-        <td>{{ form.extent() }}</td>
-      </tr>
-
-      <tr class="hide">
-        <td>{{ form.coverage.label }}</td>
-        <td>{{ form.coverage() }}
-            <span class="err">(required)</span>
-        </td>
-      </tr>
-
+      {% if delivery_type == LOT %}
+        <tr>
+          <td>{{ form.extent.label }}</td>
+          <td>{{ form.extent() }}</td>
+        </tr>
+        <tr class="hide">
+          <td>{{ form.coverage.label }}</td>
+          <td>{{ form.coverage() }}
+              <span class="err">(required)</span>
+          </td>
+        </tr>
+      {% endif %}
       <tr>
         <td>{{ form.reference.label }}</td>
         <td>{{ form.reference() }}</td>

@@ -97,8 +97,10 @@ def prepare_notification_rdf(item, event_type, rejected=None):
         event_data.append((RDF_URI['decision'], decision))
 
     for rdf_uri, metadata_name, value_map in metadata_rdf_fields:
+        exclude_country = metadata['delivery_type'] != LOT or metadata_name != COUNTRY
+        exclude_extent = metadata['delivery_type'] == LOT or metadata_name != 'extent'
 
-        if metadata['delivery_type'] != LOT or metadata_name != COUNTRY:
+        if exclude_country and exclude_extent:
             value = value_map.get(metadata[metadata_name], "")
             event_data.append((rdf_uri, value))
 
