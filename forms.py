@@ -11,18 +11,19 @@ from definitions import COUNTRY, LOT, STREAM
 
 
 def get_lot_theme(id_lot, delivery_type):
-    theme_idx = [LOTS.index(x) for x in LOTS if x[0] == id_lot][0]
+    themes = [LOTS.index(x) for x in LOTS if x[0] == id_lot]
 
-    if theme_idx is not None:
-        if delivery_type == COUNTRY:
-            return COUNTRY_LOT_THEMES[theme_idx]
-        else:
-            return LOT_THEMES[theme_idx]
+    theme_idx = themes[0]
+
+    if delivery_type == COUNTRY:
+        return COUNTRY_LOT_THEMES[theme_idx]
+    else:
+        return LOT_THEMES[theme_idx]
 
 
 class _BaseDeliveryForm(Form):
 
-    lot = SelectField('Lot', choices=LOTS)
+    lot = SelectField('Lot', [DataRequired()], choices=LOTS)
     theme = SelectField('Product', [DataRequired()], choices=THEMES)
 
     def validate_theme(self, field):

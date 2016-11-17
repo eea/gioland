@@ -11,22 +11,22 @@ SIMILAR_METADATA = (
     'reference',
 )
 
-LOT_EXCLUDE_METADATA = [
+LOT_EXCLUDE_METADATA = (
     'country',
-]
+)
 
-COUNTRY_EXCLUDE_METADATA = [
+COUNTRY_EXCLUDE_METADATA = (
     'coverage',
     'extent',
-]
+)
 
-STREAM_EXCLUDE_METADATA = [
+STREAM_EXCLUDE_METADATA = (
     'coverage',
     'extent',
     'country',
     'resolution',
     'reference'
-]
+)
 
 EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
 METADATA = EDITABLE_METADATA + ('stage',)
@@ -254,8 +254,8 @@ COUNTRY_LOT1_THEMES = (
 )
 
 COUNTRY_LOT2_THEMES = (
+    ('tcd', 'Tree Cover Density'),
     ('dlt', 'Dominant Leaf Type'),
-    ('fty', 'Forest Type'),
     ('fty', 'Forest Type'),
     ('dlt-chg', 'Dominant Leaf Type Change'),
     ('tcd-chg', 'Tree Cover Density Change'),

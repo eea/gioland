@@ -763,7 +763,6 @@ def similar_parcel(parcel, parcel_item):
 
 def finalize_parcel(wh, parcel, reject):
     stages, stage_order = _get_stages_for_parcel(parcel)
-
     stage = parcel.metadata['stage']
     stage_def = stages[stage]
     if reject:
@@ -794,6 +793,8 @@ def finalize_parcel(wh, parcel, reject):
 
 
 def finalize_and_merge_parcel(wh, parcel):
+    if parcel.metadata['delivery_type'] != LOT:
+        flask.abort(400)
     if parcel.metadata['extent'] != 'partial':
         flask.abort(400)
     if parcel.metadata['stage'] not in STAGES_FOR_MERGING:

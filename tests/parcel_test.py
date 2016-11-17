@@ -231,28 +231,28 @@ class ParcelTest(AppTestCase):
         self.assertEqual(0, len(data))
 
     def test_partial_coverage_is_saved_in_metadata(self):
-        data = dict(self.PARCEL_METADATA)
+        data = dict(self.LOT_METADATA)
         data['extent'] = 'partial'
         data['coverage'] = 'Forest type 1/3'
 
-        resp = self.client.post('/parcel/new/country', data=data)
+        resp = self.client.post('/parcel/new/lot', data=data)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
             self.assertEqual(parcel.metadata['coverage'], 'Forest type 1/3')
 
     def test_parcel_coverage_for_extent_partial_mandatory(self):
-        data = dict(self.PARCEL_METADATA)
+        data = dict(self.LOT_METADATA)
         data['extent'] = 'partial'
-        resp = self.client.post('/parcel/new/country', data=data)
+        resp = self.client.post('/parcel/new/lot', data=data)
         self.assertEqual(400, resp.status_code)
 
     def test_coverage_for_full_extent_is_empty_string(self):
-        data = dict(self.PARCEL_METADATA)
+        data = dict(self.LOT_METADATA)
         data['extent'] = 'full'
         data['coverage'] = 'Forest type 1/3'
 
-        resp = self.client.post('/parcel/new/country', data=data)
+        resp = self.client.post('/parcel/new/lot', data=data)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         with self.app.test_request_context():
@@ -263,19 +263,15 @@ class ParcelTest(AppTestCase):
         data = dict(self.PARCEL_METADATA)
         self.client.post('/parcel/new/country', data=data)
 
-        data['extent'] = 'partial'
-        data['coverage'] = 'Test coverage'
         data['theme'] = 'grd'
         self.client.post('/parcel/new/country', data=data)
 
         resp = self.client.get('/country/be')
         table_headers = select(resp.data, '.title')
-        self.assertEqual(2, len(table_headers))
+        self.assertEqual(1, len(table_headers))
 
         table_headers_text = [t.text for t in table_headers]
-        self.assertIn('Grassland Cover',
-                      map(string.strip, table_headers_text))
-        self.assertIn('Grassland Density',
+        self.assertIn('Grassland',
                       map(string.strip, table_headers_text))
 
     def test_country_workflow_overview_group_contain_correct_parcels(self):
@@ -538,10 +534,10 @@ class LotTest(AppTestCase):
 
     def test_search_lot_deliveries_filter_by_lot(self):
         self.new_parcel(stage='fih', delivery_type=LOT)
-        resp = self.client.get('/search/lot?country=lot 1')
+        resp = self.client.get('/search/lot?lot=lot3')
         self.assertEqual(200, resp.status_code)
         self.assertEqual(1, len(select(resp.data, '.datatable tbody tr')))
-        resp = self.client.get('/search/lot?country=lot 2')
+        resp = self.client.get('/search/lot?lot=lot2')
         self.assertEqual(200, resp.status_code)
         self.assertEqual(0, len(select(resp.data, '.datatable tbody tr')))
 

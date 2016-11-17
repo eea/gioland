@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from mock import Mock, patch, call
 from dateutil import tz
 from common import AppTestCase, record_events, authorization_patch
+from definitions import COUNTRY
 
 
 def setUpModule(self):
@@ -21,11 +22,13 @@ class NotificationDeliveryTest(AppTestCase):
         parcel = warehouse.Parcel(Mock(), 'asdf')
         parcel.save_metadata({
             'country': 'it',
+            'lot': 'lot3',
             'stage': 'enh',
-            'theme': 'grc',
+            'theme': 'grl',
             'projection': 'ntl',
             'resolution': '20m',
             'extent': 'partial',
+            'delivery_type': COUNTRY,
         })
         parcel.add_history_item("Now hear this", self.utcnow,
                                 'somewho', "descr")
@@ -62,10 +65,8 @@ class NotificationDeliveryTest(AppTestCase):
             RDF_URI['stage']: "Enhancement",
             RDF_URI['title']: "Now hear this (stage reference: asdf)",
             RDF_URI['identifier']: "http://example.com/parcel/asdf",
-            RDF_URI['theme']: "Grassland Cover",
-            RDF_URI['projection']: "National",
+            RDF_URI['theme']: "Grassland",
             RDF_URI['resolution']: "20 m",
-            RDF_URI['extent']: "Partial",
             RDF_URI['event_type']: "comment",
         }, rdf_data)
 
@@ -198,17 +199,15 @@ class NotificationSubscriptionTest(AppTestCase):
         self.client.post('/subscribe', data={
             'country': 'dk',
             'extent': 'partial',
-            'projection': 'eur',
             'resolution': '20m',
-            'theme': 'grd',
+            'theme': 'fty',
         })
 
         ok_filters = [{
             RDF_URI['locality']: "Denmark",
             RDF_URI['extent']: "Partial",
-            RDF_URI['projection']: "European",
-            RDF_URI['resolution']: "20m",
-            RDF_URI['theme']: "Grassland Density",
+            RDF_URI['resolution']: "20 m",
+            RDF_URI['theme']: "Forest Type",
         }]
         self.assertEqual(mock_proxy.return_value.makeSubscription.mock_calls,
                          [call(self.channel_id, 'somebody', ok_filters)])
