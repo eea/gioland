@@ -75,7 +75,7 @@ class AppTestCase(unittest.TestCase):
     PARCEL_METADATA = ImmutableDict({
         'country': 'be',
         'lot': 'lot3',
-        'theme': 'grl',
+        'product': 'grl',
         'resolution': '20m',
         'delivery_type': 'country',
         'reference': '2015',
@@ -83,7 +83,7 @@ class AppTestCase(unittest.TestCase):
 
     LOT_METADATA = ImmutableDict({
         'lot': 'lot3',
-        'theme': 'grl',
+        'product': 'grl',
         'resolution': '20m',
         'extent': 'full',
         'coverage': '',

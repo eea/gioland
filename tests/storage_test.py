@@ -265,7 +265,7 @@ class DeleteParcelTest(AppTestCase):
             'stage': 'int',
             'country': 'dk',
             'lot': 'lot1',
-            'theme': 'imp-deg',
+            'product': 'imp-deg',
             'extent': 'full',
             'projection': 'eur',
             'resolution': '20m',

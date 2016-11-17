@@ -4,33 +4,33 @@ from wtforms.validators import DataRequired, ValidationError
 from flask import g
 from warehouse import get_warehouse
 from definitions import COUNTRIES, LOTS, STREAM_LOTS,\
-    THEMES, COUNTRY_THEMES, RESOLUTIONS, LOT_THEMES, \
-    COUNTRY_LOT_THEMES
+    PRODUCTS, COUNTRY_PRODUCTS, RESOLUTIONS, LOT_PRODUCTS, \
+    COUNTRY_LOT_PRODUCTS
 from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
 from definitions import COUNTRY, LOT, STREAM
 
 
-def get_lot_theme(id_lot, delivery_type):
-    themes = [LOTS.index(x) for x in LOTS if x[0] == id_lot]
+def get_lot_product(id_lot, delivery_type):
+    products = [LOTS.index(x) for x in LOTS if x[0] == id_lot]
 
-    theme_idx = themes[0]
+    product_idx = products[0]
 
     if delivery_type == COUNTRY:
-        return COUNTRY_LOT_THEMES[theme_idx]
+        return COUNTRY_LOT_PRODUCTS[product_idx]
     else:
-        return LOT_THEMES[theme_idx]
+        return LOT_PRODUCTS[product_idx]
 
 
 class _BaseDeliveryForm(Form):
 
     lot = SelectField('Lot', [DataRequired()], choices=LOTS)
-    theme = SelectField('Product', [DataRequired()], choices=THEMES)
+    product = SelectField('Product', [DataRequired()], choices=PRODUCTS)
 
-    def validate_theme(self, field):
+    def validate_product(self, field):
         id_lot = self.data['lot']
-        theme = get_lot_theme(id_lot, self.DELIVERY_TYPE)
-        if theme is not None:
-            if field.data in [x[0] for x in theme]:
+        product = get_lot_product(id_lot, self.DELIVERY_TYPE)
+        if product is not None:
+            if field.data in [x[0] for x in product]:
                 return field.validate(self)
         else:
             raise ValidationError('This lot does not have the product provided.')
@@ -63,7 +63,7 @@ class CountryDeliveryForm(_DeliveryForm):
 
     DELIVERY_TYPE = COUNTRY
 
-    theme = SelectField('Product', [DataRequired()], choices=COUNTRY_THEMES)
+    product = SelectField('Product', [DataRequired()], choices=COUNTRY_PRODUCTS)
     country = SelectField('Country', choices=COUNTRIES)
 
 

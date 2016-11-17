@@ -20,14 +20,14 @@ import notification
 import auth
 from definitions import (
     EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE,
-    COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
-    THEMES_IDS, RESOLUTIONS, EXTENTS, REFERENCES, ALL_ROLES, UNS_FIELD_DEFS,
+    COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, PRODUCTS, PRODUCTS_FILTER,
+    PRODUCTS_IDS, RESOLUTIONS, EXTENTS, REFERENCES, ALL_ROLES, UNS_FIELD_DEFS,
     CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
-    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER, STREAM, COUNTRY_THEMES)
+    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER, STREAM, COUNTRY_PRODUCTS)
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
-from forms import get_lot_theme
+from forms import get_lot_product
 
 parcel_views = flask.Blueprint('parcel', __name__)
 
@@ -554,18 +554,18 @@ def chain(name):
 
 
 def group_parcels(parcels):
-    # order parcels based on THEMES order
+    # order parcels based on PRODUCTS order
     def sort_parcels_key(parcel):
-        return THEMES_IDS.index(parcel.metadata['theme'])
+        return PRODUCTS_IDS.index(parcel.metadata['product'])
     sorted_parcels = sorted(parcels, key=sort_parcels_key)
-    return groupby(sorted_parcels, key=lambda p: p.metadata['theme'])
+    return groupby(sorted_parcels, key=lambda p: p.metadata['product'])
 
 
 @parcel_views.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
     if flask.request.method == 'POST':
         filters = {}
-        for name in ['country', 'lot', 'extent', 'resolution', 'theme',
+        for name in ['country', 'lot', 'extent', 'resolution', 'product',
                      'decision', 'stage', 'event_type']:
             value = flask.request.form.get(name, '')
             if value:
@@ -870,14 +870,14 @@ def _get_stages_for_parcel(parcel):
     flask.abort(400)
 
 
-@parcel_views.route('/pick_themes', methods=['GET'])
-def pick_themes():
+@parcel_views.route('/pick_products', methods=['GET'])
+def pick_products():
     if flask.request.method == "GET":
         id_lot = flask.request.args.get('id', 'lot1')
         delivery_type = flask.request.args.get('delivery_type', 'lot')
-        theme = get_lot_theme(id_lot, delivery_type)
-        if theme:
-            return json.dumps(theme)
+        product = get_lot_product(id_lot, delivery_type)
+        if product:
+            return json.dumps(product)
     flask.abort(400)
 
 STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]
@@ -893,10 +893,10 @@ metadata_template_context = {
     'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,
     'COUNTRY_MAP': dict(COUNTRIES),
-    'COUNTRY_THEMES': COUNTRY_THEMES,
-    'THEMES': THEMES,
-    'THEMES_FILTER': THEMES_FILTER,
-    'THEME_MAP': dict(THEMES),
+    'COUNTRY_PRODUCTS': COUNTRY_PRODUCTS,
+    'PRODUCTS': PRODUCTS,
+    'PRODUCTS_FILTER': PRODUCTS_FILTER,
+    'PRODUCT_MAP': dict(PRODUCTS),
     'RESOLUTIONS': RESOLUTIONS,
     'RESOLUTION_MAP': dict(RESOLUTIONS),
     'EXTENTS': EXTENTS,

@@ -5,7 +5,7 @@ import itertools
 SIMILAR_METADATA = (
     'country',
     'lot',
-    'theme',
+    'product',
     'resolution',
     'extent',
     'reference',
@@ -211,7 +211,7 @@ LOT = 'lot'
 STREAM = 'stream'
 
 
-LOT1_THEMES = (
+LOT1_PRODUCTS = (
     ('imp-deg', 'Imperviousness degree'),
     ('imp-chg', 'Imperviousness change'),
     ('imp-chg-cls', 'Imperviousness change classified'),
@@ -220,7 +220,7 @@ LOT1_THEMES = (
     ('bvd', 'Biophysical variables delivery'),
 )
 
-LOT2_THEMES = (
+LOT2_PRODUCTS = (
     ('bvd', 'Biophysical variables delivery'),
     ('tcd', 'Tree Cover Density'),
     ('dlt', 'Dominant Leaf Type'),
@@ -232,28 +232,28 @@ LOT2_THEMES = (
     ('tcd-grd', 'Tree Cover Density Reference Grid'),
 )
 
-LOT3_THEMES = (
+LOT3_PRODUCTS = (
     ('grl', 'Grassland'),
     ('gvp', 'Grassland Vegetation Probability'),
     ('pgi', 'Ploughing Indicator'),
 )
 
-LOT4_THEMES = (
+LOT4_PRODUCTS = (
     ('wwp', 'Wetness and Water product'),
     ('wwp-idx', 'Wetness and Water Probability Index'),
 )
 
-LOT5_THEMES = (
+LOT5_PRODUCTS = (
     ('swf', 'Small woody features'),
 )
 
-COUNTRY_LOT1_THEMES = (
+COUNTRY_LOT1_PRODUCTS = (
     ('imp-deg', 'Imperviousness degree'),
     ('imp-chg', 'Imperviousness change'),
     ('imp-chg-cls', 'Imperviousness change classified'),
 )
 
-COUNTRY_LOT2_THEMES = (
+COUNTRY_LOT2_PRODUCTS = (
     ('tcd', 'Tree Cover Density'),
     ('dlt', 'Dominant Leaf Type'),
     ('fty', 'Forest Type'),
@@ -261,41 +261,41 @@ COUNTRY_LOT2_THEMES = (
     ('tcd-chg', 'Tree Cover Density Change'),
 )
 
-COUNTRY_LOT3_THEMES = (
+COUNTRY_LOT3_PRODUCTS = (
     ('grl', 'Grassland'),
 )
 
-COUNTRY_LOT4_THEMES = (
+COUNTRY_LOT4_PRODUCTS = (
     ('wwp', 'Wetness and Water product'),
 )
 
-COUNTRY_LOT5_THEMES = (
+COUNTRY_LOT5_PRODUCTS = (
     ('swf', 'Small woody features'),
 )
 
-COUNTRY_LOT_THEMES = [
-    COUNTRY_LOT1_THEMES,
-    COUNTRY_LOT2_THEMES,
-    COUNTRY_LOT3_THEMES,
-    COUNTRY_LOT4_THEMES,
-    COUNTRY_LOT5_THEMES,
+COUNTRY_LOT_PRODUCTS = [
+    COUNTRY_LOT1_PRODUCTS,
+    COUNTRY_LOT2_PRODUCTS,
+    COUNTRY_LOT3_PRODUCTS,
+    COUNTRY_LOT4_PRODUCTS,
+    COUNTRY_LOT5_PRODUCTS,
 ]
 
-LOT_THEMES = [
-    LOT1_THEMES,
-    LOT2_THEMES,
-    LOT3_THEMES,
-    LOT4_THEMES,
-    LOT5_THEMES,
+LOT_PRODUCTS = [
+    LOT1_PRODUCTS,
+    LOT2_PRODUCTS,
+    LOT3_PRODUCTS,
+    LOT4_PRODUCTS,
+    LOT5_PRODUCTS,
 ]
 
-STREAM_LOT_THEMES = LOT_THEMES[3:5]
+STREAM_LOT_PRODUCTS = LOT_PRODUCTS[3:5]
 
-THEMES = set(list(itertools.chain.from_iterable(LOT_THEMES)))
-COUNTRY_THEMES = set(list(itertools.chain.from_iterable(COUNTRY_LOT_THEMES)))
-STREAM_THEMES = set(list(itertools.chain.from_iterable(STREAM_LOT_THEMES)))
+PRODUCTS = set(list(itertools.chain.from_iterable(LOT_PRODUCTS)))
+COUNTRY_PRODUCTS = set(list(itertools.chain.from_iterable(COUNTRY_LOT_PRODUCTS)))
+STREAM_PRODUCTS = set(list(itertools.chain.from_iterable(STREAM_LOT_PRODUCTS)))
 
-THEMES_FILTER = [
+PRODUCTS_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),
     ('tcd', 'Tree Cover Density'),
     ('fty', 'Forest Type'),
@@ -306,8 +306,8 @@ THEMES_FILTER = [
 ]
 
 
-THEMES_IDS = map(lambda x: x[0], THEMES)
-COUNTRY_THEMES_IDS = (map(lambda x: x[0], COUNTRY_THEMES))
+PRODUCTS_IDS = map(lambda x: x[0], PRODUCTS)
+COUNTRY_PRODUCTS_IDS = (map(lambda x: x[0], COUNTRY_PRODUCTS))
 
 RESOLUTIONS = [
     ('20m', "20 m"),
@@ -334,7 +334,7 @@ RDF_URI = {
     'actor': GIOLAND_SCHEMA + '#actor',
     'actor_name': GIOLAND_SCHEMA + '#actor_name',
     'stage': GIOLAND_SCHEMA + '#stage',
-    'theme': GIOLAND_SCHEMA + '#theme',
+    'product': GIOLAND_SCHEMA + '#product',
     'resolution': GIOLAND_SCHEMA + '#resolution',
     'extent': GIOLAND_SCHEMA + '#extent',
     'event_type': GIOLAND_SCHEMA + '#event_type',
@@ -354,10 +354,10 @@ UNS_FIELD_DEFS = [
      'rdf_uri': RDF_URI['lot'],
      'range': LOTS},
 
-    {'name': 'theme',
-     'label': "Theme",
-     'rdf_uri': RDF_URI['theme'],
-     'range': THEMES},
+    {'name': 'product',
+     'label': "Product",
+     'rdf_uri': RDF_URI['product'],
+     'range': PRODUCTS},
 
     {'name': 'extent',
      'label': "Extent",

@@ -263,7 +263,7 @@ class ParcelTest(AppTestCase):
         data = dict(self.PARCEL_METADATA)
         self.client.post('/parcel/new/country', data=data)
 
-        data['theme'] = 'grd'
+        data['product'] = 'grd'
         self.client.post('/parcel/new/country', data=data)
 
         resp = self.client.get('/country/be')

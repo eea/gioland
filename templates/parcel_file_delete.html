@@ -6,7 +6,7 @@
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GIO Land'),
     (url_for('parcel.view', name=parcel.name),
-             THEME_MAP[parcel.metadata["theme"]]),
+             PRODUCT_MAP[parcel.metadata["product"]]),
     (url_for('parcel.delete_file', name=parcel.name,
              filename=filename), 'Delete file'),
   ]) }}

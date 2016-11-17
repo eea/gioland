@@ -17,7 +17,7 @@
     </tr>
     <tr>
       <th>Product</th>
-      <td>{{ THEME_MAP[metadata['theme']] }}</td>
+      <td>{{ PRODUCT_MAP[metadata['product']] }}</td>
     </tr>
     {%if delivery_type != STREAM %}
       <tr>
@@ -166,7 +166,7 @@
     <thead>
       <tr>
         <th class="title" colspan="{{ FILTERED_STAGES|length }}">
-          {{ THEME_MAP[grouper] }}</th>
+          {{ PRODUCT_MAP[grouper] }}</th>
       </tr>
       <tr>
         {% for stage, data in FILTERED_STAGES.items() %}

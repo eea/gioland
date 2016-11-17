@@ -6,7 +6,7 @@
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GIO Land'),
     (url_for('parcel.view', name=first_parcel.name),
-             THEME_MAP[first_parcel.metadata["theme"]]),
+             PRODUCT_MAP[first_parcel.metadata["product"]]),
     (url_for('parcel.chain', name=first_parcel.name),
              "High Resolution Layers - workflow overview")
   ]) }}

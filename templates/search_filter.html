@@ -3,9 +3,9 @@
 <div class="filters">
 
   {% if delivery_type == LOT %}
-    {% set theme = THEMES %}
+    {% set product = PRODUCTS %}
   {% elif delivery_type == COUNTRY %}
-    {% set theme = COUNTRY_THEMES %}
+    {% set product = COUNTRY_PRODUCTS %}
   {% endif %}
 
   {% if delivery_type == COUNTRY %}
@@ -15,7 +15,7 @@
 
   {{ pick_from_list('filter-lot', 'lot', LOTS, any=True, label='Lot') }}
 
-    {{ pick_from_list('filter-theme', 'theme', theme, any=True, label='Product') }}
+    {{ pick_from_list('filter-product', 'product', product, any=True, label='Product') }}
 
   {{ pick_from_list('filter-resolution', 'resolution', RESOLUTIONS, any=True) }}
 

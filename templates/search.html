@@ -27,7 +27,7 @@
           if(val) { uri.addSearch(name, val); }
           var id = $(this).attr("id")
           if ( id == "filter-lot"){
-            uri.removeSearch("theme");
+            uri.removeSearch("product");
           }
           document.location = uri.href();
       }
@@ -47,11 +47,11 @@
         lotSelected = $('#filter-lot').val();
         var delivery_type = $('#delivery').val()
         if (lotSelected){
-          $.getJSON('/pick_themes', {
+          $.getJSON('/pick_products', {
               id: lotSelected,
               delivery_type: delivery_type,
           }, function(data) {
-               var select = $("#filter-theme");
+               var select = $("#filter-product");
                select.html('');
                select.append($("<option />").val(null).text("Any Product"));
                $.each(data, function(){
@@ -116,7 +116,7 @@
         {% endif %}
 
         <td>
-          {{ THEME_MAP[metadata['theme']] }}
+          {{ PRODUCT_MAP[metadata['product']] }}
           {% if delivery_type == LOT %}
             {% if parcel.metadata['extent'] == 'partial' %}
               ({{ parcel.metadata['coverage'] }})

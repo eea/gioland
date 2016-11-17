@@ -24,10 +24,9 @@ class NotificationDeliveryTest(AppTestCase):
             'country': 'it',
             'lot': 'lot3',
             'stage': 'enh',
-            'theme': 'grl',
+            'product': 'grl',
             'projection': 'ntl',
             'resolution': '20m',
-            'extent': 'partial',
             'delivery_type': COUNTRY,
         })
         parcel.add_history_item("Now hear this", self.utcnow,
@@ -65,7 +64,7 @@ class NotificationDeliveryTest(AppTestCase):
             RDF_URI['stage']: "Enhancement",
             RDF_URI['title']: "Now hear this (stage reference: asdf)",
             RDF_URI['identifier']: "http://example.com/parcel/asdf",
-            RDF_URI['theme']: "Grassland",
+            RDF_URI['product']: "Grassland",
             RDF_URI['resolution']: "20 m",
             RDF_URI['event_type']: "comment",
         }, rdf_data)
@@ -200,14 +199,14 @@ class NotificationSubscriptionTest(AppTestCase):
             'country': 'dk',
             'extent': 'partial',
             'resolution': '20m',
-            'theme': 'fty',
+            'product': 'fty',
         })
 
         ok_filters = [{
             RDF_URI['locality']: "Denmark",
             RDF_URI['extent']: "Partial",
             RDF_URI['resolution']: "20 m",
-            RDF_URI['theme']: "Forest Type",
+            RDF_URI['product']: "Forest Type",
         }]
         self.assertEqual(mock_proxy.return_value.makeSubscription.mock_calls,
                          [call(self.channel_id, 'somebody', ok_filters)])
