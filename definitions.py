@@ -307,7 +307,7 @@ THEMES_FILTER = [
 
 
 THEMES_IDS = map(lambda x: x[0], THEMES)
-
+COUNTRY_THEMES_IDS = (map(lambda x: x[0], COUNTRY_THEMES))
 
 RESOLUTIONS = [
     ('20m', "20 m"),

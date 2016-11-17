@@ -10,7 +10,7 @@ from persistent import Persistent
 import transaction
 from path import path
 
-from definitions import METADATA, STAGES, LOT_STAGES, COUNTRY_EXCLUDE_METADATA, STREAM
+from definitions import METADATA, STAGES, LOT_STAGES, COUNTRY_EXCLUDE_METADATA, STREAM, STREAM_EXCLUDE_METADATA
 from definitions import STAGE_ORDER, LOT_STAGE_ORDER
 from definitions import LOT, COUNTRY
 
@@ -113,7 +113,7 @@ class Parcel(Persistent):
         if self.metadata['delivery_type'] == COUNTRY:
             filtered_metadata = tuple(set(METADATA) ^ set(COUNTRY_EXCLUDE_METADATA))
         elif self.metadata['delivery_type'] == STREAM:
-            filtered_metadata = tuple(set(METADATA) ^ set(COUNTRY_EXCLUDE_METADATA))
+            filtered_metadata = tuple(set(METADATA) ^ set(STREAM_EXCLUDE_METADATA))
         else:
             filtered_metadata = METADATA
 

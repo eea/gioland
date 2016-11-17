@@ -8,14 +8,17 @@
 
 {% set metadata = parcel.metadata %}
 {% set country_code = metadata['country'] %}
+{% set lot_code = metadata['lot'] %}
 {% set title_bits = '%s, %s'|format(THEME_MAP[metadata['theme']],
                                     STAGE_MAP[metadata['stage']]) %}
+
 {% set country = COUNTRY_MAP[country_code] %}
+{% set lot = LOTS_MAP[lot_code] %}
 
 
 {% block page_title -%}
   {{ super() }} &ndash;
-  {{ country }}, {{ title_bits }} (ref. {{ parcel.name }})
+  {{ country if country else lot }}, {{ title_bits }} (ref. {{ parcel.name }})
 {%- endblock %}
 
 
@@ -92,14 +95,15 @@
 
 
 {% block page_heading %}
-  <h1>{{ country }}, {{ title_bits }} (ref. <tt>{{ parcel.name }}</tt>)</h1>
+  <h1>{{ country if country else lot }}, {{ title_bits }} (ref. <tt>{{ parcel.name }}</tt>)</h1>
 {% endblock %}
 
 
 {% block breadcrumb %}
   {{ breadcrumb_items([
     (url_for('parcel.index'), 'GioLand'),
-    (url_for('parcel.country', code=country_code), COUNTRY_MAP[country_code]),
+    (url_for('parcel.country', code=country_code), COUNTRY_MAP[country_code]) if country else
+    (url_for('parcel.lot', code=lot_code), LOTS_MAP[lot_code]),
     (url_for('parcel.view', name=parcel.name),
         '%s (%s)'|format(title_bits, parcel.name)),
   ]) }}
@@ -107,7 +111,6 @@
 
 
 {% block content %}
-
 <p>
   {% set overview_url = url_for('parcel.chain', name=parcel.name) %}
   <a href="{{ overview_url }}">workflow overview</a>

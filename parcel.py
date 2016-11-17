@@ -90,8 +90,8 @@ def parcel_metadata(name):
 @parcel_views.route('/country/<string:code>')
 def country(code):
     wh = get_warehouse()
-    all_parcels = [p for p in chain_tails(wh)
-                   if p.metadata['delivery_type'] != LOT and
+    all_parcels = [p for p in chain_tails(wh) if
+                   p.metadata['delivery_type'] == COUNTRY and
                    p.metadata['country'] == code]
 
     all_reports = [r for r in wh.get_all_reports()
