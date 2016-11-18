@@ -10,11 +10,11 @@ from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
 from definitions import COUNTRY, LOT, STREAM
 
 
-def get_lot_product(lot_id, delivery_type):
+def get_lot_products(lot_id, delivery_type):
     if delivery_type == COUNTRY:
-        return COUNTRY_LOT_PRODUCTS.get(lot_id, None)
+        return COUNTRY_LOT_PRODUCTS.get(lot_id)
     else:
-        return LOT_PRODUCTS.get(lot_id, None)
+        return LOT_PRODUCTS.get(lot_id)
 
 
 class _BaseDeliveryForm(Form):
@@ -22,22 +22,20 @@ class _BaseDeliveryForm(Form):
     lot = SelectField('Lot', [DataRequired()], choices=LOTS)
     product = SelectField('Product', [DataRequired()], choices=PRODUCTS)
 
-    def validate_product(self, field):
-        id_lot = self.data['lot']
-        product = get_lot_product(id_lot, self.DELIVERY_TYPE)
-        if product is not None:
-            if field.data in [x[0] for x in product]:
-                return field.validate(self)
-        else:
-            raise ValidationError('This lot does not have the product provided.')
+    def validate(self):
+        lot_id = self.data['lot']
+        provided_product = self.data['product']
+        products = get_lot_products(lot_id, self.DELIVERY_TYPE)
+        if provided_product in [slug for slug, name in products]:
+            return super(_BaseDeliveryForm, self).validate()
+        raise ValidationError('This lot does not have the product provided.')
 
     def save(self):
         data = dict(self.data)
         data['stage'] = INITIAL_STAGE
         data['delivery_type'] = self.DELIVERY_TYPE
-        if data['delivery_type'] == LOT:
-            if data['extent'] == 'full':
-                data['coverage'] = ''
+        if data['delivery_type'] == LOT and data['extent'] == 'full':
+            data['coverage'] = ''
         wh = get_warehouse()
         parcel = wh.new_parcel()
         parcel.save_metadata(data)

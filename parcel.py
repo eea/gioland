@@ -27,7 +27,7 @@ from definitions import (
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
-from forms import get_lot_product
+from forms import get_lot_products
 
 parcel_views = flask.Blueprint('parcel', __name__)
 
@@ -873,9 +873,9 @@ def _get_stages_for_parcel(parcel):
 @parcel_views.route('/pick_products', methods=['GET'])
 def pick_products():
     if flask.request.method == "GET":
-        id_lot = flask.request.args.get('id', 'lot1')
+        lot_id = flask.request.args.get('id', 'lot1')
         delivery_type = flask.request.args.get('delivery_type', 'lot')
-        product = get_lot_product(id_lot, delivery_type)
+        product = get_lot_products(lot_id, delivery_type)
         if product:
             return json.dumps(product)
     flask.abort(400)
