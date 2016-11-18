@@ -2,7 +2,8 @@ import logging
 from xmlrpclib import ServerProxy
 import flask
 import blinker
-from definitions import RDF_URI, UNS_FIELD_DEFS, METADATA, LOT, COUNTRY, COUNTRY_EXCLUDE_METADATA, LOT_EXCLUDE_METADATA, \
+from definitions import RDF_URI, UNS_FIELD_DEFS, METADATA, LOT, COUNTRY, \
+    COUNTRY_EXCLUDE_METADATA, LOT_EXCLUDE_METADATA, \
     STREAM_EXCLUDE_METADATA
 import auth
 from utils import format_datetime

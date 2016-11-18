@@ -273,26 +273,26 @@ COUNTRY_LOT5_PRODUCTS = (
     ('swf', 'Small woody features'),
 )
 
-COUNTRY_LOT_PRODUCTS = [
-    COUNTRY_LOT1_PRODUCTS,
-    COUNTRY_LOT2_PRODUCTS,
-    COUNTRY_LOT3_PRODUCTS,
-    COUNTRY_LOT4_PRODUCTS,
-    COUNTRY_LOT5_PRODUCTS,
-]
+COUNTRY_LOT_PRODUCTS = {
+    'lot1': COUNTRY_LOT1_PRODUCTS,
+    'lot2': COUNTRY_LOT2_PRODUCTS,
+    'lot3': COUNTRY_LOT3_PRODUCTS,
+    'lot4': COUNTRY_LOT4_PRODUCTS,
+    'lot5': COUNTRY_LOT5_PRODUCTS,
+}
 
-LOT_PRODUCTS = [
-    LOT1_PRODUCTS,
-    LOT2_PRODUCTS,
-    LOT3_PRODUCTS,
-    LOT4_PRODUCTS,
-    LOT5_PRODUCTS,
-]
+LOT_PRODUCTS = {
+    "lot1": LOT1_PRODUCTS,
+    "lot2": LOT2_PRODUCTS,
+    "lot3": LOT3_PRODUCTS,
+    "lot4": LOT4_PRODUCTS,
+    "lot5": LOT5_PRODUCTS,
+}
 
-STREAM_LOT_PRODUCTS = LOT_PRODUCTS[3:5]
+STREAM_LOT_PRODUCTS = LOT_PRODUCTS["lot3"] + LOT_PRODUCTS["lot4"] + LOT_PRODUCTS["lot5"]
 
-PRODUCTS = set(list(itertools.chain.from_iterable(LOT_PRODUCTS)))
-COUNTRY_PRODUCTS = set(list(itertools.chain.from_iterable(COUNTRY_LOT_PRODUCTS)))
+PRODUCTS = set(list(itertools.chain.from_iterable(LOT_PRODUCTS.values())))
+COUNTRY_PRODUCTS = set(list(itertools.chain.from_iterable(COUNTRY_LOT_PRODUCTS.values())))
 STREAM_PRODUCTS = set(list(itertools.chain.from_iterable(STREAM_LOT_PRODUCTS)))
 
 PRODUCTS_FILTER = [

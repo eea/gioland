@@ -10,15 +10,11 @@ from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
 from definitions import COUNTRY, LOT, STREAM
 
 
-def get_lot_product(id_lot, delivery_type):
-    products = [LOTS.index(x) for x in LOTS if x[0] == id_lot]
-
-    product_idx = products[0]
-
+def get_lot_product(lot_id, delivery_type):
     if delivery_type == COUNTRY:
-        return COUNTRY_LOT_PRODUCTS[product_idx]
+        return COUNTRY_LOT_PRODUCTS.get(lot_id, None)
     else:
-        return LOT_PRODUCTS[product_idx]
+        return LOT_PRODUCTS.get(lot_id, None)
 
 
 class _BaseDeliveryForm(Form):
