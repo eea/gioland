@@ -289,6 +289,9 @@ LOT_PRODUCTS = {
     "lot5": LOT5_PRODUCTS,
 }
 
+DEFAULT_LOT = 'lot1'
+DEFAULT_DELIVERY_TYPE = LOT
+
 STREAM_LOT_PRODUCTS = LOT_PRODUCTS["lot3"] + LOT_PRODUCTS["lot4"] + LOT_PRODUCTS["lot5"]
 
 PRODUCTS = set(list(itertools.chain.from_iterable(LOT_PRODUCTS.values())))

@@ -40,7 +40,7 @@ parcel_deleted = parcel_signals.signal('parcel-deleted')
 parcel_file_deleted = parcel_signals.signal('parcel-file-deleted')
 
 
-@parcel_views.route('/', defaults={'delivery': 'lots'})
+@parcel_views.route('/', defaults={'delivery': LOT})
 @parcel_views.route('/<string:delivery>', endpoint='switch_delivery')
 def index(delivery):
     return flask.render_template('index.html', **{'delivery': delivery})

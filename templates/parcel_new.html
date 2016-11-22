@@ -28,10 +28,10 @@
       });
 
       $('#lot').on('change', function() {
-        var idLot = $(this).val()
+        var lot_id = $(this).val()
         var delivery_type = $('#delivery').val()
-        $.getJSON('/pick_products', {
-          id: idLot,
+        $.getJSON($(this).attr('data-href'), {
+          id: lot_id,
           delivery_type: delivery_type,
         }, function(data) {
              var select = $('#product');
@@ -131,7 +131,7 @@
       {% endif %}
       <tr>
         <td>{{ form.lot.label }}</td>
-        <td>{{ form.lot() }}</td>
+        <td>{{ form.lot(data_href=url_for('parcel.pick_products')) }}</td>
       </tr>
 
       <tr>

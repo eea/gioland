@@ -13,7 +13,7 @@
   {% endif %}
 
 
-  {{ pick_from_list('filter-lot', 'lot', LOTS, any=True, label='Lot') }}
+  {{ pick_from_list('filter-lot', 'lot', LOTS, any=True, label='Lot', url=url_for('parcel.pick_products')) }}
 
   {{ pick_from_list('filter-product', 'product', product, any=True, label='Product') }}
 

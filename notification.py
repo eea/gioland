@@ -104,9 +104,8 @@ def prepare_notification_rdf(item, event_type, rejected=None):
         EXCLUDE_METADATA = LOT_EXCLUDE_METADATA
     else:
         EXCLUDE_METADATA = STREAM_EXCLUDE_METADATA
-
-    filtered_metadata = [x for x in metadata_rdf_fields if x[1] not in EXCLUDE_METADATA]
-
+    filtered_metadata = [(uri, name, data) for uri, name, data in metadata_rdf_fields
+                         if name not in EXCLUDE_METADATA]
     for rdf_uri, metadata_name, value_map in filtered_metadata:
 
             value = value_map.get(metadata[metadata_name], "")

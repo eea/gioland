@@ -47,7 +47,7 @@
         lotSelected = $('#filter-lot').val();
         var delivery_type = $('#delivery').val()
         if (lotSelected){
-          $.getJSON('/pick_products', {
+          $.getJSON($('#filter-lot').attr('data-href'), {
               id: lotSelected,
               delivery_type: delivery_type,
           }, function(data) {
