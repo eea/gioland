@@ -20,8 +20,7 @@
 
 {% block content %}
 
-  {% from 'bits.html' import workflow_overview, report_overview with context %}
+  {% from 'bits.html' import workflow_overview with context %}
   {{ workflow_overview(grouped_parcels) }}
-  {{ report_overview(all_reports) }}
 
 {% endblock %}

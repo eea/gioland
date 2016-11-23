@@ -4,6 +4,28 @@
 
 {% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
 
+{% block scripts %}
+<script>
+$(function() {
+    $('#upload-meta-lot').on('change', function() {
+      var lot_id = $(this).val()
+      console.log(lot_id)
+      var delivery_type = "{{ COUNTRY }}"
+      $.getJSON($(this).attr('data-href'), {
+        id: lot_id,
+        delivery_type: delivery_type,
+      }, function(data) {
+           var select = $('#upload-meta-product');
+           select.html('');
+           $.each(data, function() {
+             select.append($("<option />").val(this[0]).text(this[1]));
+           });
+      });
+
+    }).change();
+});
+</script>
+{% endblock %}
 
 {% from 'bits.html' import breadcrumb_items %}
 {% block breadcrumb %}
@@ -25,13 +47,18 @@
 
     <table>
     {% for name, label, items in [
-            ('country', "Country", COUNTRIES),
-            ('category', "Category", CATEGORIES),
+            ('lot', "Lot", LOTS),
+            ('product', "Product", COUNTRY_PRODUCTS),
       ] %}
       <tr>
         {% set field_id = 'upload-meta-' + name %}
+        {% if name == LOT %}
+          {%set url = url_for('parcel.pick_products') %}
+        {% else %}
+          {% set url = '' %}
+        {% endif %}
         <td><label for="{{ field_id }}">{{ label }}</label></td>
-        <td>{{ pick_from_list(field_id, name, items) }}</td>
+        <td>{{ pick_from_list(field_id, name, items, url=url) }}</td>
       </tr>
     {% endfor %}
 
