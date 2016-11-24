@@ -34,7 +34,7 @@ class ReportTest(AppTestCase):
 
     def test_report_fail_if_corrupted_metadata(self):
         data = dict(self.REPORT_METADATA)
-        data['country'] = 'eau'
+        data['lot'] = 'lo2'
         resp = self.client.post('/report/new', data=data)
         self.assertEqual(400, resp.status_code)
 
