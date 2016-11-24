@@ -669,6 +669,7 @@ def authorize_for_parcel(parcel):
 
 
 def authorize_for_upload(parcel):
+
     stage = STAGES[parcel.metadata['stage']]
     if not authorize_for_parcel(parcel):
         return False

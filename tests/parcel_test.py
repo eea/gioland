@@ -47,6 +47,11 @@ class ParcelTest(AppTestCase):
             parcel = self.wh.get_parcel(parcel_name)
             self.assertEqual(parcel.metadata['stage'], 'int')
 
+    def test_begin_parcel_displays_all_deliveries(self):
+        resp = self.client.get('/parcel/new/country')
+        delivery_types = select(resp.data, '[name=delivery_type]')
+        self.assertEqual(len(delivery_types), 3)
+
     def test_show_existing_files_in_parcel(self):
         resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
@@ -540,6 +545,11 @@ class LotTest(AppTestCase):
         resp = self.client.get('/search/lot?lot=lot2')
         self.assertEqual(200, resp.status_code)
         self.assertEqual(0, len(select(resp.data, '.datatable tbody tr')))
+
+    def test_pick_products(self):
+        import json
+        resp = self.client.get('/pick_products')
+        self.assertEqual(6, len(json.loads(resp.data)))
 
 
 class ApiTest(AppTestCase):
