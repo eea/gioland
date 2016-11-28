@@ -30,7 +30,7 @@
       $('#lot').on('change', function() {
         var lot_id = $(this).val()
         var delivery_type = $('#delivery').val()
-        $.getJSON($(this).attr('data-href'), {
+        $.getJSON($(this).data('href'), {
           id: lot_id,
           delivery_type: delivery_type,
         }, function(data) {
