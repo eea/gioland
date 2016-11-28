@@ -86,11 +86,7 @@
 
 
 {% macro pick_from_list(id, name, items, any=False, label=None, url='') -%}
-  {% if url %}
-    <select id="{{ id }}" name="{{ name }}" data-href="{{ url }}">
-  {% else %}
-    <select id="{{ id }}" name="{{ name }}">
-  {% endif %}
+  <select id="{{ id }}" name="{{ name }}"  {% if url %} data-href="{{ url }}" {% endif %}>
   {% if any %}
     <option value="">Any {{ label or name|title }}</option>
   {% endif %}
