@@ -1,6 +1,6 @@
 from collections import OrderedDict
+from utils import remove_duplicates_preserve_order
 
-import itertools
 
 SIMILAR_METADATA = (
     'country',
@@ -296,9 +296,24 @@ STREAM_LOT_PRODUCTS = LOT3_PRODUCTS + \
                       LOT4_PRODUCTS + \
                       LOT5_PRODUCTS
 
-PRODUCTS = set(list(itertools.chain.from_iterable(LOT_PRODUCTS.values())))
-COUNTRY_PRODUCTS = set(list(itertools.chain.from_iterable(COUNTRY_LOT_PRODUCTS.values())))
-STREAM_PRODUCTS = set(list(itertools.chain.from_iterable(STREAM_LOT_PRODUCTS)))
+
+PRODUCTS = remove_duplicates_preserve_order(
+    LOT1_PRODUCTS +
+    LOT2_PRODUCTS +
+    LOT3_PRODUCTS +
+    LOT4_PRODUCTS +
+    LOT5_PRODUCTS
+)
+
+COUNTRY_PRODUCTS = remove_duplicates_preserve_order(
+    COUNTRY_LOT1_PRODUCTS +
+    COUNTRY_LOT2_PRODUCTS +
+    COUNTRY_LOT3_PRODUCTS +
+    COUNTRY_LOT4_PRODUCTS +
+    COUNTRY_LOT5_PRODUCTS
+)
+
+STREAM_PRODUCTS = remove_duplicates_preserve_order(STREAM_LOT_PRODUCTS)
 
 PRODUCTS_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),
