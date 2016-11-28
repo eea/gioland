@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from path import path
 import transaction
 from common import AppTestCase
-
+from definitions import COUNTRY_EXCLUDE_METADATA
 
 BAD_METADATA_VALUES = [
     {2: 'a'},
@@ -264,7 +264,8 @@ class DeleteParcelTest(AppTestCase):
         parcel.save_metadata({
             'stage': 'int',
             'country': 'dk',
-            'theme': 'imp-deg',
+            'lot': 'lot1',
+            'product': 'imp-deg',
             'extent': 'full',
             'projection': 'eur',
             'resolution': '20m',
@@ -403,8 +404,9 @@ class FilesystemSymlinkTest(AppTestCase):
 
     def symlink_path(self, metadata, *extra):
         from definitions import EDITABLE_METADATA
+        filtered_metadata = tuple(set(EDITABLE_METADATA) ^ set(COUNTRY_EXCLUDE_METADATA))
         symlink_path = self.symlinks_root
-        for name in EDITABLE_METADATA:
+        for name in filtered_metadata:
             symlink_path = symlink_path / metadata[name]
         for bit in extra:
             symlink_path = symlink_path / str(bit)

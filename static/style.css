@@ -44,6 +44,10 @@ a.delete-parcel {
     height: 60px;
 }
 
+.filters select {
+    margin-bottom: 10px;
+}
+
 .filters .clear {
     padding-top: 6px;
     padding-left: 3px;

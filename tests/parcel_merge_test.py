@@ -1,6 +1,9 @@
+import unittest
+
 from common import AppTestCase, authorization_patch, select
 
 
+@unittest.skip("merge is unreachable in this version")
 class ParcelMergeTests(AppTestCase):
 
     CREATE_WAREHOUSE = True

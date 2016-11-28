@@ -27,6 +27,21 @@
         window.location.href = $(this).val();
       });
 
+      $('#lot').on('change', function() {
+        var lot_id = $(this).val()
+        var delivery_type = $('#delivery').val()
+        $.getJSON($(this).data('href'), {
+          id: lot_id,
+          delivery_type: delivery_type,
+        }, function(data) {
+             var select = $('#product');
+             select.html('');
+             $.each(data, function() {
+               select.append($("<option />").val(this[0]).text(this[1]));
+             });
+        });
+
+      }).change();
     });
   </script>
 
@@ -56,7 +71,7 @@
 
     <ul>
       <li>
-        1. The Identifier field in an HRL process notificaion contains a link to the HRL parcel.<br />
+        1. The Identifier field in an HRL process notification contains a link to the HRL parcel.<br />
         - Click on Identifier field link.<br />
         - Click on Next step: Service provider upload.<br />
         - Use the dialogue to upload your data.<br />
@@ -64,7 +79,7 @@
 
       <li>
         2. Use the Search deliveries tool.<br />
-        - Select the country, theme etc. to find the HRL of interest.<br />
+        - Select the country, product etc. to find the HRL of interest.<br />
         - Click on the Stage link. This takes you to the upload page, as in 1) above.<br />
       </li>
     </ul>
@@ -91,53 +106,67 @@
             <input type="radio" name="delivery_type"
             {% if delivery_type == LOT %}checked="checked"{% endif %}
                    value="{{ url_for('parcel.lot_delivery') }}">
-            Lot delivery
+            LAEA mosaic delivery
+        </label>
+      </td>
+      <td>
+        <label>
+            <input type="radio" name="delivery_type"
+            {% if delivery_type == STREAM %}checked="checked"{% endif %}
+                   value="{{ url_for('parcel.stream_delivery') }}">
+            Streamlining delivery
         </label>
       </td>
     </tr>
   </table>
-
+  <input id="delivery"hidden value="{{delivery_type}}"/>
   <hr>
 
   <form class="delivery_form" method="post">
 
     <table>
+      {% if delivery_type == COUNTRY %}
       <tr>
         <td>{{ form.country.label }}</td>
         <td>{{ form.country() }}</td>
       </tr>
-
+      {% endif %}
       <tr>
-        <td>{{ form.theme.label }}</td>
-        <td>{{ form.theme() }}</td>
-      </tr>
-
-      <tr>
-        <td>{{ form.projection.label }}</td>
-        <td>{{ form.projection() }}</td>
+        <td>{{ form.lot.label }}</td>
+        <td>{{ form.lot(data_href=url_for('parcel.pick_products')) }}</td>
       </tr>
 
       <tr>
-        <td>{{ form.resolution.label }}</td>
-        <td>{{ form.resolution() }}</td>
+        <td>{{ form.product.label }}</td>
+        <td>{{ form.product() }}</td>
       </tr>
-
-      <tr>
-        <td>{{ form.extent.label }}</td>
-        <td>{{ form.extent() }}</td>
-      </tr>
-
-      <tr class="hide">
-        <td>{{ form.coverage.label }}</td>
-        <td>{{ form.coverage() }}
-            <span class="err">(required)</span>
-        </td>
-      </tr>
-    </table>
-
-    <button type="submit">Begin upload</button>
-
+      {% if delivery_type != STREAM  %}
+        <tr>
+          <td>{{ form.resolution.label }}</td>
+          <td>{{ form.resolution() }}</td>
+        </tr>
+        {% if delivery_type == LOT %}
+          <tr>
+            <td>{{ form.extent.label }}</td>
+            <td>{{ form.extent() }}</td>
+          </tr>
+          <tr class="hide">
+            <td>{{ form.coverage.label }}</td>
+            <td>{{ form.coverage() }}
+                <span class="err">(required)</span>
+            </td>
+          </tr>
+        {% endif %}
+        <tr>
+          <td>{{ form.reference.label }}</td>
+          <td>{{ form.reference() }}</td>
+        </tr>
+      {% endif %}
+      </table>
+    {% if delivery_type != STREAM %}
+      <button type="submit">Begin upload</button>
+    {% else %}
+      <button type="submit" disabled>Begin upload</button>
+    {% endif %}
   </form>
-
-
 {% endblock %}

@@ -1,20 +1,38 @@
 from collections import OrderedDict
+from utils import remove_duplicates_preserve_order
 
 
 SIMILAR_METADATA = (
     'country',
-    'theme',
-    'projection',
+    'lot',
+    'product',
     'resolution',
+    'extent',
+    'reference',
+)
+
+LOT_EXCLUDE_METADATA = (
+    'country',
+)
+
+COUNTRY_EXCLUDE_METADATA = (
+    'coverage',
     'extent',
 )
 
+STREAM_EXCLUDE_METADATA = (
+    'coverage',
+    'extent',
+    'country',
+    'resolution',
+    'reference'
+)
 
 EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
 METADATA = EDITABLE_METADATA + ('stage',)
 
 
-REPORT_METADATA = ('country', 'category',)
+REPORT_METADATA = ('country', 'category')
 
 
 STAGE_INT = 'int'
@@ -180,34 +198,124 @@ COUNTRIES = COUNTRIES_MC + COUNTRIES_CC
 
 
 LOTS = (
-    ('lot 1', 'Lot 1'),
-    ('lot 2', 'Lot 2'),
-    ('lot 3', 'Lot 3'),
-    ('lot 4', 'Lot 4'),
-    ('lot 5', 'Lot 5'),
-    ('lot 6', 'Lot 6'),
+    ('lot1', 'Lot 1 Imperviousness'),
+    ('lot2', 'Lot 2 Forest'),
+    ('lot3', 'Lot 3 Grassland'),
+    ('lot4', 'Lot 4 Wetness and water'),
+    ('lot5', 'Lot 5 Small woody features'),
 )
 
-
+STREAM_LOTS = LOTS[2:5]
 COUNTRY = 'country'
 LOT = 'lot'
+STREAM = 'stream'
 
 
-THEMES = (
-    ('imp-deg', 'Imperviousness Degree'),
-    ('imp-chg', 'Imperviousness Change'),
-    ('tcd', 'Tree Cover Density'),
-    ('fty', 'Forest Type'),
-    ('tnt', 'Tree / Non-tree'),
-    ('grc', 'Grassland Cover'),
-    ('grd', 'Grassland Density'),
-    ('wet', 'Wetlands'),
-    ('pwb', 'Permanent Water Bodies'),
-    ('ngr', 'New grassland - NGR'),
+LOT1_PRODUCTS = (
+    ('imp-deg', 'Imperviousness degree'),
+    ('imp-chg', 'Imperviousness change'),
+    ('imp-chg-cls', 'Imperviousness change classified'),
+    ('imp-deg-prd', 'Imperviousness degree reference product (vector)'),
+    ('imp-deg-grd', 'Imperviousness degree reference (grid)'),
+    ('bvd', 'Biophysical variables delivery'),
 )
 
+LOT2_PRODUCTS = (
+    ('bvd', 'Biophysical variables delivery'),
+    ('tcd', 'Tree Cover Density'),
+    ('dlt', 'Dominant Leaf Type'),
+    ('fty', 'Forest Type'),
+    ('fsl', 'Forest Additional Support Layer'),
+    ('dlt-chg', 'Dominant Leaf Type Change'),
+    ('tcd-chg', 'Tree Cover Density Change'),
+    ('tcd-prd', 'Tree Cover Density Reference Product (Vector data)'),
+    ('tcd-grd', 'Tree Cover Density Reference Grid'),
+)
 
-THEMES_FILTER = [
+LOT3_PRODUCTS = (
+    ('grl', 'Grassland'),
+    ('gvp', 'Grassland Vegetation Probability'),
+    ('pgi', 'Ploughing Indicator'),
+)
+
+LOT4_PRODUCTS = (
+    ('wwp', 'Wetness and Water product'),
+    ('wwp-idx', 'Wetness and Water Probability Index'),
+)
+
+LOT5_PRODUCTS = (
+    ('swf', 'Small woody features'),
+)
+
+COUNTRY_LOT1_PRODUCTS = (
+    ('imp-deg', 'Imperviousness degree'),
+    ('imp-chg', 'Imperviousness change'),
+    ('imp-chg-cls', 'Imperviousness change classified'),
+)
+
+COUNTRY_LOT2_PRODUCTS = (
+    ('tcd', 'Tree Cover Density'),
+    ('dlt', 'Dominant Leaf Type'),
+    ('fty', 'Forest Type'),
+    ('dlt-chg', 'Dominant Leaf Type Change'),
+    ('tcd-chg', 'Tree Cover Density Change'),
+)
+
+COUNTRY_LOT3_PRODUCTS = (
+    ('grl', 'Grassland'),
+)
+
+COUNTRY_LOT4_PRODUCTS = (
+    ('wwp', 'Wetness and Water product'),
+)
+
+COUNTRY_LOT5_PRODUCTS = (
+    ('swf', 'Small woody features'),
+)
+
+COUNTRY_LOT_PRODUCTS = {
+    'lot1': COUNTRY_LOT1_PRODUCTS,
+    'lot2': COUNTRY_LOT2_PRODUCTS,
+    'lot3': COUNTRY_LOT3_PRODUCTS,
+    'lot4': COUNTRY_LOT4_PRODUCTS,
+    'lot5': COUNTRY_LOT5_PRODUCTS,
+}
+
+LOT_PRODUCTS = {
+    "lot1": LOT1_PRODUCTS,
+    "lot2": LOT2_PRODUCTS,
+    "lot3": LOT3_PRODUCTS,
+    "lot4": LOT4_PRODUCTS,
+    "lot5": LOT5_PRODUCTS,
+}
+
+DEFAULT_LOT = 'lot1'
+DEFAULT_DELIVERY_TYPE = LOT
+
+STREAM_LOT_PRODUCTS = LOT3_PRODUCTS + \
+                      LOT4_PRODUCTS + \
+                      LOT5_PRODUCTS
+
+
+PRODUCTS = remove_duplicates_preserve_order(
+    LOT1_PRODUCTS +
+    LOT2_PRODUCTS +
+    LOT3_PRODUCTS +
+    LOT4_PRODUCTS +
+    LOT5_PRODUCTS
+)
+
+COUNTRY_PRODUCTS = remove_duplicates_preserve_order(
+    COUNTRY_LOT1_PRODUCTS +
+    COUNTRY_LOT2_PRODUCTS +
+    COUNTRY_LOT3_PRODUCTS +
+    COUNTRY_LOT4_PRODUCTS +
+    COUNTRY_LOT5_PRODUCTS
+)
+
+STREAM_PRODUCTS = remove_duplicates_preserve_order(STREAM_LOT_PRODUCTS)
+
+PRODUCTS_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),
     ('tcd', 'Tree Cover Density'),
     ('fty', 'Forest Type'),
@@ -218,17 +326,12 @@ THEMES_FILTER = [
 ]
 
 
-THEMES_IDS = map(lambda x: x[0], THEMES)
-
-
-PROJECTIONS = [
-    ('ntl', "National"),
-    ('eur', "European"),
-]
+PRODUCTS_IDS = map(lambda x: x[0], PRODUCTS)
+COUNTRY_PRODUCTS_IDS = (map(lambda x: x[0], COUNTRY_PRODUCTS))
 
 RESOLUTIONS = [
-    ('20m', "20m"),
-    ('100m', "100m"),
+    ('20m', "20 m"),
+    ('100m', "100 m"),
 ]
 
 FULL = 'full'
@@ -247,11 +350,11 @@ RDF_URI = {
     'date': 'http://purl.org/dc/elements/1.1/date',
     'parcel_event': GIOLAND_SCHEMA + '#parcelevent',
     'locality': GIOLAND_SCHEMA + '#locality',
+    'lot': GIOLAND_SCHEMA + '#lot',
     'actor': GIOLAND_SCHEMA + '#actor',
     'actor_name': GIOLAND_SCHEMA + '#actor_name',
     'stage': GIOLAND_SCHEMA + '#stage',
-    'theme': GIOLAND_SCHEMA + '#theme',
-    'projection': GIOLAND_SCHEMA + '#projection',
+    'product': GIOLAND_SCHEMA + '#product',
     'resolution': GIOLAND_SCHEMA + '#resolution',
     'extent': GIOLAND_SCHEMA + '#extent',
     'event_type': GIOLAND_SCHEMA + '#event_type',
@@ -262,24 +365,24 @@ RDF_URI = {
 UNS_FIELD_DEFS = [
 
     {'name': 'country',
-     'label': "Country / Lots",
+     'label': "Country",
      'rdf_uri': RDF_URI['locality'],
-     'range': COUNTRIES + LOTS},
+     'range': COUNTRIES},
 
-    {'name': 'theme',
-     'label': "Theme",
-     'rdf_uri': RDF_URI['theme'],
-     'range': THEMES},
+    {'name': 'lot',
+     'label': "Lot",
+     'rdf_uri': RDF_URI['lot'],
+     'range': LOTS},
+
+    {'name': 'product',
+     'label': "Product",
+     'rdf_uri': RDF_URI['product'],
+     'range': PRODUCTS},
 
     {'name': 'extent',
      'label': "Extent",
      'rdf_uri': RDF_URI['extent'],
      'range': EXTENTS},
-
-    {'name': 'projection',
-     'label': "Projection",
-     'rdf_uri': RDF_URI['projection'],
-     'range': PROJECTIONS},
 
     {'name': 'resolution',
      'label': "Spatial resolution",
@@ -298,6 +401,16 @@ UNS_FIELD_DEFS = [
 
 ]
 
+REFERENCES = (
+    ('2006', '2006'),
+    ('2009', '2009'),
+    ('2012', '2012'),
+    ('2015', '2015'),
+    ('20062009', '2006-2009'),
+    ('20092012', '2009-2012'),
+    ('20122015', '2012-2015'),
+    ('20062012', '2006-2012'),
+)
 
 ALL_ROLES = [
     'ROLE_SP',

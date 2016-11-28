@@ -16,15 +16,14 @@
 
 {% block content %}
   <ul class="tabs">
-    <li {% if delivery == 'lots' %}class="active"{% endif %}>
-      <a href="{{ url_for('.switch_delivery', delivery='lots') }}" >
+    <li {% if delivery == LOT %}class="active"{% endif %}>
+      <a href="{{ url_for('.switch_delivery', delivery=LOT) }}" >
       Lots</a></li>
-    <li {% if delivery == 'country' %}class="active"{% endif %}>
-      <a href="{{ url_for('.switch_delivery', delivery='country') }}">
+    <li {% if delivery == COUNTRY %}class="active"{% endif %}>
+      <a href="{{ url_for('.switch_delivery', delivery=COUNTRY) }}">
       Country deliveries</a></li>
   </ul>
-
-  {% if delivery == 'lots' %}
+  {% if delivery == LOT %}
     <h2>Lots</h2>
 
     <div>
@@ -38,7 +37,7 @@
     </div>
   {% endif %}
 
-  {% if delivery == 'country' %}
+  {% if delivery == COUNTRY %}
     <h2>EEA Member countries</h2>
 
     <div class="countrybox-container">

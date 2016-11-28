@@ -6,7 +6,6 @@ from werkzeug.contrib.cache import NullCache, SimpleCache
 import flask
 from dateutil import tz, parser
 from zc.lockfile import LockFile, LockError
-from definitions import DATE_FORMAT
 
 
 log = logging.getLogger(__name__)
@@ -42,6 +41,7 @@ def initialize_app(app):
 
 def format_datetime(value, format_name='long'):
     """ Formats a datetime according to the given format. """
+    from definitions import DATE_FORMAT
     timezone = flask.current_app.config.get("TIME_ZONE")
     if timezone:
         from_zone = tz.gettz("UTC")
@@ -97,3 +97,16 @@ def exclusive_lock(func=None):
             return func(*args, **kwargs)
 
     return wrapper
+
+
+def remove_duplicates_preserve_order(seq):
+    seen = {}
+    result = []
+    for item in seq:
+        if item in seen:
+            continue
+        seen[item] = 1
+        result.append(item)
+    return result
+
+

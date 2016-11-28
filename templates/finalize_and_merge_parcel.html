@@ -3,7 +3,7 @@
 {% set title = "Finalize and merge parcels" %}
 {% set metadata = parcel.metadata %}
 {% set country_code = metadata['country'] %}
-{% set title_bits = '%s, %s'|format(THEME_MAP[metadata['theme']],
+{% set title_bits = '%s, %s'|format(PRODUCT_MAP[metadata['product']],
                                     STAGE_MAP[metadata['stage']]) %}
 {% set country = COUNTRY_MAP[country_code] %}
 

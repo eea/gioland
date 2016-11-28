@@ -11,37 +11,33 @@
       </tr>
     {% endif %}
 
-    {% if delivery_type == LOT %}
+    <tr>
+      <th>Lot</th>
+      <td>{{ LOTS_MAP[metadata['lot']] }}</td>
+    </tr>
+    <tr>
+      <th>Product</th>
+      <td>{{ PRODUCT_MAP[metadata['product']] }}</td>
+    </tr>
+    {%if delivery_type != STREAM %}
       <tr>
-        <th>Lot</th>
-        <td>{{ LOTS_MAP[metadata['country']] }}</td>
+        <th>Spatial resolution</th>
+        <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
+      </tr>
+      {% if delivery_type == LOT %}
+        <tr>
+          <th>Extent</th>
+          <td>
+            {{ EXTENT_MAP[metadata['extent']] }} <br>
+            <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
+          </td>
+        </tr>
+      {% endif %}
+      <tr>
+        <th>Reference year</th>
+        <td>{{ REFERENCE_MAP[metadata['reference']] }}</td>
       </tr>
     {% endif %}
-
-
-    <tr>
-      <th>Theme</th>
-      <td>{{ THEME_MAP[metadata['theme']] }}</td>
-    </tr>
-
-    <tr>
-      <th>Projection</th>
-      <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
-    </tr>
-
-    <tr>
-      <th>Spatial resolution</th>
-      <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
-    </tr>
-
-    <tr>
-      <th>Extent</th>
-      <td>
-        {{ EXTENT_MAP[metadata['extent']] }} <br>
-        <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
-      </td>
-    </tr>
-
     {% if show_stage %}
     <tr>
       <th>Processing stage</th>
@@ -89,8 +85,8 @@
 {% endmacro %}
 
 
-{% macro pick_from_list(id, name, items, any=False, label=None) -%}
-  <select id="{{ id }}" name="{{ name }}">
+{% macro pick_from_list(id, name, items, any=False, label=None, url='') -%}
+  <select id="{{ id }}" name="{{ name }}"  {% if url %} data-href="{{ url }}" {% endif %}>
   {% if any %}
     <option value="">Any {{ label or name|title }}</option>
   {% endif %}
@@ -170,7 +166,7 @@
     <thead>
       <tr>
         <th class="title" colspan="{{ FILTERED_STAGES|length }}">
-          {{ THEME_MAP[grouper] }}</th>
+          {{ PRODUCT_MAP[grouper] }}</th>
       </tr>
       <tr>
         {% for stage, data in FILTERED_STAGES.items() %}

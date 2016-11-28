@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import tempfile
@@ -17,16 +18,18 @@ from path import path
 
 import notification
 import auth
-from definitions import (
-    EDITABLE_METADATA, METADATA, STAGES, STAGE_ORDER, INITIAL_STAGE,
-    COUNTRIES_MC, COUNTRIES_CC, COUNTRIES, THEMES, THEMES_FILTER,
-    THEMES_IDS, PROJECTIONS, RESOLUTIONS, EXTENTS, ALL_ROLES, UNS_FIELD_DEFS,
-    CATEGORIES, REPORT_METADATA, DOCUMENTS, SIMILAR_METADATA,
-    STAGES_FOR_MERGING, COUNTRY, LOT, LOTS, LOT_STAGES, LOT_STAGE_ORDER)
+from definitions import ALL_ROLES, CATEGORIES, COUNTRIES, COUNTRY, COUNTRIES_CC
+from definitions import COUNTRIES_MC, COUNTRY_PRODUCTS, DOCUMENTS
+from definitions import EDITABLE_METADATA,  EXTENTS, INITIAL_STAGE, LOT, LOTS
+from definitions import LOT_STAGE_ORDER, LOT_STAGES, METADATA, PRODUCTS
+from definitions import PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
+from definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
+from definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
+from definitions import UNS_FIELD_DEFS
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
-from forms import CountryDeliveryForm, LotDeliveryForm
-
+from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
+from forms import get_lot_products
 
 parcel_views = flask.Blueprint('parcel', __name__)
 
@@ -39,7 +42,7 @@ parcel_deleted = parcel_signals.signal('parcel-deleted')
 parcel_file_deleted = parcel_signals.signal('parcel-file-deleted')
 
 
-@parcel_views.route('/', defaults={'delivery': 'lots'})
+@parcel_views.route('/', defaults={'delivery': LOT})
 @parcel_views.route('/<string:delivery>', endpoint='switch_delivery')
 def index(delivery):
     return flask.render_template('index.html', **{'delivery': delivery})
@@ -89,8 +92,10 @@ def parcel_metadata(name):
 @parcel_views.route('/country/<string:code>')
 def country(code):
     wh = get_warehouse()
-    all_parcels = [p for p in chain_tails(wh)
-                   if p.metadata['country'] == code]
+    all_parcels = [p for p in chain_tails(wh) if
+                   p.metadata['delivery_type'] == COUNTRY and
+                   p.metadata['country'] == code]
+
     all_reports = [r for r in wh.get_all_reports()
                    if r.country == code]
     grouped_parcels = group_parcels(all_parcels)
@@ -105,7 +110,7 @@ def country(code):
 def lot(code):
     wh = get_warehouse()
     all_parcels = [p for p in chain_tails(wh)
-                   if p.metadata['country'] == code]
+                   if p.metadata['lot'] == code]
     grouped_parcels = group_parcels(all_parcels)
     return flask.render_template('lot.html', **{
         'code': code,
@@ -146,12 +151,20 @@ class LotDelivery(_BaseDelivery):
     delivery_type = LOT
 
 
+class StreamDelivery(_BaseDelivery):
+
+    form_class = StreamDeliveryForm
+    delivery_type = STREAM
+
 parcel_views.add_url_rule(
     '/parcel/new/country',
     view_func=CountryDelivery.as_view('country_delivery'))
 parcel_views.add_url_rule(
     '/parcel/new/lot',
     view_func=LotDelivery.as_view('lot_delivery'))
+parcel_views.add_url_rule(
+    '/parcel/new/stream',
+    view_func=StreamDelivery.as_view('stream_delivery'))
 
 
 @parcel_views.route('/parcel/<string:name>/chunk', methods=['POST'])
@@ -543,18 +556,18 @@ def chain(name):
 
 
 def group_parcels(parcels):
-    # order parcels based on THEMES order
+    # order parcels based on PRODUCTS order
     def sort_parcels_key(parcel):
-        return THEMES_IDS.index(parcel.metadata['theme'])
+        return PRODUCTS_IDS.index(parcel.metadata['product'])
     sorted_parcels = sorted(parcels, key=sort_parcels_key)
-    return groupby(sorted_parcels, key=lambda p: p.metadata['theme'])
+    return groupby(sorted_parcels, key=lambda p: p.metadata['product'])
 
 
 @parcel_views.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
     if flask.request.method == 'POST':
         filters = {}
-        for name in ['country', 'extent', 'projection', 'resolution', 'theme',
+        for name in ['country', 'lot', 'extent', 'resolution', 'product',
                      'decision', 'stage', 'event_type']:
             value = flask.request.form.get(name, '')
             if value:
@@ -658,6 +671,7 @@ def authorize_for_parcel(parcel):
 
 
 def authorize_for_upload(parcel):
+
     stage = STAGES[parcel.metadata['stage']]
     if not authorize_for_parcel(parcel):
         return False
@@ -693,7 +707,8 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
     links = []
     for p in parcels:
         url = flask.url_for('.view', name=p.name)
-        if p.metadata['extent'] == 'partial':
+        if p.metadata['delivery_type'] == LOT and \
+           p.metadata['extent'] == 'partial':
             links.append('<a href="%s">%s (%s)</a>' % (
                 url, stage_def['label'], p.metadata['coverage']))
         else:
@@ -751,7 +766,6 @@ def similar_parcel(parcel, parcel_item):
 
 def finalize_parcel(wh, parcel, reject):
     stages, stage_order = _get_stages_for_parcel(parcel)
-
     stage = parcel.metadata['stage']
     stage_def = stages[stage]
     if reject:
@@ -782,6 +796,8 @@ def finalize_parcel(wh, parcel, reject):
 
 
 def finalize_and_merge_parcel(wh, parcel):
+    if parcel.metadata['delivery_type'] != LOT:
+        flask.abort(400)
     if parcel.metadata['extent'] != 'partial':
         flask.abort(400)
     if parcel.metadata['stage'] not in STAGES_FOR_MERGING:
@@ -857,6 +873,16 @@ def _get_stages_for_parcel(parcel):
     flask.abort(400)
 
 
+@parcel_views.route('/pick_products', methods=['GET'])
+def pick_products():
+    if flask.request.method == "GET":
+        lot_id = flask.request.args.get('id', 'lot1')
+        delivery_type = flask.request.args.get('delivery_type', 'lot')
+        product = get_lot_products(lot_id, delivery_type)
+        if product:
+            return json.dumps(product)
+    flask.abort(400)
+
 STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]
 
 metadata_template_context = {
@@ -870,19 +896,21 @@ metadata_template_context = {
     'COUNTRIES_CC': COUNTRIES_CC,
     'COUNTRIES': COUNTRIES,
     'COUNTRY_MAP': dict(COUNTRIES),
-    'THEMES': THEMES,
-    'THEMES_FILTER': THEMES_FILTER,
-    'THEME_MAP': dict(THEMES),
+    'COUNTRY_PRODUCTS': COUNTRY_PRODUCTS,
+    'PRODUCTS': PRODUCTS,
+    'PRODUCTS_FILTER': PRODUCTS_FILTER,
+    'PRODUCT_MAP': dict(PRODUCTS),
     'RESOLUTIONS': RESOLUTIONS,
     'RESOLUTION_MAP': dict(RESOLUTIONS),
-    'PROJECTIONS': PROJECTIONS,
-    'PROJECTION_MAP': dict(PROJECTIONS),
     'EXTENTS': EXTENTS,
     'EXTENT_MAP': dict(EXTENTS),
+    'REFERENCES': REFERENCES,
+    'REFERENCE_MAP': dict(REFERENCES),
     'UNS_FIELD_DEFS': UNS_FIELD_DEFS,
     'STAGES_FOR_MERGING': STAGES_FOR_MERGING,
     'COUNTRY': COUNTRY,
     'LOT': LOT,
+    'STREAM': STREAM,
     'LOTS': LOTS,
     'LOTS_MAP': dict(LOTS),
 }

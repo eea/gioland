@@ -10,7 +10,7 @@ from persistent import Persistent
 import transaction
 from path import path
 
-from definitions import METADATA, STAGES, LOT_STAGES
+from definitions import METADATA, STAGES, LOT_STAGES, COUNTRY_EXCLUDE_METADATA, STREAM, STREAM_EXCLUDE_METADATA
 from definitions import STAGE_ORDER, LOT_STAGE_ORDER
 from definitions import LOT, COUNTRY
 
@@ -110,7 +110,14 @@ class Parcel(Persistent):
 
     def link_in_tree(self):
         symlink_path = self._warehouse.tree_path
-        for name in METADATA:
+        if self.metadata['delivery_type'] == COUNTRY:
+            filtered_metadata = tuple(set(METADATA) ^ set(COUNTRY_EXCLUDE_METADATA))
+        elif self.metadata['delivery_type'] == STREAM:
+            filtered_metadata = tuple(set(METADATA) ^ set(STREAM_EXCLUDE_METADATA))
+        else:
+            filtered_metadata = METADATA
+
+        for name in filtered_metadata:
             if name in self.metadata:
                 symlink_path = symlink_path / self.metadata[name]
         symlink_path.makedirs_p()
