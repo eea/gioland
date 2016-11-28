@@ -292,7 +292,9 @@ LOT_PRODUCTS = {
 DEFAULT_LOT = 'lot1'
 DEFAULT_DELIVERY_TYPE = LOT
 
-STREAM_LOT_PRODUCTS = LOT_PRODUCTS["lot3"] + LOT_PRODUCTS["lot4"] + LOT_PRODUCTS["lot5"]
+STREAM_LOT_PRODUCTS = LOT3_PRODUCTS + \
+                      LOT4_PRODUCTS + \
+                      LOT5_PRODUCTS
 
 PRODUCTS = set(list(itertools.chain.from_iterable(LOT_PRODUCTS.values())))
 COUNTRY_PRODUCTS = set(list(itertools.chain.from_iterable(COUNTRY_LOT_PRODUCTS.values())))
