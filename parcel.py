@@ -18,18 +18,14 @@ from path import path
 
 import notification
 import auth
-from definitions import EDITABLE_METADATA, METADATA, \
-                        REPORT_METADATA, SIMILAR_METADATA
-from definitions import STAGES, STAGE_ORDER, INITIAL_STAGE, \
-                        STAGES_FOR_MERGING
-from definitions import COUNTRIES_MC, COUNTRIES_CC, COUNTRIES
-from definitions import LOTS, LOT_STAGES, LOT_STAGE_ORDER
-from definitions import COUNTRY, LOT
-from definitions import PRODUCTS, PRODUCTS_FILTER, PRODUCTS_IDS, \
-                        COUNTRY_PRODUCTS
-from definitions import RESOLUTIONS, EXTENTS, REFERENCES
-from definitions import ALL_ROLES, UNS_FIELD_DEFS
-from definitions import CATEGORIES,  DOCUMENTS, STREAM
+from definitions import ALL_ROLES, CATEGORIES, COUNTRIES, COUNTRY, COUNTRIES_CC
+from definitions import COUNTRIES_MC, COUNTRY_PRODUCTS, DOCUMENTS
+from definitions import EDITABLE_METADATA,  EXTENTS, INITIAL_STAGE, LOT, LOTS
+from definitions import LOT_STAGE_ORDER, LOT_STAGES, METADATA, PRODUCTS
+from definitions import PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
+from definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
+from definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
+from definitions import UNS_FIELD_DEFS
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
