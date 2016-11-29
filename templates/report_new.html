@@ -53,7 +53,7 @@ $(function() {
       <tr>
         {% set field_id = 'upload-meta-' + name %}
         {% if url %}
-          {%set url = url_for('parcel.pick_products') %}
+          {% set url = url_for('parcel.pick_products') %}
         {% endif %}
         <td><label for="{{ field_id }}">{{ label }}</label></td>
         <td>{{ pick_from_list(field_id, name, items, url=url) }}</td>
