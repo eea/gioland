@@ -11,7 +11,7 @@ $(function() {
       var lot_id = $(this).val()
       console.log(lot_id)
       var delivery_type = "{{ COUNTRY }}"
-      $.getJSON($(this).attr('data-href'), {
+      $.getJSON($(this).data('href'), {
         id: lot_id,
         delivery_type: delivery_type,
       }, function(data) {
