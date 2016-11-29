@@ -588,7 +588,7 @@ def new_report():
         wh = get_warehouse()
         form = flask.request.form.to_dict()
         metadata = {k: form.get(k, '') for k in REPORT_METADATA}
-        data_map = zip(['lot', 'product'], [LOTS, COUNTRY_LOT_PRODUCTS.get(metadata['lot'], ())])
+        data_map = zip(REPORT_METADATA, [LOTS, COUNTRY_LOT_PRODUCTS.get(metadata['lot'], ())])
         if not validate_metadata(metadata, data_map):
             flask.abort(400)
         posted_file = flask.request.files.get('file')
