@@ -46,16 +46,14 @@ $(function() {
   <form id="country_form" method="post" enctype="multipart/form-data">
 
     <table>
-    {% for name, label, items in [
-            ('lot', "Lot", LOTS),
-            ('product', "Product", COUNTRY_PRODUCTS),
+    {% for name, label, items, url in [
+            ('lot', "Lot", LOTS, True),
+            ('product', "Product", COUNTRY_PRODUCTS, False),
       ] %}
       <tr>
         {% set field_id = 'upload-meta-' + name %}
-        {% if name == LOT %}
+        {% if url %}
           {%set url = url_for('parcel.pick_products') %}
-        {% else %}
-          {% set url = '' %}
         {% endif %}
         <td><label for="{{ field_id }}">{{ label }}</label></td>
         <td>{{ pick_from_list(field_id, name, items, url=url) }}</td>
