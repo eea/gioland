@@ -32,7 +32,7 @@ EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
 METADATA = EDITABLE_METADATA + ('stage',)
 
 
-REPORT_METADATA = ('country', 'category')
+REPORT_METADATA = ('lot', 'product')
 
 
 STAGE_INT = 'int'

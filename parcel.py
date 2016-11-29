@@ -19,10 +19,10 @@ from path import path
 import notification
 import auth
 from definitions import ALL_ROLES, CATEGORIES, COUNTRIES, COUNTRY, COUNTRIES_CC
-from definitions import COUNTRIES_MC, COUNTRY_PRODUCTS, DOCUMENTS
-from definitions import EDITABLE_METADATA,  EXTENTS, INITIAL_STAGE, LOT, LOTS
-from definitions import LOT_STAGE_ORDER, LOT_STAGES, METADATA, PRODUCTS
-from definitions import PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
+from definitions import COUNTRIES_MC, COUNTRY_LOT_PRODUCTS, COUNTRY_PRODUCTS
+from definitions import DOCUMENTS, EDITABLE_METADATA,  EXTENTS, INITIAL_STAGE
+from definitions import LOT, LOTS, LOT_STAGE_ORDER, LOT_STAGES, METADATA
+from definitions import PRODUCTS, PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
 from definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
 from definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
 from definitions import UNS_FIELD_DEFS
@@ -96,13 +96,10 @@ def country(code):
                    p.metadata['delivery_type'] == COUNTRY and
                    p.metadata['country'] == code]
 
-    all_reports = [r for r in wh.get_all_reports()
-                   if r.country == code]
     grouped_parcels = group_parcels(all_parcels)
     return flask.render_template('country.html', **{
         'code': code,
         'grouped_parcels': grouped_parcels,
-        'all_reports': all_reports,
     })
 
 
@@ -111,10 +108,14 @@ def lot(code):
     wh = get_warehouse()
     all_parcels = [p for p in chain_tails(wh)
                    if p.metadata['lot'] == code]
+    all_reports = [r for r in wh.get_all_reports()
+                   if r.lot == code]
+
     grouped_parcels = group_parcels(all_parcels)
     return flask.render_template('lot.html', **{
         'code': code,
         'grouped_parcels': grouped_parcels,
+        'all_reports': all_reports,
     })
 
 
@@ -587,7 +588,7 @@ def new_report():
         wh = get_warehouse()
         form = flask.request.form.to_dict()
         metadata = {k: form.get(k, '') for k in REPORT_METADATA}
-        data_map = zip(['country', 'category'], [COUNTRIES, CATEGORIES])
+        data_map = zip(REPORT_METADATA, [LOTS, COUNTRY_LOT_PRODUCTS.get(metadata['lot'], ())])
         if not validate_metadata(metadata, data_map):
             flask.abort(400)
         posted_file = flask.request.files.get('file')
@@ -597,7 +598,7 @@ def new_report():
                              posted_file=posted_file,
                              report=report)
             report_created.send(report)
-            url = flask.url_for('parcel.country', code=report.country)
+            url = flask.url_for('parcel.lot', code=report.lot)
             return flask.redirect(url)
         else:
             flask.flash("File field is missing or it's not a document.",
@@ -622,14 +623,14 @@ def delete_report(report_id):
         return flask.abort(403)
     wh = get_warehouse()
     report = get_or_404(wh.get_report, report_id, _exc=KeyError)
-    country_code = report.country
+    lot_code = report.lot
     if flask.request.method == 'POST':
         file_path = safe_join(wh.reports_path, report.filename)
         if file_path.exists():
             file_path.unlink()
         wh.delete_report(report_id)
         flask.flash('Report was deleted.', 'system')
-        url = flask.url_for('parcel.country', code=country_code)
+        url = flask.url_for('parcel.lot', code=lot_code)
         return flask.redirect(url)
 
     return flask.render_template('report_delete.html', report=report)
@@ -897,6 +898,7 @@ metadata_template_context = {
     'COUNTRIES': COUNTRIES,
     'COUNTRY_MAP': dict(COUNTRIES),
     'COUNTRY_PRODUCTS': COUNTRY_PRODUCTS,
+    'COUNTRY_PRODUCTS_MAP': dict(COUNTRY_PRODUCTS),
     'PRODUCTS': PRODUCTS,
     'PRODUCTS_FILTER': PRODUCTS_FILTER,
     'PRODUCT_MAP': dict(PRODUCTS),

@@ -34,7 +34,7 @@ class ReportTest(AppTestCase):
 
     def test_report_fail_if_corrupted_metadata(self):
         data = dict(self.REPORT_METADATA)
-        data['country'] = 'eau'
+        data['lot'] = 'lo2'
         resp = self.client.post('/report/new', data=data)
         self.assertEqual(400, resp.status_code)
 
@@ -85,3 +85,15 @@ class ReportTest(AppTestCase):
         with self.app.test_request_context():
             self.assertRaises(KeyError, self.wh.get_report, 1)
             self.assertEqual(0, len(list(self.wh.reports_path.walk())))
+
+    def test_reports_are_listed_on_lot_page(self):
+        data = dict(self.REPORT_METADATA,
+                    file=(StringIO('ze file'), 'doc.pdf'))
+        self.client.post('/report/new', data=data)
+        data = dict(self.REPORT_METADATA,
+                    file=(StringIO('ze file'), 'doc.pdf'))
+        self.client.post('/report/new', data=data)
+        resp = self.client.get('/lot/lot1')
+        reports_number = len(select(resp.data, '.report-list > li'))
+        self.assertEqual(2, reports_number)
+

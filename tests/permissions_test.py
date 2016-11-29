@@ -310,7 +310,7 @@ class PermisionsTest(AppTestCase):
         self.add_to_role('somebody', 'ROLE_SP')
         self.try_new_report()
         self.app.config['ROLE_SP'] = []
-        resp = self.client.get('/country/be')
+        resp = self.client.get('/lot/lot1')
         self.assertEqual(1, len(select(resp.data, '.report-list')))
 
     def test_random_user_not_allowed_to_delete_report(self):
