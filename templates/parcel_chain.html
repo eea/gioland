@@ -45,7 +45,16 @@
           <td>
             {% set prev_parcel_url = url_for('parcel.view',
                                              name=prev_parcel.name) %}
-            {% set stage = STAGE_MAP[prev_parcel.metadata['stage']]  %}
+            {% if prev_parcel.metadata['delivery_type']  == COUNTRY %}
+              {% set DELIVERY_STAGE_MAP = STAGE_MAP %}
+            {% else %}
+              {% if prev_parcel.metadata['extent'] == 'partial' %}
+                {% set DELIVERY_STAGE_MAP = PARTIAL_LOT_STAGE_MAP %}
+              {% else %}
+                {% set DELIVERY_STAGE_MAP = FULL_LOT_STAGE_MAP %}
+              {% endif %}
+            {% endif %}
+            {% set stage = DELIVERY_STAGE_MAP[prev_parcel.metadata['stage']]  %}
             <a href="{{ prev_parcel_url }}">
               {{ stage  }} ({{ prev_parcel.metadata['coverage'] }})</a>
           </td>
@@ -75,7 +84,19 @@
 
         <td>
           {% set parcel_url = url_for('parcel.view', name=parcel.name) %}
-          {% set stage = STAGE_MAP[parcel.metadata['stage']]  %}
+          {% if parcel.metadata['delivery_type']  == COUNTRY %}
+            {% set DELIVERY_STAGE_MAP = STAGE_MAP %}
+            {% set DELIVERY_STAGES = STAGES %}
+          {% else %}
+            {% if parcel.metadata['extent'] == 'partial' %}
+              {% set DELIVERY_STAGE_MAP = PARTIAL_LOT_STAGE_MAP %}
+              {% set DELIVERY_STAGES = PARTIAL_LOT_STAGES %}
+            {% else %}
+              {% set DELIVERY_STAGE_MAP = FULL_LOT_STAGE_MAP %}
+              {% set DELIVERY_STAGES = FULL_LOT_STAGES %}
+            {% endif %}
+          {% endif %}
+          {% set stage = DELIVERY_STAGE_MAP[parcel.metadata['stage']]  %}
           <a href="{{ parcel_url }}">
             {{ stage }}
             {% if parcel.metadata.get('merged') %}(merged){% endif %}
@@ -85,7 +106,7 @@
         <td>
           {% if parcel.uploading %}
 
-            {% if STAGES[parcel.metadata['stage']]['last'] %}
+            {% if DELIVERY_STAGES[parcel.metadata['stage']]['last'] %}
               <em>done</em>
             {% else %}
               <em>in progress</em>

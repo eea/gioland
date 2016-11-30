@@ -1,6 +1,6 @@
 {% macro metadata_table(metadata, show_stage=True) %}
 
-  {% set delivery_type = metadata.get('delivery_type', COUNTRY) %}
+  {% set delivery_type = metadata.get('delivery_type', LOT) %}
 
   <table class="datatable">
 
@@ -41,7 +41,15 @@
     {% if show_stage %}
     <tr>
       <th>Processing stage</th>
-      <td>{{ STAGE_MAP[metadata['stage']] }}</td>
+      {% if delivery_type == COUNTRY %}
+        <td>{{ STAGE_MAP[metadata['stage']] }}</td>
+      {% elif delivery_type == LOT %}
+        {% if EXTENT_MAP[metadata['extent']] == 'Partial' %}
+          <td>{{ PARTIAL_LOT_STAGE_MAP[metadata['stage']]}}</td>
+        {% else %}
+          <td>{{ FULL_LOT_STAGE_MAP[metadata['stage']] }}</td>
+        {% endif %}
+      {% endif %}
     </tr>
     {% endif %}
 
@@ -128,8 +136,12 @@
 
   <a href="{{ url_for('parcel.view', name=parcel.name) }}">
   {% if parcel.uploading %}
-
-    {% if STAGES[parcel.metadata['stage']]['last'] %}
+    {% if parcel.metadata['delivery_type'] == LOT %}
+      {% set DELIVERY_STAGES = PARTIAL_LOT_STAGES %}
+    {% else %}
+      {% set DELIVERY_STAGES = STAGES %}
+    {% endif %}
+    {% if DELIVERY_STAGES[parcel.metadata['stage']]['last'] %}
       <em>done</em>
     {% else %}
       <em>in progress</em>
@@ -154,7 +166,7 @@
 {% macro workflow_overview(grouped_parcels, lot=False) %}
 
   {% if lot %}
-    {% set FILTERED_STAGES = LOT_STAGES %}
+    {% set FILTERED_STAGES = PARTIAL_LOT_STAGES %}
   {% else %}
     {% set FILTERED_STAGES = STAGES %}
   {% endif %}

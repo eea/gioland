@@ -7,10 +7,23 @@
 {% set file_authorize = authorize_for_upload(parcel) %}
 
 {% set metadata = parcel.metadata %}
+{% if metadata.delivery_type == COUNTRY %}
+  {% set DELIVERY_STAGES = STAGES, STAGE_MAP %}
+  {% set DELIVERY_STAGE_MAP = STAGE_MAP %}
+{% elif metadata.delivery_type == LOT %}
+  {% if metadata['extent'] == 'partial' %}
+    {% set DELIVERY_STAGES = PARTIAL_LOT_STAGES %}
+    {% set DELIVERY_STAGE_MAP = PARTIAL_LOT_STAGE_MAP %}
+  {% else %}
+    {% set DELIVERY_STAGES = FULL_LOT_STAGES %}
+    {% set DELIVERY_STAGE_MAP = FULL_LOT_STAGE_MAP %}
+  {% endif %}
+{% endif %}
+
 {% set country_code = metadata['country'] %}
 {% set lot_code = metadata['lot'] %}
 {% set title_bits = '%s, %s'|format(PRODUCT_MAP[metadata['product']],
-                                    STAGE_MAP[metadata['stage']]) %}
+                                    DELIVERY_STAGE_MAP[metadata['stage']]) %}
 
 {% set country = COUNTRY_MAP[country_code] %}
 {% set lot = LOTS_MAP[lot_code] %}
@@ -124,7 +137,7 @@
 <h2>Metadata</h2>
 {{ metadata_table(metadata) }}
 
-{% if not STAGES[parcel.metadata['stage']]['last'] %}
+{% if not DELIVERY_STAGES[parcel.metadata['stage']]['last'] %}
 
 {% if parcel.file_uploading %}
   <h2>Files</h2>
@@ -148,7 +161,7 @@
       <p>When ready, finalize the parcel, which will trigger the next workflow step.</p>
 
       <button type="submit">Finalize</button>
-      {% if STAGES[parcel.metadata['stage']]['reject'] %}
+      {% if DELIVERY_STAGES[parcel.metadata['stage']]['reject'] %}
         <button type="submit" name="reject" value="on">
           Finalize and reject</button>
       {% endif %}

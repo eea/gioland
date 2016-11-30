@@ -39,13 +39,15 @@ STAGE_INT = 'int'
 STAGE_SCH = 'sch'
 STAGE_VER = 'ver'
 STAGE_VCH = 'vch'
+STAGE_VSC = 'vsc'
 STAGE_ENH = 'enh'
 STAGE_ERH = 'erh'
 STAGE_ECH = 'ech'
 STAGE_FIN = 'fin'
 STAGE_FVA = 'fva'
 STAGE_FIH = 'fih'
-
+STAGE_FMC = 'fmc'
+STAGE_FHM = 'fmh'
 
 STAGES = OrderedDict((
     (STAGE_INT, {
@@ -125,8 +127,17 @@ LOT_STAGES = OrderedDict((
         'file_uploading': True,
     }),
 
-    (STAGE_FVA, {
-        'label': "Final Semantic Check",
+    (STAGE_VSC, {
+        'label': "Validation sample check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'file_uploading': True,
+        'reject': True,
+        'reject_stage': STAGE_INT,
+        'partial': True,
+    }),
+
+    (STAGE_SCH, {
+        'label': "Semantic Check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
@@ -134,17 +145,40 @@ LOT_STAGES = OrderedDict((
     }),
 
     (STAGE_FIH, {
-        'label': "Final HRL Lot Mosaic",
-        'roles': ['ROLE_ADMIN'],
-        'last': True,
+        'label': "Final HRL",
+        'roles': ['ROLE_SP', 'ROLE_ADMIN'],
+        'file_uploading': True,
     }),
 
+    (STAGE_FMC, {
+        'label': "Final mosaic check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'reject': True,
+        'reject_stage': STAGE_FIH,
+    }),
+
+    (STAGE_FHM, {
+        'label': "Final HRL mosaic",
+        'roles': ['ROLE_SP', 'ROLE_ETC', 'ROLE_ADMIN'],
+        'last': True,
+    }),
 ))
 
 
+PARTIAL_LOT_STAGES = LOT_STAGES
+FULL_LOT_STAGES = OrderedDict(
+    (k, v) for k, v in LOT_STAGES.items()
+    if not v.get('partial', False)
+)
+
+
 STAGES_FOR_MERGING = [STAGE_ENH]
+
 STAGE_ORDER = list(STAGES)
 LOT_STAGE_ORDER = list(LOT_STAGES)
+PARTIAL_LOT_STAGES_ORDER = list(PARTIAL_LOT_STAGES)
+FULL_LOT_STAGES_ORDER = list(FULL_LOT_STAGES)
+
 INITIAL_STAGE = STAGE_ORDER[0]
 
 COUNTRIES_MC = (
@@ -362,7 +396,7 @@ RDF_URI = {
 }
 
 
-UNS_FIELD_DEFS = [
+UNS_FIELD_DEFS = [  # Need to update this list soon to the new format
 
     {'name': 'country',
      'label': "Country",
