@@ -23,8 +23,8 @@ class PermisionsTest(AppTestCase):
 
     def create_parcel(self, stage=None):
         with patch('auth.authorize'):
-            post_resp = self.client.post('/parcel/new/country',
-                                         data=self.PARCEL_METADATA)
+            post_resp = self.client.post('/parcel/new/lot',
+                                         data=self.LOT_METADATA)
             self.assertEqual(post_resp.status_code, 302)
             parcel_name = post_resp.location.rsplit('/', 1)[-1]
 
@@ -185,70 +185,65 @@ class PermisionsTest(AppTestCase):
         name = self.create_parcel()
         self.assertTrue(self.try_finalize(name))
 
-    def test_random_user_not_allowed_to_upload_at_final_semantic_check(self):
-        name = self.create_parcel(stage='fva')
+    def test_random_user_not_allowed_to_upload_at_semantic_check(self):
+        name = self.create_parcel(stage='sch')
         self.assertFalse(self.try_upload(name))
         self.assertFalse(self.try_upload_file(name))
 
-    def test_etc_user_allowed_to_upload_at_final_semantic_check(self):
+    def test_etc_user_allowed_to_upload_at_semantic_check(self):
         self.add_to_role('somebody', 'ROLE_ETC')
-        name = self.create_parcel(stage='fva')
+        name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_upload(name))
         self.assertTrue(self.try_upload_file(name))
 
-    def test_admin_user_allowed_to_upload_at_final_semantic_check(self):
+    def test_admin_user_allowed_to_upload_at_semantic_check(self):
         self.add_to_role('somebody', 'ROLE_ADMIN')
-        name = self.create_parcel(stage='fva')
+        name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_upload(name))
         self.assertTrue(self.try_upload_file(name))
 
-    def test_random_user_not_allowed_to_finalize_at_final_semantic_check(self):
-        name = self.create_parcel(stage='fva')
+    def test_random_user_not_allowed_to_finalize_at_semantic_check(self):
+        name = self.create_parcel(stage='sch')
         self.assertFalse(self.try_finalize(name))
 
-    def test_service_provider_not_allowed_to_finalize_at_final_semantic_check(self):
+    def test_service_provider_not_allowed_to_semantic_check(self):
         self.add_to_role('somebody', 'ROLE_SP')
-        name = self.create_parcel(stage='fva')
+        name = self.create_parcel(stage='sch')
         self.assertFalse(self.try_finalize(name))
 
-    def test_etc_user_allowed_to_finalize_at_final_semantic_check_stage(self):
+    def test_etc_user_allowed_to_finalize_at_semantic_check_stage(self):
         self.add_to_role('somebody', 'ROLE_ETC')
-        name = self.create_parcel(stage='fva')
+        name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_finalize(name))
 
-    def test_admin_user_allowed_to_finalize_at_final_semantic_check_stage(self):
+    def test_admin_user_allowed_to_finalize_at_semantic_check_stage(self):
         self.add_to_role('somebody', 'ROLE_ADMIN')
-        name = self.create_parcel(stage='fva')
+        name = self.create_parcel(stage='sch')
         self.assertTrue(self.try_finalize(name))
 
-    def test_random_user_not_allowed_to_upload_at_final_semantic_check_stage(self):
-        name = self.create_parcel(stage='fva')
-        self.assertFalse(self.try_upload(name))
-        self.assertFalse(self.try_upload_file(name))
-
-    def test_admin_user_allowed_to_upload_at_enhancement_stage(self):
-        self.add_to_role('somebody', 'ROLE_ADMIN')
-        name = self.create_parcel(stage='fva')
-        self.assertTrue(self.try_upload(name))
-        self.assertTrue(self.try_upload_file(name))
-
-    def test_vep_user_not_allowed_to_upload_at_final_semantic_check(self):
-        self.add_to_role('somebody', 'ROLE_VEP')
-        name = self.create_parcel(stage='fva')
-        self.assertFalse(self.try_upload(name))
-
-    def test_admin_user_not_allowed_to_upload_at_final_hrl(self):
-        self.add_to_role('somebody', 'ROLE_ADMIN')
+    def test_random_user_not_allowed_to_upload_at_final_hrl_stage(self):
         name = self.create_parcel(stage='fih')
         self.assertFalse(self.try_upload(name))
+        self.assertFalse(self.try_upload_file(name))
 
-    def test_random_user_not_allowed_to_finalize_at_service_provider_upload(self):
-        name = self.create_parcel(stage='int')
-        self.assertFalse(self.try_finalize(name))
-
-    def test_admin_user_allowed_to_finalize_at_service_provider_upload(self):
+    def test_admin_user_allowed_to_upload_at_final_hrl_stage(self):
         self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel(stage='int')
+        self.assertTrue(self.try_upload(name))
+        self.assertTrue(self.try_upload_file(name))
+
+    def test_admin_user_not_allowed_to_upload_at_final_mosaic_check(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel(stage='fmc')
+        self.assertFalse(self.try_upload(name))
+
+    def test_random_user_not_allowed_to_finalize_at_validation_sample_check(self):
+        name = self.create_parcel(stage='fih')
+        self.assertFalse(self.try_finalize(name))
+
+    def test_admin_user_allowed_to_finalize_at_validation_sample_check(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel(stage='fih')
         self.assertTrue(self.try_finalize(name))
 
     def test_random_user_not_allowed_to_delete_parcel(self):

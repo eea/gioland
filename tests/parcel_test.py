@@ -303,7 +303,7 @@ class ParcelTest(AppTestCase):
             files = [f for f in parcel2.get_files()]
             self.assertEqual(0, len(files))
 
-    @unittest.skip("test needs to be updated to the new stages")
+    @unittest.skip("this test needs to be fixed")
     def test_parcel_final_stage_has_files_from_final_integrated_stage(self):
         self.add_to_role('somebody', 'ROLE_ADMIN')
         parcel_name = self.new_parcel(stage='fin')

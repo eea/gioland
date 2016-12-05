@@ -80,8 +80,9 @@ class Parcel(Persistent):
 
     @property
     def file_uploading(self):
-        # disable uploading files for verification check
-        stage = STAGES.get(self.metadata.get('stage'), {})
+        from parcel import _get_stages_for_parcel
+        DELIVERY_STAGES, _ = _get_stages_for_parcel(self)
+        stage = DELIVERY_STAGES.get(self.metadata.get('stage'), {})
         return stage.get('file_uploading', False)
 
     def save_metadata(self, new_metadata):
