@@ -92,7 +92,7 @@ class ParcelTest(AppTestCase):
         with self.app.test_request_context():
             parcel = self.wh.new_parcel()
             parcel.save_metadata(self.PARCEL_METADATA)
-            parcel.save_metadata({'stage': 'vch'})  # verification check
+            parcel.save_metadata({'stage': 'fva'})  # verification check
             parcel_name = parcel.name
 
         self.client.post('/parcel/%s/finalize' % parcel_name)
@@ -105,7 +105,7 @@ class ParcelTest(AppTestCase):
             self.assertIn(parcel.name,
                           next_parcel.metadata['prev_parcel_list'])
             # enhancement
-            self.assertEqual(next_parcel.metadata['stage'], 'enh')
+            self.assertEqual(next_parcel.metadata['stage'], 'fih')
 
     def test_finalize_preserves_metadata(self):
         resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
@@ -125,17 +125,14 @@ class ParcelTest(AppTestCase):
         self.assertEqual(400, resp.status_code)
 
     def test_finalize_with_reject_disallowed_for_most_stages(self):
-        for stage in ['int', 'ver', 'enh', 'fin']:
+        for stage in ['int', 'fih']:
             parcel_name = self.new_parcel(stage=stage)
             resp = self.client.post('/parcel/%s/finalize' % parcel_name,
                                     data={'reject': 'on'})
             self.assertEqual(resp.status_code, 403)
 
     def test_finalize_with_reject_triggers_previous_step(self):
-        for stage, prev_stage in [('sch', 'int'),
-                                  ('vch', 'ver'),
-                                  ('erh', 'enh'),
-                                  ('ech', 'enh')]:
+        for stage, prev_stage in [('fva', 'int')]:
             parcel_name = self.new_parcel(stage=stage)
             self.client.post('/parcel/%s/finalize' % parcel_name,
                              data={'reject': 'on'})
@@ -146,7 +143,7 @@ class ParcelTest(AppTestCase):
                 self.assertEqual(next_parcel.metadata['stage'], prev_stage)
 
     def test_finalize_with_reject_saves_rejected_metadata(self):
-        for stage in ['sch', 'vch', 'ech']:
+        for stage in ['fva']:
             parcel_name = self.new_parcel(stage=stage)
             self.client.post('/parcel/%s/finalize' % parcel_name,
                              data={'reject': 'on'})
@@ -157,7 +154,7 @@ class ParcelTest(AppTestCase):
     def test_get_parcels_by_stage(self):
         import parcel
         self.new_parcel(stage='int')
-        parcel_name_1 = self.new_parcel(stage='sch')
+        parcel_name_1 = self.new_parcel(stage='fva')
         self.client.post('/parcel/%s/finalize' % parcel_name_1,
                          data={'reject': 'on'})
 
@@ -174,15 +171,15 @@ class ParcelTest(AppTestCase):
         self.assertEqual(403, resp.status_code)
 
     def test_finalize_finalized_parcel_forbidden(self):
-        parcel_name = self.new_parcel(stage='enh')
+        parcel_name = self.new_parcel(stage='fva')
         resp1 = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(resp1.status_code, 302)
         resp2 = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(resp2.status_code, 403)
 
     def test_delete_parcel(self):
-        parcel_name_1 = self.new_parcel(stage='ver')
-        parcel_name_2 = self.new_parcel(stage='vch')
+        parcel_name_1 = self.new_parcel(stage='int')
+        parcel_name_2 = self.new_parcel(stage='fva')
 
         with self.app.test_request_context():
             parcel_1 = self.wh.get_parcel(parcel_name_1)
@@ -200,13 +197,13 @@ class ParcelTest(AppTestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_delete_parcel_link_if_allow_parcel_deletion(self):
-        parcel_name = self.new_parcel(stage='ver')
+        parcel_name = self.new_parcel(stage='fva')
         resp = self.client.get('/parcel/%s' % parcel_name)
         self.assertEqual(1, len(select(resp.data, '.delete-parcel')))
 
     def test_delete_parcel_link_if_not_allow_parcel_deletion(self):
         self.app.config['ALLOW_PARCEL_DELETION'] = False
-        parcel_name = self.new_parcel(stage='ver')
+        parcel_name = self.new_parcel(stage='fva')
         resp = self.client.get('/parcel/%s' % parcel_name)
         self.assertEqual(0, len(select(resp.data, '.delete-parcel')))
 
@@ -293,7 +290,7 @@ class ParcelTest(AppTestCase):
 
     def test_parcel_other_stage_does_not_have_files_from_prev_stage(self):
         self.add_to_role('somebody', 'ROLE_ADMIN')
-        parcel_name = self.new_parcel(stage='ech')
+        parcel_name = self.new_parcel(stage='fva')
         parcel_path = self.parcels_path / parcel_name
         (parcel_path / 'some.txt').write_text('hello world')
 
@@ -405,7 +402,7 @@ class ParcelHistoryTest(AppTestCase):
             item = parcel2.history[0]
             self.check_history_item(item, {
                 'time': utcnow,
-                'title': "Ready for Semantic check",
+                'title': "Ready for Final Semantic check",
                 'actor': 'somebody',
             })
             self.assertIn(parcel1_name, item.description_html)

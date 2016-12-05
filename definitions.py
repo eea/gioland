@@ -56,65 +56,18 @@ STAGES = OrderedDict((
         'file_uploading': True,
     }),
 
-    (STAGE_SCH, {
-        'label': "Semantic check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
-        'reject': True,
-        'file_uploading': True,
-    }),
-
-    (STAGE_VER, {
-        'label': "Verification",
-        'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
-        'file_uploading': True,
-    }),
-
-    (STAGE_VCH, {
-        'label': "Verification check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN', 'ROLE_VEP'],
-        'reject': True,
-        'file_uploading': False,
-    }),
-
-    (STAGE_ENH, {
-        'label': "Enhancement",
-        'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
-        'file_uploading': True,
-    }),
-
-    (STAGE_ERH, {
-        'label': "Enhancement Report Check",
-        'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
-        'reject': True,
-        'file_uploading': False,
-    }),
-
-    (STAGE_ECH, {
-        'label': "Enhancement Semantic Check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
-        'reject': True,
-        'file_uploading': True,
-        'reject_stage': STAGE_ENH,
-    }),
-
-    (STAGE_FIN, {
-        'label': "Final integrated",
-        'roles': ['ROLE_ADMIN', 'ROLE_SP'],
-        'file_uploading': True,
-
-    }),
-
     (STAGE_FVA, {
-        'label': "Final Semantic Check",
+        'label': "Final Semantic check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
-        'reject_stage': STAGE_FIN,
+        'reject_stage': STAGE_INT,
     }),
 
     (STAGE_FIH, {
         'label': "Final HRL",
-        'roles': ['ROLE_ADMIN'],
+        'roles': ['ROLE_SP',
+                  'ROLE_ADMIN'],
         'last': True,
     }),
 ))
