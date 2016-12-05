@@ -12,9 +12,19 @@
 {% endblock %}
 
 
+{% if parcel.metadata['delivery_type'] == LOT %}
+  {% if parcel.metadata['extent'] == 'partial' %}
+    {% set DELIVERY_STAGE_MAP =  PARTIAL_LOT_STAGE_MAP %}
+  {% else %}
+    {% set DELIVERY_STAGE_MAP =  FULL_LOT_STAGE_MAP %}
+  {% endif %}
+{% else %}
+    {% set DELIVERY_STAGE_MAP =  STAGE_MAP %}
+{% endif %}
+
 {% macro parcel_link(parcel) -%}
 <a href="{{ url_for('parcel.view', name=parcel.name) }}">
-{{- STAGE_MAP[parcel.metadata['stage']] -}}
+{{- DELIVERY_STAGE_MAP[parcel.metadata['stage']] -}}
 </a>
   {{ parcel.metadata['upload_time'] }}
 {%- endmacro %}

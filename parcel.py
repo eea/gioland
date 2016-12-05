@@ -18,10 +18,12 @@ from path import path
 
 import notification
 import auth
-from definitions import ALL_ROLES, CATEGORIES, COUNTRIES, COUNTRY, COUNTRIES_CC
-from definitions import COUNTRIES_MC, COUNTRY_LOT_PRODUCTS, COUNTRY_PRODUCTS
-from definitions import DOCUMENTS, EDITABLE_METADATA,  EXTENTS, INITIAL_STAGE
-from definitions import LOT, LOTS, LOT_STAGE_ORDER, LOT_STAGES, METADATA
+from definitions import ALL_ROLES, CATEGORIES, COUNTRIES, COUNTRIES_CC
+from definitions import COUNTRIES_MC, COUNTRY_PRODUCTS, COUNTRY
+from definitions import COUNTRY_LOT_PRODUCTS, DOCUMENTS, EDITABLE_METADATA
+from definitions import EXTENTS, FULL_LOT_STAGES, FULL_LOT_STAGES_ORDER
+from definitions import INITIAL_STAGE, LOT, LOTS, LOT_STAGES, METADATA, PARTIAL
+from definitions import PARTIAL_LOT_STAGES, PARTIAL_LOT_STAGES_ORDER
 from definitions import PRODUCTS, PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
 from definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
 from definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
@@ -333,11 +335,9 @@ class Finalize(MethodView):
         self.wh = get_warehouse()
         self.parcel = get_or_404(self.wh.get_parcel, name, _exc=KeyError)
 
-        delivery_type = self.parcel.metadata.get('delivery_type', COUNTRY)
-        if delivery_type == COUNTRY:
-            stage_def = STAGES[self.parcel.metadata['stage']]
-        elif delivery_type == LOT:
-            stage_def = LOT_STAGES[self.parcel.metadata['stage']]
+        DELIVERY_STAGES, _ = _get_stages_for_parcel(self.parcel)
+        if DELIVERY_STAGES:
+            stage_def = DELIVERY_STAGES[self.parcel.metadata['stage']]
         else:
             flask.abort(400)
 
@@ -588,7 +588,8 @@ def new_report():
         wh = get_warehouse()
         form = flask.request.form.to_dict()
         metadata = {k: form.get(k, '') for k in REPORT_METADATA}
-        data_map = zip(REPORT_METADATA, [LOTS, COUNTRY_LOT_PRODUCTS.get(metadata['lot'], ())])
+        data_map = zip(REPORT_METADATA,
+                       [LOTS, COUNTRY_LOT_PRODUCTS.get(metadata['lot'], ())])
         if not validate_metadata(metadata, data_map):
             flask.abort(400)
         posted_file = flask.request.files.get('file')
@@ -668,12 +669,14 @@ def filter_parcels(parcels, **kwargs):
 
 def authorize_for_parcel(parcel):
     stage = INITIAL_STAGE if parcel is None else parcel.metadata['stage']
-    return auth.authorize(STAGES[stage]['roles'])
+    DELIVERY_STAGES, _ = _get_stages_for_parcel(parcel)
+    return auth.authorize(DELIVERY_STAGES[stage]['roles'])
 
 
 def authorize_for_upload(parcel):
 
-    stage = STAGES[parcel.metadata['stage']]
+    DELIVERY_STAGES, _ = _get_stages_for_parcel(parcel)
+    stage = DELIVERY_STAGES[parcel.metadata['stage']]
     if not authorize_for_parcel(parcel):
         return False
     if not parcel.uploading:
@@ -783,8 +786,8 @@ def finalize_parcel(wh, parcel, reject):
     next_parcel = create_next_parcel(wh, [parcel], next_stage, stage_def,
                                      next_stage_def)
 
-    # if last stage, copy files from STAGE_FIN (Final integrated)
-    if next_parcel.metadata['stage'] == STAGE_ORDER[-1]:
+    DELIVERY_STAGES = _get_stages_for_parcel(parcel)
+    if next_parcel.metadata['stage'] == DELIVERY_STAGES[-1]:
         try:
             [final_int_parcel_name] = parcel.metadata['prev_parcel_list']
             final_int_parcel = wh.get_parcel(final_int_parcel_name)
@@ -846,6 +849,7 @@ def register_on(app):
         'authorize_for_cdr': authorize_for_cdr,
         'can_subscribe_to_notifications': notification.can_subscribe,
         'get_parcels_by_stage': get_parcels_by_stage,
+        'get_stages_for_parcel': _get_stages_for_parcel,
     })
     app.jinja_env.filters["datetime"] = format_datetime
     app.jinja_env.filters["isoformat_to_datetime"] = isoformat_to_datetime
@@ -866,11 +870,17 @@ def extension(filename):
 
 
 def _get_stages_for_parcel(parcel):
+    if not parcel:
+        return STAGES, STAGE_ORDER
     delivery_type = parcel.metadata.get('delivery_type', COUNTRY)
     if delivery_type == COUNTRY:
         return STAGES, STAGE_ORDER
     elif delivery_type == LOT:
-        return LOT_STAGES, LOT_STAGE_ORDER
+        extent = parcel.metadata.get('extent', '')
+        if extent == PARTIAL:
+            return PARTIAL_LOT_STAGES, PARTIAL_LOT_STAGES_ORDER
+        else:
+            return FULL_LOT_STAGES, FULL_LOT_STAGES_ORDER
     flask.abort(400)
 
 
@@ -885,11 +895,20 @@ def pick_products():
     flask.abort(400)
 
 STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]
+PARTIAL_LOT_STAGES_PICKLIST = [(k, s['label']) for k, s
+                                in PARTIAL_LOT_STAGES.items()]
+FULL_LOT_STAGES_PICKLIST = [(k, s['label']) for k, s in FULL_LOT_STAGES.items()]
 
 metadata_template_context = {
     'STAGES': STAGES,
+    'FULL_LOT_STAGES': FULL_LOT_STAGES,
+    'PARTIAL_LOT_STAGES': PARTIAL_LOT_STAGES,
     'STAGES_PICKLIST': STAGES_PICKLIST,
     'STAGE_MAP': dict(STAGES_PICKLIST),
+    'FULL_LOT_STAGES_PICKLIST': FULL_LOT_STAGES_PICKLIST,
+    'FULL_LOT_STAGE_MAP': dict(FULL_LOT_STAGES_PICKLIST),
+    'PARTIAL_LOT_STAGES_PICKLIST': PARTIAL_LOT_STAGES_PICKLIST,
+    'PARTIAL_LOT_STAGE_MAP': dict(PARTIAL_LOT_STAGES_PICKLIST),
     'LOT_STAGES': LOT_STAGES,
     'CATEGORIES': CATEGORIES,
     'CATEGORIES_MAP': dict(CATEGORIES),
