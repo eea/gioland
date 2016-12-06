@@ -110,8 +110,9 @@ def country(code):
 @parcel_views.route('/lot/<string:code>')
 def lot(code):
     wh = get_warehouse()
-    all_parcels = [p for p in chain_tails(wh)
-                   if p.metadata['lot'] == code]
+    all_parcels = [p for p in chain_tails(wh) if
+                   p.metadata['delivery_type'] == LOT and
+                   p.metadata['lot'] == code]
     all_reports = [r for r in wh.get_all_reports()
                    if r.lot == code]
 
@@ -126,8 +127,9 @@ def lot(code):
 @parcel_views.route('/stream/<string:code>')
 def stream(code):
     wh = get_warehouse()
-    all_parcels = [p for p in chain_tails(wh)
-                   if p.metadata['lot'] == code]
+    all_parcels = [p for p in chain_tails(wh) if
+                   p.metadata['delivery_type'] == STREAM and
+                   p.metadata['lot'] == code]
     grouped_parcels = group_parcels(all_parcels)
     return flask.render_template('stream.html', **{
         'code': code,
