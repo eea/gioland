@@ -686,6 +686,9 @@ def filter_parcels(parcels, **kwargs):
 
 
 def authorize_for_parcel(parcel):
+    # New delivery tab should be visible only for users that can
+    # create a delivery( have access to the first stage) - in this case parcel
+    # will be None
     stage = INITIAL_STAGE[LOT] \
         if parcel is None else parcel.metadata['stage']
     DELIVERY_STAGES, _ = _get_stages_for_parcel(parcel)
