@@ -8,6 +8,7 @@ import flask
 
 from definitions import COUNTRY, LOT
 from common import AppTestCase, authorization_patch, select
+from parcel import _get_stages_for_parcel
 
 
 class ParcelTest(AppTestCase):
@@ -125,15 +126,20 @@ class ParcelTest(AppTestCase):
         self.assertEqual(400, resp.status_code)
 
     def test_finalize_with_reject_disallowed_for_most_stages(self):
-        for stage in ['int', 'fih']:
-            parcel_name = self.new_parcel(stage=stage)
+        for stage in ['int', 'fih', 'fhm']:
+            parcel_name = self.new_parcel(stage=stage,
+                                          delivery_type=LOT)
             resp = self.client.post('/parcel/%s/finalize' % parcel_name,
                                     data={'reject': 'on'})
             self.assertEqual(resp.status_code, 403)
 
     def test_finalize_with_reject_triggers_previous_step(self):
-        for stage, prev_stage in [('fva', 'int')]:
-            parcel_name = self.new_parcel(stage=stage)
+        for stage, prev_stage in [('vsc', 'int'),
+                                  ('sch', 'int'),
+                                  ('fmc', 'fih')]:
+            parcel_name = self.new_parcel(stage=stage,
+                                          delivery_type=LOT,
+                                          extent='partial')
             self.client.post('/parcel/%s/finalize' % parcel_name,
                              data={'reject': 'on'})
             with self.app.test_request_context():
@@ -273,37 +279,6 @@ class ParcelTest(AppTestCase):
 
             files = [f for f in parcel2.get_files()]
             self.assertEqual(0, len(files))
-
-    @unittest.skip("this test needs to be fixed")
-    def test_parcel_final_stage_has_files_from_final_integrated_stage(self):
-        self.add_to_role('somebody', 'ROLE_ADMIN')
-        parcel_name = self.new_parcel(stage='fin')
-        parcel_path = self.parcels_path / parcel_name
-        (parcel_path / 'some.txt').write_text('hello world')
-
-        with self.app.test_request_context():
-            # new parcel in Final Semantic Check
-            self.client.post('/parcel/%s/finalize' % parcel_name)
-            parcel = self.wh.get_parcel(parcel_name)
-            parcel_semantic_check = self.wh.get_parcel(
-                parcel.metadata['next_parcel'])
-
-            # new parcel in Final HRL
-            self.client.post('/parcel/%s/finalize' %
-                             parcel_semantic_check.name)
-            parcel_semantic_check = self.wh.get_parcel(
-                parcel.metadata['next_parcel'])
-            parcel_final_hrl = self.wh.get_parcel(
-                parcel_semantic_check.metadata['next_parcel'])
-            files = [f for f in parcel_final_hrl.get_files()]
-            self.assertEqual(1, len(files))
-            self.assertIn('some.txt', [f.name for f in files])
-
-            # check that files for parcel at final integrated stage
-            # is the same
-            files = [f for f in parcel.get_files()]
-            self.assertEqual(1, len(files))
-            self.assertIn('some.txt', [f.name for f in files])
 
 
 class ParcelHistoryTest(AppTestCase):
@@ -463,6 +438,24 @@ class LotTest(AppTestCase):
             parcel = self.wh.get_parcel(parcel_name)
             self.assertDictContainsSubset({'delivery_type': 'lot'},
                                           parcel.metadata)
+
+    def test_partial_lot_parcel_contains_optional_stage(self):
+        parcel_name = self.new_parcel(stage='int',
+                                      delivery_type=LOT,
+                                      extent='partial')
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            _, DELIVERY_STAGES_ORDER = _get_stages_for_parcel(parcel)
+            self.assertIn('vsc', DELIVERY_STAGES_ORDER)
+
+    def test_full_lot_parcel_does_not_contain_optional_stage(self):
+        parcel_name = self.new_parcel(stage='int',
+                                      delivery_type=LOT,
+                                      extent='full')
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            _, DELIVERY_STAGES_ORDER = _get_stages_for_parcel(parcel)
+            self.assertNotIn('vsc', DELIVERY_STAGES_ORDER)
 
     def test_finalize_lot_triggers_correct_stage(self):
         parcel_name = self.new_parcel(stage='int', delivery_type=LOT, extent='partial')
