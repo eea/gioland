@@ -9,20 +9,7 @@
 {% block scripts %}
 
   <script>
-    $(function() {
-      $('[name=extent]').on('change', function () {
-        var val = $(this).val();
-        var coverage = $(this).parents('form').find('[name=coverage]');
-        if(val == 'full') {
-          coverage.parents('tr').hide();
-          coverage.val('');
-        }
-        if(val == 'partial') {
-          coverage.parents('tr').show();
-          coverage.focus();
-        }
-      }).change();
-
+  $(function() {
       $('#delivery_type').on('change', 'input[type=radio]', function () {
         window.location.href = $(this).val();
       });
@@ -149,12 +136,6 @@
           <tr>
             <td>{{ form.extent.label }}</td>
             <td>{{ form.extent() }}</td>
-          </tr>
-          <tr class="hide">
-            <td>{{ form.coverage.label }}</td>
-            <td>{{ form.coverage() }}
-                <span class="err">(required)</span>
-            </td>
           </tr>
         {% endif %}
         <tr>

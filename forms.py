@@ -1,13 +1,12 @@
 from datetime import datetime
-from wtforms import Form, SelectField, StringField
+from wtforms import Form, SelectField
 from wtforms.validators import DataRequired, ValidationError
 from flask import g
 from warehouse import get_warehouse
-from definitions import COUNTRIES, LOTS, STREAM_LOTS,\
-    PRODUCTS, COUNTRY_PRODUCTS, RESOLUTIONS, LOT_PRODUCTS, \
-    COUNTRY_LOT_PRODUCTS
-from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
-from definitions import COUNTRY, LOT, STREAM
+from definitions import COUNTRIES, COUNTRY, COUNTRY_PRODUCTS
+from definitions import COUNTRY_LOT_PRODUCTS, EXTENTS, INITIAL_STAGE
+from definitions import LOT, LOT_PRODUCTS, LOTS, PRODUCTS, RESOLUTIONS
+from definitions import REFERENCES, STREAM,  STREAM_LOTS
 
 
 def get_lot_products(lot_id, delivery_type):
@@ -34,8 +33,6 @@ class _BaseDeliveryForm(Form):
         data = dict(self.data)
         data['stage'] = INITIAL_STAGE
         data['delivery_type'] = self.DELIVERY_TYPE
-        if data['delivery_type'] == LOT and data['extent'] == 'full':
-            data['coverage'] = ''
         wh = get_warehouse()
         parcel = wh.new_parcel()
         parcel.save_metadata(data)
@@ -66,11 +63,6 @@ class LotDeliveryForm(_DeliveryForm):
     DELIVERY_TYPE = LOT
 
     extent = SelectField('Extent', [DataRequired()], choices=EXTENTS)
-    coverage = StringField('Coverage')
-
-    def validate_coverage(self, field):
-        if self.extent.data == PARTIAL:
-            return field.validate(self, [DataRequired()])
 
 
 class StreamDeliveryForm(_BaseDeliveryForm):

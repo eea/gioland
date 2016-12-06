@@ -269,7 +269,6 @@ class DeleteParcelTest(AppTestCase):
             'extent': 'full',
             'projection': 'eur',
             'resolution': '20m',
-            'coverage': '',
             'delivery_type': 'country',
         })
         return parcel

@@ -510,7 +510,9 @@ def walk_parcels(wh, name, forward=True):
 
 def get_parcels_by_stage(name):
     wh = get_warehouse()
-    stages_with_parcels = {stage: None for stage in STAGES}
+    parcel = get_or_404(wh.get_parcel, name, _exc=KeyError)
+    DELIVERY_STAGES, _ = _get_stages_for_parcel(parcel)
+    stages_with_parcels = {stage: None for stage in DELIVERY_STAGES}
     for parcel in walk_parcels(wh, name, forward=False):
         stage = parcel.metadata['stage']
         if not stages_with_parcels[stage]:
@@ -713,8 +715,8 @@ def create_next_parcel(wh, parcels, next_stage, stage_def, next_stage_def):
         url = flask.url_for('.view', name=p.name)
         if p.metadata['delivery_type'] == LOT and \
            p.metadata['extent'] == 'partial':
-            links.append('<a href="%s">%s (%s)</a>' % (
-                url, stage_def['label'], p.metadata['coverage']))
+            links.append('<a href="%s">%s</a>' % (
+                url, stage_def['label']))
         else:
             links.append('<a href="%s">%s</a>' % (url, stage_def['label']))
     next_description_html = '<p>Previous step: %s</p>' % ', '.join(links)
@@ -820,7 +822,7 @@ def finalize_and_merge_parcel(wh, parcel):
         close_prev_parcel(partial_parcel, merged=True)
     next_parcel = create_next_parcel(wh, partial_parcels, next_stage,
                                      stage_def, next_stage_def)
-    next_parcel.save_metadata({'extent': 'full', 'coverage': ''})
+    next_parcel.save_metadata({'extent': 'full'})
     for partial_parcel in partial_parcels:
         link_to_next_parcel(next_parcel, partial_parcel, stage_def,
                             next_stage_def)
@@ -829,10 +831,6 @@ def finalize_and_merge_parcel(wh, parcel):
 def validate_metadata(metadata, data_map):
     data_map = dict(data_map)
     for key, value in metadata.items():
-        if key == 'coverage':
-            if metadata['extent'] == 'partial' and not value:
-                return False
-            continue
         if value and value in dict(data_map[key]).keys():
             continue
         return False

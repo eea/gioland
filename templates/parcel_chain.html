@@ -56,7 +56,7 @@
             {% endif %}
             {% set stage = DELIVERY_STAGE_MAP[prev_parcel.metadata['stage']]  %}
             <a href="{{ prev_parcel_url }}">
-              {{ stage  }} ({{ prev_parcel.metadata['coverage'] }})</a>
+              {{ stage  }} </a>
           </td>
           <td>
             {{ prev_parcel.metadata['upload_time']|isoformat_to_datetime

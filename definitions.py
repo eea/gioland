@@ -16,19 +16,17 @@ LOT_EXCLUDE_METADATA = (
 )
 
 COUNTRY_EXCLUDE_METADATA = (
-    'coverage',
     'extent',
 )
 
 STREAM_EXCLUDE_METADATA = (
-    'coverage',
     'extent',
     'country',
     'resolution',
     'reference'
 )
 
-EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
+EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', )
 METADATA = EDITABLE_METADATA + ('stage',)
 
 

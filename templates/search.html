@@ -119,7 +119,6 @@
           {{ PRODUCT_MAP[metadata['product']] }}
           {% if delivery_type == LOT %}
             {% if parcel.metadata['extent'] == 'partial' %}
-              ({{ parcel.metadata['coverage'] }})
             {% endif %}
           {% endif %}
         </td>

@@ -26,7 +26,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_view_finalize_and_merge_btn_if_parcel_is_partial(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         parcel_name = self._new_parcel(data)
         self._set_parcel_to_merge_stage(parcel_name)
         resp = self.client.get('/parcel/' + parcel_name)
@@ -39,7 +39,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_view_finalize_and_merge_btn_if_parcel_stage_in_stages_for_merging(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         parcel_name = self._new_parcel(data)
         self._set_parcel_to_merge_stage(parcel_name)
         resp = self.client.get('/parcel/' + parcel_name)
@@ -47,7 +47,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_view_finalize_and_merge_btn_if_parcel_stage_not_in_stages_for_merging(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         parcel_name = self._new_parcel(data)
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
@@ -64,7 +64,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_finalize_and_merge_fail_if_parcel_stage_not_in_stages_for_merging(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         parcel_name = self._new_parcel(data)
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
@@ -75,7 +75,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_merge_partials_parcels_creates_new_full_partial(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         # create a full parcel
         self._new_parcel(self.PARCEL_METADATA)
         #create 2 partial parcels
@@ -90,13 +90,12 @@ class ParcelMergeTests(AppTestCase):
             next_parcel = self.wh.get_parcel(parcel.metadata['next_parcel'])
             new_data = dict(data)
             new_data['extent'] = 'full'
-            new_data['coverage'] = ''
             self.assertDictContainsSubset(new_data, next_parcel.metadata)
             self.assertEqual('full', next_parcel.metadata['extent'])
 
     def test_merge_partials_parcels_fail_if_only_one_parcel(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         parcel_name = self._new_parcel(data)
         self._set_parcel_to_merge_stage(parcel_name)
         with self.app.test_request_context():
@@ -108,7 +107,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_merge_partials_parcels_closes_all_merged_parcels(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         partial_parcels_names = []
         for i in range(2):
             parcel_name = self._new_parcel(data)
@@ -125,7 +124,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_merge_partials_parcels_link_to_next_parcel(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         partial_parcels_names = []
         for i in range(3):
             parcel_name = self._new_parcel(data)
@@ -143,10 +142,9 @@ class ParcelMergeTests(AppTestCase):
 
     def test_merge_partials_previous_steps(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         #create 2 partial parcels
         for i in range(2):
-            data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
             self._set_parcel_to_merge_stage(parcel_name)
         self.client.post('/parcel/%s/finalize' % parcel_name,
@@ -165,7 +163,6 @@ class ParcelMergeTests(AppTestCase):
         data['extent'] = 'partial'
         #create 2 partial parcels
         for i in range(2):
-            data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
             self._set_parcel_to_merge_stage(parcel_name)
 
@@ -185,7 +182,6 @@ class ParcelMergeTests(AppTestCase):
         data['extent'] = 'partial'
         #create 2 partial parcels
         for i in range(2):
-            data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
             self._set_parcel_to_merge_stage(parcel_name)
         resp = self.client.get('/parcel/%s/finalize?merge=on' % parcel_name)
@@ -195,7 +191,7 @@ class ParcelMergeTests(AppTestCase):
 
     def test_merge_partial_confirmation_view_with_empty_results(self):
         data = dict(self.PARCEL_METADATA)
-        data['extent'] = data['coverage'] = 'partial'
+        data['extent'] = 'partial'
         parcel_name = self._new_parcel(data)
         self._set_parcel_to_merge_stage(parcel_name)
         resp = self.client.get('/parcel/%s/finalize?merge=on' % parcel_name)
@@ -208,7 +204,6 @@ class ParcelMergeTests(AppTestCase):
         data['extent'] = 'partial'
         #create 2 partial parcels
         for i in range(2):
-            data['coverage'] = 'partial_%s' % i
             parcel_name = self._new_parcel(data)
             self._set_parcel_to_merge_stage(parcel_name)
 
