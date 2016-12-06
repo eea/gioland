@@ -23,7 +23,7 @@ class NotificationDeliveryTest(AppTestCase):
         parcel.save_metadata({
             'country': 'it',
             'lot': 'lot3',
-            'stage': 'fva',
+            'stage': 'c-fsc',
             'product': 'grl',
             'resolution': '20m',
             'delivery_type': COUNTRY,

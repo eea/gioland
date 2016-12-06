@@ -40,17 +40,7 @@
     {% if show_stage %}
     <tr>
       <th>Processing stage</th>
-      {% if delivery_type == COUNTRY %}
-        <td>{{ STAGE_MAP[metadata['stage']] }}</td>
-      {% elif delivery_type == LOT %}
-        {% if EXTENT_MAP[metadata['extent']] == 'Partial' %}
-          <td>{{ PARTIAL_LOT_STAGE_MAP[metadata['stage']] }}</td>
-        {% else %}
-          <td>{{ FULL_LOT_STAGE_MAP[metadata['stage']] }}</td>
-        {% endif %}
-      {% elif delivery_type == STREAM %}
-        <td>{{ STREAM_STAGE_MAP[metadata['stage']] }}</td>
-      {% endif %}
+      <td>{{ ALL_STAGES_MAP[metadata['stage']] }}</td>
     </tr>
     {% endif %}
 

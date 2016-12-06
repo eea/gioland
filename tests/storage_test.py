@@ -262,7 +262,7 @@ class DeleteParcelTest(AppTestCase):
     def create_initial_parcel(self):
         parcel = self.wh.new_parcel()
         parcel.save_metadata({
-            'stage': 'int',
+            'stage': 'c-int',
             'country': 'dk',
             'lot': 'lot1',
             'product': 'imp-deg',

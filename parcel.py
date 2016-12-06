@@ -18,8 +18,8 @@ from path import path
 
 import notification
 import auth
-from definitions import ALL_ROLES, CATEGORIES, COUNTRIES, COUNTRIES_CC
-from definitions import COUNTRIES_MC, COUNTRY_PRODUCTS, COUNTRY
+from definitions import ALL_STAGES_MAP, ALL_ROLES, CATEGORIES, COUNTRIES
+from definitions import COUNTRIES_CC, COUNTRIES_MC, COUNTRY_PRODUCTS, COUNTRY
 from definitions import COUNTRY_LOT_PRODUCTS, DOCUMENTS, EDITABLE_METADATA
 from definitions import EXTENTS, FULL_LOT_STAGES, FULL_LOT_STAGES_ORDER
 from definitions import INITIAL_STAGE, LOT, LOTS, LOT_STAGES, METADATA, PARTIAL
@@ -686,7 +686,8 @@ def filter_parcels(parcels, **kwargs):
 
 
 def authorize_for_parcel(parcel):
-    stage = INITIAL_STAGE if parcel is None else parcel.metadata['stage']
+    stage = INITIAL_STAGE[LOT] \
+        if parcel is None else parcel.metadata['stage']
     DELIVERY_STAGES, _ = _get_stages_for_parcel(parcel)
     return auth.authorize(DELIVERY_STAGES[stage]['roles'])
 
@@ -885,7 +886,7 @@ def extension(filename):
 
 def _get_stages_for_parcel(parcel):
     if not parcel:
-        return STAGES, STAGE_ORDER
+        return FULL_LOT_STAGES, FULL_LOT_STAGES_ORDER
     delivery_type = parcel.metadata.get('delivery_type', COUNTRY)
     if delivery_type == COUNTRY:
         return STAGES, STAGE_ORDER
@@ -917,19 +918,16 @@ FULL_LOT_STAGES_PICKLIST = [(k, s['label']) for k, s in FULL_LOT_STAGES.items()]
 STREAM_STAGES_PICKLIST = [(k, s['label']) for k, s in STREAM_STAGES.items()]
 
 metadata_template_context = {
+    'ALL_STAGES_MAP': ALL_STAGES_MAP,
     'STAGES': STAGES,
     'FULL_LOT_STAGES': FULL_LOT_STAGES,
     'PARTIAL_LOT_STAGES': PARTIAL_LOT_STAGES,
     'STAGES_PICKLIST': STAGES_PICKLIST,
-    'STAGE_MAP': dict(STAGES_PICKLIST),
     'FULL_LOT_STAGES_PICKLIST': FULL_LOT_STAGES_PICKLIST,
-    'FULL_LOT_STAGE_MAP': dict(FULL_LOT_STAGES_PICKLIST),
     'PARTIAL_LOT_STAGES_PICKLIST': PARTIAL_LOT_STAGES_PICKLIST,
-    'PARTIAL_LOT_STAGE_MAP': dict(PARTIAL_LOT_STAGES_PICKLIST),
     'LOT_STAGES': LOT_STAGES,
     'STREAM_STAGES': STREAM_STAGES,
     'STREAM_STAGES_PICKLIST': STREAM_STAGES_PICKLIST,
-    'STREAM_STAGE_MAP': dict(STREAM_STAGES_PICKLIST),
     'CATEGORIES': CATEGORIES,
     'CATEGORIES_MAP': dict(CATEGORIES),
     'COUNTRIES_MC': COUNTRIES_MC,

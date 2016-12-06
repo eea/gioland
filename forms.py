@@ -33,7 +33,7 @@ class _BaseDeliveryForm(Form):
 
     def save(self):
         data = dict(self.data)
-        data['stage'] = INITIAL_STAGE
+        data['stage'] = INITIAL_STAGE[self.DELIVERY_TYPE]
         data['delivery_type'] = self.DELIVERY_TYPE
         wh = get_warehouse()
         parcel = wh.new_parcel()

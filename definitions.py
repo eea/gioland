@@ -33,38 +33,38 @@ METADATA = EDITABLE_METADATA + ('stage',)
 REPORT_METADATA = ('lot', 'product')
 
 
-STAGE_INT = 'int'
-STAGE_SCH = 'sch'
-STAGE_VER = 'ver'
-STAGE_VCH = 'vch'
-STAGE_VSC = 'vsc'
-STAGE_ENH = 'enh'
-STAGE_ERH = 'erh'
-STAGE_ECH = 'ech'
-STAGE_FIN = 'fin'
-STAGE_FVA = 'fva'
-STAGE_FIH = 'fih'
-STAGE_FMC = 'fmc'
-STAGE_FHM = 'fhm'
-STAGE_SLC = 'slc'
+COUNTRY_STAGE_INT = 'c-int'
+COUNTRY_STAGE_FSC = 'c-fsc'
+COUNTRY_STAGE_FIH = 'c-fih'
+
+LOT_STAGE_INT = 'l-int'
+LOT_STAGE_VSC = 'l-vsc'
+LOT_STAGE_SCH = 'l-sch'
+LOT_STAGE_FIH = 'l-fih'
+LOT_STAGE_FMC = 'l-fmc'
+LOT_STAGE_FHM = 'l-fhm'
+
+STREAM_STAGE_INT = 's-int'
+STREAM_STAGE_SLC = 's-slc'
+STREAM_STAGE_FIH = 's-fih'
 
 
 STAGES = OrderedDict((
-    (STAGE_INT, {
+    (COUNTRY_STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
         'file_uploading': True,
     }),
 
-    (STAGE_FVA, {
+    (COUNTRY_STAGE_FSC, {
         'label': "Final Semantic check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
-        'reject_stage': STAGE_INT,
+        'reject_stage': COUNTRY_STAGE_INT,
     }),
 
-    (STAGE_FIH, {
+    (COUNTRY_STAGE_FIH, {
         'label': "Final HRL",
         'roles': ['ROLE_SP',
                   'ROLE_ADMIN'],
@@ -74,43 +74,43 @@ STAGES = OrderedDict((
 
 
 LOT_STAGES = OrderedDict((
-    (STAGE_INT, {
+    (LOT_STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
         'file_uploading': True,
     }),
 
-    (STAGE_VSC, {
+    (LOT_STAGE_VSC, {
         'label': "Validation sample check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
-        'reject_stage': STAGE_INT,
+        'reject_stage': LOT_STAGE_INT,
         'partial': True,
     }),
 
-    (STAGE_SCH, {
+    (LOT_STAGE_SCH, {
         'label': "Semantic Check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
-        'reject_stage': STAGE_INT,
+        'reject_stage': LOT_STAGE_INT,
     }),
 
-    (STAGE_FIH, {
+    (LOT_STAGE_FIH, {
         'label': "Final HRL",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
         'file_uploading': True,
     }),
 
-    (STAGE_FMC, {
+    (LOT_STAGE_FMC, {
         'label': "Final mosaic check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'reject': True,
-        'reject_stage': STAGE_FIH,
+        'reject_stage': LOT_STAGE_FIH,
     }),
 
-    (STAGE_FHM, {
+    (LOT_STAGE_FHM, {
         'label': "Final HRL mosaic",
         'roles': ['ROLE_SP', 'ROLE_ETC', 'ROLE_ADMIN'],
         'last': True,
@@ -118,21 +118,21 @@ LOT_STAGES = OrderedDict((
 ))
 
 STREAM_STAGES = OrderedDict((
-    (STAGE_INT, {
+    (STREAM_STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
         'file_uploading': True,
     }),
 
-    (STAGE_SLC, {
+    (STREAM_STAGE_SLC, {
         'label': "Streamlining check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
-        'reject_stage': STAGE_INT
+        'reject_stage': STREAM_STAGE_INT
     }),
 
-    (STAGE_FIH, {
+    (STREAM_STAGE_FIH, {
         'label': "Final streamlining",
         'roles': ['ROLE_SP',
                   'ROLE_ADMIN'],
@@ -146,15 +146,22 @@ FULL_LOT_STAGES = OrderedDict(
     if not v.get('partial', False)
 )
 
+ALL_STAGES_MAP = {k: v['label'] for k, v in STREAM_STAGES.items() +
+                  LOT_STAGES.items() + STAGES.items()
+                  }
 
-STAGES_FOR_MERGING = [STAGE_ENH]
+STAGES_FOR_MERGING = []
 STAGE_ORDER = list(STAGES)
 LOT_STAGE_ORDER = list(LOT_STAGES)
 PARTIAL_LOT_STAGES_ORDER = list(PARTIAL_LOT_STAGES)
 FULL_LOT_STAGES_ORDER = list(FULL_LOT_STAGES)
 STREAM_STAGES_ORDER = list(STREAM_STAGES)
 
-INITIAL_STAGE = STAGE_ORDER[0]
+INITIAL_STAGE = {
+    'country': STAGE_ORDER[0],
+    'lot': LOT_STAGE_ORDER[0],
+    'stream': STREAM_STAGES_ORDER[0]
+}
 
 COUNTRIES_MC = (
     ('at', "Austria"),

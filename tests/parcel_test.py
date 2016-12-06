@@ -43,11 +43,12 @@ class ParcelTest(AppTestCase):
             self.assertNotIn('bogus', parcel.metadata)
 
     def test_begin_parcel_saves_default_metadata(self):
-        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/country',
+                                data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
-            self.assertEqual(parcel.metadata['stage'], 'int')
+            self.assertEqual(parcel.metadata['stage'], 'c-int')
 
     def test_begin_parcel_displays_all_deliveries(self):
         resp = self.client.get('/parcel/new/country')
@@ -93,7 +94,7 @@ class ParcelTest(AppTestCase):
         with self.app.test_request_context():
             parcel = self.wh.new_parcel()
             parcel.save_metadata(self.PARCEL_METADATA)
-            parcel.save_metadata({'stage': 'fva'})  # verification check
+            parcel.save_metadata({'stage': 'c-fsc'})  # verification check
             parcel_name = parcel.name
 
         self.client.post('/parcel/%s/finalize' % parcel_name)
@@ -106,7 +107,7 @@ class ParcelTest(AppTestCase):
             self.assertIn(parcel.name,
                           next_parcel.metadata['prev_parcel_list'])
             # enhancement
-            self.assertEqual(next_parcel.metadata['stage'], 'fih')
+            self.assertEqual(next_parcel.metadata['stage'], 'c-fih')
 
     def test_finalize_preserves_metadata(self):
         resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
@@ -126,7 +127,7 @@ class ParcelTest(AppTestCase):
         self.assertEqual(400, resp.status_code)
 
     def test_finalize_with_reject_disallowed_for_most_stages(self):
-        for stage in ['int', 'fih', 'fhm']:
+        for stage in ['l-int', 'l-fih', 'l-fhm']:
             parcel_name = self.new_parcel(stage=stage,
                                           delivery_type=LOT)
             resp = self.client.post('/parcel/%s/finalize' % parcel_name,
@@ -134,9 +135,9 @@ class ParcelTest(AppTestCase):
             self.assertEqual(resp.status_code, 403)
 
     def test_finalize_with_reject_triggers_previous_step(self):
-        for stage, prev_stage in [('vsc', 'int'),
-                                  ('sch', 'int'),
-                                  ('fmc', 'fih')]:
+        for stage, prev_stage in [('l-vsc', 'l-int'),
+                                  ('l-sch', 'l-int'),
+                                  ('l-fmc', 'l-fih')]:
             parcel_name = self.new_parcel(stage=stage,
                                           delivery_type=LOT,
                                           extent='partial')
@@ -149,7 +150,7 @@ class ParcelTest(AppTestCase):
                 self.assertEqual(next_parcel.metadata['stage'], prev_stage)
 
     def test_finalize_with_reject_saves_rejected_metadata(self):
-        for stage in ['fva']:
+        for stage in ['c-fsc']:
             parcel_name = self.new_parcel(stage=stage)
             self.client.post('/parcel/%s/finalize' % parcel_name,
                              data={'reject': 'on'})
@@ -159,8 +160,8 @@ class ParcelTest(AppTestCase):
 
     def test_get_parcels_by_stage(self):
         import parcel
-        self.new_parcel(stage='int')
-        parcel_name_1 = self.new_parcel(stage='fva')
+        self.new_parcel(stage='c-int')
+        parcel_name_1 = self.new_parcel(stage='c-fsc')
         self.client.post('/parcel/%s/finalize' % parcel_name_1,
                          data={'reject': 'on'})
 
@@ -172,20 +173,20 @@ class ParcelTest(AppTestCase):
             self.assertEqual(2, len(parcels))
 
     def test_finalize_last_parcel_forbidden(self):
-        parcel_name = self.new_parcel(stage='fih')
+        parcel_name = self.new_parcel(stage='c-fih')
         resp = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(403, resp.status_code)
 
     def test_finalize_finalized_parcel_forbidden(self):
-        parcel_name = self.new_parcel(stage='fva')
+        parcel_name = self.new_parcel(stage='c-fsc')
         resp1 = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(resp1.status_code, 302)
         resp2 = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(resp2.status_code, 403)
 
     def test_delete_parcel(self):
-        parcel_name_1 = self.new_parcel(stage='int')
-        parcel_name_2 = self.new_parcel(stage='fva')
+        parcel_name_1 = self.new_parcel(stage='c-int')
+        parcel_name_2 = self.new_parcel(stage='c-fsc')
 
         with self.app.test_request_context():
             parcel_1 = self.wh.get_parcel(parcel_name_1)
@@ -203,13 +204,13 @@ class ParcelTest(AppTestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_delete_parcel_link_if_allow_parcel_deletion(self):
-        parcel_name = self.new_parcel(stage='fva')
+        parcel_name = self.new_parcel(stage='c-fsc')
         resp = self.client.get('/parcel/%s' % parcel_name)
         self.assertEqual(1, len(select(resp.data, '.delete-parcel')))
 
     def test_delete_parcel_link_if_not_allow_parcel_deletion(self):
         self.app.config['ALLOW_PARCEL_DELETION'] = False
-        parcel_name = self.new_parcel(stage='fva')
+        parcel_name = self.new_parcel(stage='c-fsc')
         resp = self.client.get('/parcel/%s' % parcel_name)
         self.assertEqual(0, len(select(resp.data, '.delete-parcel')))
 
@@ -267,7 +268,7 @@ class ParcelTest(AppTestCase):
 
     def test_parcel_other_stage_does_not_have_files_from_prev_stage(self):
         self.add_to_role('somebody', 'ROLE_ADMIN')
-        parcel_name = self.new_parcel(stage='fva')
+        parcel_name = self.new_parcel(stage='c-fsc')
         parcel_path = self.parcels_path / parcel_name
         (parcel_path / 'some.txt').write_text('hello world')
 
@@ -446,19 +447,20 @@ class LotTest(AppTestCase):
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
             _, DELIVERY_STAGES_ORDER = _get_stages_for_parcel(parcel)
-            self.assertIn('vsc', DELIVERY_STAGES_ORDER)
+            self.assertIn('l-vsc', DELIVERY_STAGES_ORDER)
 
     def test_full_lot_parcel_does_not_contain_optional_stage(self):
-        parcel_name = self.new_parcel(stage='int',
+        parcel_name = self.new_parcel(stage='l-int',
                                       delivery_type=LOT,
                                       extent='full')
         with self.app.test_request_context():
             parcel = self.wh.get_parcel(parcel_name)
             _, DELIVERY_STAGES_ORDER = _get_stages_for_parcel(parcel)
-            self.assertNotIn('vsc', DELIVERY_STAGES_ORDER)
+            self.assertNotIn('l-vsc', DELIVERY_STAGES_ORDER)
 
     def test_finalize_lot_triggers_correct_stage(self):
-        parcel_name = self.new_parcel(stage='int', delivery_type=LOT, extent='partial')
+        parcel_name = self.new_parcel(stage='l-int', delivery_type=LOT,
+                                      extent='partial')
         self.client.post('/parcel/%s/finalize' % parcel_name)
 
         with self.app.test_request_context():
@@ -469,10 +471,10 @@ class LotTest(AppTestCase):
             self.assertIn(parcel.name,
                           next_parcel.metadata['prev_parcel_list'])
             # Final Semantic Check
-            self.assertEqual(next_parcel.metadata['stage'], 'vsc')
+            self.assertEqual(next_parcel.metadata['stage'], 'l-vsc')
 
     def test_finalize_with_reject_triggers_previous_step(self):
-        parcel_name = self.new_parcel(stage='fmc', delivery_type=LOT)
+        parcel_name = self.new_parcel(stage='l-fmc', delivery_type=LOT)
         resp = self.client.post('/parcel/%s/finalize' % parcel_name,
                                 data={'reject': 'on'})
         self.assertEqual(302, resp.status_code)
@@ -480,28 +482,28 @@ class LotTest(AppTestCase):
             parcel = self.wh.get_parcel(parcel_name)
             next_parcel = self.wh.get_parcel(
                     parcel.metadata['next_parcel'])
-            self.assertEqual(next_parcel.metadata['stage'], 'fih')
+            self.assertEqual(next_parcel.metadata['stage'], 'l-fih')
 
     def test_finalze_lot_final_stage_forbidden(self):
-        parcel_name = self.new_parcel(stage='fhm', delivery_type=LOT)
+        parcel_name = self.new_parcel(stage='l-fhm', delivery_type=LOT)
         resp = self.client.post('/parcel/%s/finalize' % parcel_name)
         self.assertEqual(403, resp.status_code)
 
     def test_search_country_deliveries(self):
-        self.new_parcel(stage='fih', delivery_type=COUNTRY)
+        self.new_parcel(stage='l-fih', delivery_type=COUNTRY)
         resp = self.client.get('/search')
         self.assertEqual(200, resp.status_code)
         self.assertEqual(1, len(select(resp.data, '.datatable tbody tr')))
 
     def test_search_lot_deliveries(self):
-        self.new_parcel(stage='fih', delivery_type=LOT)
-        self.new_parcel(stage='fih', delivery_type=LOT)
+        self.new_parcel(stage='l-fih', delivery_type=LOT)
+        self.new_parcel(stage='l-fih', delivery_type=LOT)
         resp = self.client.get('/search/lot')
         self.assertEqual(200, resp.status_code)
         self.assertEqual(2, len(select(resp.data, '.datatable tbody tr')))
 
     def test_search_lot_deliveries_filter_by_lot(self):
-        self.new_parcel(stage='fih', delivery_type=LOT)
+        self.new_parcel(stage='l-fih', delivery_type=LOT)
         resp = self.client.get('/search/lot?lot=lot3')
         self.assertEqual(200, resp.status_code)
         self.assertEqual(1, len(select(resp.data, '.datatable tbody tr')))

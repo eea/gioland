@@ -7,11 +7,11 @@
 {% set file_authorize = authorize_for_upload(parcel) %}
 
 {% set metadata = parcel.metadata %}
-{% set DELIVERY_STAGES, DELIVERY_STAGE_MAP  = get_stages_for_parcel(parcel) %}
+{% set DELIVERY_STAGES, _ = get_stages_for_parcel(parcel) %}
 {% set country_code = metadata['country'] %}
 {% set lot_code = metadata['lot'] %}
 {% set title_bits = '%s, %s'|format(PRODUCT_MAP[metadata['product']],
-                                    DELIVERY_STAGE_MAP[metadata['stage']]) %}
+                                    ALL_STAGES_MAP[metadata['stage']]) %}
 
 {% set country = COUNTRY_MAP[country_code] %}
 {% set lot = LOTS_MAP[lot_code] %}

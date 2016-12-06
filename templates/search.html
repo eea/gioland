@@ -127,11 +127,7 @@
         {% endif %}
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
         <td><a href="{{ overview_url }}">workflow overview</a></td>
-        {% if delivery_type == LOT %}
-          <td>{{ PARTIAL_LOT_STAGE_MAP[metadata['stage']] }}</td>
-        {% else %}
-          <td>{{ STAGE_MAP[metadata['stage']] }}</td>
-        {% endif %}
+        <td>{{ ALL_STAGES_MAP[metadata['stage']] }}</td>
         <td>{{ parcel.last_modified|datetime }}</td>
         <td>{{ REFERENCE_MAP[metadata['reference']] }}</td>
       </tr>
