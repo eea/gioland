@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% set title = STREAM_LOTS_MAP[code] %}
+
+
+{% block page_title %}{{ super() }} &ndash; {{ title }}{% endblock %}
+
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GIO Land'),
+    (url_for('parcel.stream', code=code), title),
+  ]) }}
+{% endblock %}
+
+
+{% block page_heading %}<h1>{{ title }}</h1>{% endblock %}
+
+
+{% block content %}
+
+  {% from 'bits.html' import workflow_overview with context %}
+  {{ workflow_overview(grouped_parcels, stream=True) }}
+
+{% endblock %}

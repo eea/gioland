@@ -27,7 +27,8 @@ from definitions import PARTIAL_LOT_STAGES, PARTIAL_LOT_STAGES_ORDER
 from definitions import PRODUCTS, PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
 from definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
 from definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
-from definitions import STREAM_STAGES, STREAM_STAGES_ORDER, UNS_FIELD_DEFS
+from definitions import STREAM_LOTS, STREAM_STAGES, STREAM_STAGES_ORDER
+from definitions import UNS_FIELD_DEFS
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
@@ -119,6 +120,18 @@ def lot(code):
         'code': code,
         'grouped_parcels': grouped_parcels,
         'all_reports': all_reports,
+    })
+
+
+@parcel_views.route('/stream/<string:code>')
+def stream(code):
+    wh = get_warehouse()
+    all_parcels = [p for p in chain_tails(wh)
+                   if p.metadata['lot'] == code]
+    grouped_parcels = group_parcels(all_parcels)
+    return flask.render_template('stream.html', **{
+        'code': code,
+        'grouped_parcels': grouped_parcels,
     })
 
 
@@ -938,5 +951,7 @@ metadata_template_context = {
     'LOT': LOT,
     'STREAM': STREAM,
     'LOTS': LOTS,
+    'STREAM_LOTS': STREAM_LOTS,
+    'STREAM_LOTS_MAP': dict(STREAM_LOTS),
     'LOTS_MAP': dict(LOTS),
 }

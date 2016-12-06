@@ -161,9 +161,11 @@
 {% endmacro %}
 
 
-{% macro workflow_overview(grouped_parcels, lot=False) %}
+{% macro workflow_overview(grouped_parcels, lot=False, stream=False) %}
 
-  {% if lot %}
+  {% if stream %}
+    {% set FILTERED_STAGES = STREAM_STAGES %}
+  {% elif lot %}
     {% set FILTERED_STAGES = PARTIAL_LOT_STAGES %}
   {% else %}
     {% set FILTERED_STAGES = STAGES %}

@@ -22,6 +22,10 @@
     <li {% if delivery == COUNTRY %}class="active"{% endif %}>
       <a href="{{ url_for('.switch_delivery', delivery=COUNTRY) }}">
       Country deliveries</a></li>
+    <li {% if delivery == STREAM %}class="active"{% endif %}>
+      <a href="{{ url_for('.switch_delivery', delivery=STREAM) }}">
+        Streamlining deliveries
+      </a></li>
   </ul>
   {% if delivery == LOT %}
     <h2>Lots</h2>
@@ -57,6 +61,20 @@
 
       <div class="countrybox">
         <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+      </div>
+
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if delivery == STREAM %}
+    <h2>Lots for streamlining deliveries</h2>
+
+    <div>
+      {% for key, label in STREAM_LOTS %}
+
+      <div>
+        <a href="{{ url_for('parcel.stream', code=key) }}">{{ label }}</a>
       </div>
 
       {% endfor %}
