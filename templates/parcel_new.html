@@ -144,10 +144,6 @@
         </tr>
       {% endif %}
       </table>
-    {% if delivery_type != STREAM %}
       <button type="submit">Begin upload</button>
-    {% else %}
-      <button type="submit" disabled>Begin upload</button>
-    {% endif %}
   </form>
 {% endblock %}

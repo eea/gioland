@@ -46,6 +46,8 @@ STAGE_FVA = 'fva'
 STAGE_FIH = 'fih'
 STAGE_FMC = 'fmc'
 STAGE_FHM = 'fhm'
+STAGE_SLC = 'slc'
+
 
 STAGES = OrderedDict((
     (STAGE_INT, {
@@ -115,6 +117,28 @@ LOT_STAGES = OrderedDict((
     }),
 ))
 
+STREAM_STAGES = OrderedDict((
+    (STAGE_INT, {
+        'label': "Service provider upload",
+        'roles': ['ROLE_SP', 'ROLE_ADMIN'],
+        'file_uploading': True,
+    }),
+
+    (STAGE_SLC, {
+        'label': "Streamlining check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'file_uploading': True,
+        'reject': True,
+        'reject_stage': STAGE_INT
+    }),
+
+    (STAGE_FIH, {
+        'label': "Final HRL",
+        'roles': ['ROLE_SP',
+                  'ROLE_ADMIN'],
+        'last': True,
+    }),
+))
 
 PARTIAL_LOT_STAGES = LOT_STAGES
 FULL_LOT_STAGES = OrderedDict(
@@ -128,6 +152,7 @@ STAGE_ORDER = list(STAGES)
 LOT_STAGE_ORDER = list(LOT_STAGES)
 PARTIAL_LOT_STAGES_ORDER = list(PARTIAL_LOT_STAGES)
 FULL_LOT_STAGES_ORDER = list(FULL_LOT_STAGES)
+STREAM_STAGES_ORDER = list(STREAM_STAGES)
 
 INITIAL_STAGE = STAGE_ORDER[0]
 
@@ -276,10 +301,11 @@ LOT_PRODUCTS = {
 DEFAULT_LOT = 'lot1'
 DEFAULT_DELIVERY_TYPE = LOT
 
-STREAM_LOT_PRODUCTS = LOT3_PRODUCTS + \
-                      LOT4_PRODUCTS + \
-                      LOT5_PRODUCTS
-
+STREAM_LOT_PRODUCTS = {
+    "lot3": LOT3_PRODUCTS,
+    "lot4": LOT4_PRODUCTS,
+    "lot5": LOT5_PRODUCTS
+}
 
 PRODUCTS = remove_duplicates_preserve_order(
     LOT1_PRODUCTS +
@@ -297,7 +323,9 @@ COUNTRY_PRODUCTS = remove_duplicates_preserve_order(
     COUNTRY_LOT5_PRODUCTS
 )
 
-STREAM_PRODUCTS = remove_duplicates_preserve_order(STREAM_LOT_PRODUCTS)
+STREAM_PRODUCTS = remove_duplicates_preserve_order(
+    LOT3_PRODUCTS + LOT4_PRODUCTS + LOT5_PRODUCTS
+)
 
 PRODUCTS_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),

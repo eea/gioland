@@ -18,8 +18,10 @@
   {% else %}
     {% set DELIVERY_STAGE_MAP =  FULL_LOT_STAGE_MAP %}
   {% endif %}
+{% elif parcel.metadata['delivery_type'] == COUNTRY %}
+  {% set DELIVERY_STAGE_MAP =  STAGE_MAP %}
 {% else %}
-    {% set DELIVERY_STAGE_MAP =  STAGE_MAP %}
+  {% set DELIVERY_STAGE_MAP = STREAM_STAGE_MAP %}
 {% endif %}
 
 {% macro parcel_link(parcel) -%}

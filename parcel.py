@@ -27,7 +27,7 @@ from definitions import PARTIAL_LOT_STAGES, PARTIAL_LOT_STAGES_ORDER
 from definitions import PRODUCTS, PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
 from definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
 from definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
-from definitions import UNS_FIELD_DEFS
+from definitions import STREAM_STAGES, STREAM_STAGES_ORDER, UNS_FIELD_DEFS
 from warehouse import get_warehouse, _current_user
 from utils import format_datetime, exclusive_lock, isoformat_to_datetime
 from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
@@ -61,9 +61,10 @@ def search(delivery_type):
     wh = get_warehouse()
     filter_arguments = get_filter_arguments()
     all_reports = []
-    if 'country' in filter_arguments:
+    # right now the reports are showed only when a lot is selected
+    if 'lot' in filter_arguments and delivery_type == LOT:
         all_reports = [r for r in wh.get_all_reports()
-                       if r.country == filter_arguments['country']]
+                       if r.lot == filter_arguments['lot']]
     parcels = list(filter_parcels(chain_tails(wh), **filter_arguments))
     parcels = [p for p in parcels
                if p.metadata.get('delivery_type', COUNTRY) == delivery_type]
@@ -879,6 +880,8 @@ def _get_stages_for_parcel(parcel):
             return PARTIAL_LOT_STAGES, PARTIAL_LOT_STAGES_ORDER
         else:
             return FULL_LOT_STAGES, FULL_LOT_STAGES_ORDER
+    elif delivery_type == STREAM:
+        return STREAM_STAGES, STREAM_STAGES_ORDER
     flask.abort(400)
 
 
@@ -896,6 +899,7 @@ STAGES_PICKLIST = [(k, s['label']) for k, s in STAGES.items()]
 PARTIAL_LOT_STAGES_PICKLIST = [(k, s['label']) for k, s
                                 in PARTIAL_LOT_STAGES.items()]
 FULL_LOT_STAGES_PICKLIST = [(k, s['label']) for k, s in FULL_LOT_STAGES.items()]
+STREAM_STAGES_PICKLIST = [(k, s['label']) for k, s in STREAM_STAGES.items()]
 
 metadata_template_context = {
     'STAGES': STAGES,
@@ -908,6 +912,9 @@ metadata_template_context = {
     'PARTIAL_LOT_STAGES_PICKLIST': PARTIAL_LOT_STAGES_PICKLIST,
     'PARTIAL_LOT_STAGE_MAP': dict(PARTIAL_LOT_STAGES_PICKLIST),
     'LOT_STAGES': LOT_STAGES,
+    'STREAM_STAGES': STREAM_STAGES,
+    'STREAM_STAGES_PICKLIST': STREAM_STAGES_PICKLIST,
+    'STREAM_STAGE_MAP': dict(STREAM_STAGES_PICKLIST),
     'CATEGORIES': CATEGORIES,
     'CATEGORIES_MAP': dict(CATEGORIES),
     'COUNTRIES_MC': COUNTRIES_MC,

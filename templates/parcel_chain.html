@@ -47,12 +47,14 @@
                                              name=prev_parcel.name) %}
             {% if prev_parcel.metadata['delivery_type']  == COUNTRY %}
               {% set DELIVERY_STAGE_MAP = STAGE_MAP %}
-            {% else %}
+            {% elif prev_parcel.metadata['delivery_type'] == LOT %}
               {% if prev_parcel.metadata['extent'] == 'partial' %}
                 {% set DELIVERY_STAGE_MAP = PARTIAL_LOT_STAGE_MAP %}
               {% else %}
                 {% set DELIVERY_STAGE_MAP = FULL_LOT_STAGE_MAP %}
               {% endif %}
+            {% else %}
+              {% set DELIVERY_STAGE_MAP = STREAM_STAGE_MAP %}
             {% endif %}
             {% set stage = DELIVERY_STAGE_MAP[prev_parcel.metadata['stage']]  %}
             <a href="{{ prev_parcel_url }}">
@@ -87,12 +89,14 @@
           {% set DELIVERY_STAGES, _ = get_stages_for_parcel(parcel) %}
           {% if parcel.metadata['delivery_type']  == COUNTRY %}
             {% set DELIVERY_STAGE_MAP = STAGE_MAP %}
-          {% else %}
+          {% elif parcel.metadata['delivery_type'] == LOT %}
             {% if parcel.metadata['extent'] == 'partial' %}
               {% set DELIVERY_STAGE_MAP = PARTIAL_LOT_STAGE_MAP %}
             {% else %}
               {% set DELIVERY_STAGE_MAP = FULL_LOT_STAGE_MAP %}
             {% endif %}
+          {% else %}
+              {% set DELIVERY_STAGE_MAP = STREAM_STAGE_MAP %}
           {% endif %}
           {% set stage = DELIVERY_STAGE_MAP[parcel.metadata['stage']]  %}
           <a href="{{ parcel_url }}">

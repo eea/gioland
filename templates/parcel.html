@@ -125,7 +125,8 @@
 <h2>Metadata</h2>
 {{ metadata_table(metadata) }}
 
-{% if not DELIVERY_STAGES[parcel.metadata['stage']]['last'] %}
+{% if not DELIVERY_STAGES[parcel.metadata['stage']]['last'] or
+   parcel.metadata['stage'] == 'slc' %}
 
 {% if parcel.file_uploading %}
   <h2>Files</h2>

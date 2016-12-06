@@ -6,14 +6,16 @@ from warehouse import get_warehouse
 from definitions import COUNTRIES, COUNTRY, COUNTRY_PRODUCTS
 from definitions import COUNTRY_LOT_PRODUCTS, EXTENTS, INITIAL_STAGE
 from definitions import LOT, LOT_PRODUCTS, LOTS, PRODUCTS, RESOLUTIONS
-from definitions import REFERENCES, STREAM,  STREAM_LOTS
+from definitions import REFERENCES, STREAM,  STREAM_LOTS, STREAM_LOT_PRODUCTS
 
 
 def get_lot_products(lot_id, delivery_type):
     if delivery_type == COUNTRY:
         return COUNTRY_LOT_PRODUCTS.get(lot_id)
-    else:
+    elif delivery_type == LOT:
         return LOT_PRODUCTS.get(lot_id)
+    elif delivery_type == STREAM:
+        return STREAM_LOT_PRODUCTS.get(lot_id)
 
 
 class _BaseDeliveryForm(Form):

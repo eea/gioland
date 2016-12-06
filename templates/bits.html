@@ -48,6 +48,8 @@
         {% else %}
           <td>{{ FULL_LOT_STAGE_MAP[metadata['stage']] }}</td>
         {% endif %}
+      {% elif delivery_type == STREAM %}
+        <td>{{ STREAM_STAGE_MAP[metadata['stage']] }}</td>
       {% endif %}
     </tr>
     {% endif %}
