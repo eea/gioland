@@ -4,7 +4,7 @@
 {% from 'bits.html' import breadcrumb_items %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
-    (url_for('parcel.index'), 'GIO Land'),
+    (url_for('parcel.index'), 'Copernicus HRL'),
     (url_for('parcel.view', name=first_parcel.name),
              PRODUCT_MAP[first_parcel.metadata["product"]]),
     (url_for('parcel.chain', name=first_parcel.name),
