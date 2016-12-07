@@ -4,9 +4,10 @@ from wtforms.validators import DataRequired, ValidationError
 from flask import g
 from warehouse import get_warehouse
 from definitions import COUNTRIES, COUNTRY, COUNTRY_PRODUCTS
-from definitions import COUNTRY_LOT_PRODUCTS, EXTENTS, INITIAL_STAGE
-from definitions import LOT, LOT_PRODUCTS, LOTS, PRODUCTS, RESOLUTIONS
-from definitions import REFERENCES, STREAM,  STREAM_LOTS, STREAM_LOT_PRODUCTS
+from definitions import COUNTRY_LOT_PRODUCTS, DEFAULT_REFERENCE, EXTENTS
+from definitions import INITIAL_STAGE, LOT, LOT_PRODUCTS, LOTS, PRODUCTS
+from definitions import RESOLUTIONS, REFERENCES, STREAM,  STREAM_LOTS
+from definitions import STREAM_LOT_PRODUCTS
 
 
 def get_lot_products(lot_id, delivery_type):
@@ -49,7 +50,8 @@ class _DeliveryForm(_BaseDeliveryForm):
 
     resolution = SelectField('Spatial resolution', [DataRequired()],
                              choices=RESOLUTIONS)
-    reference = SelectField('Reference year', [DataRequired()], choices=REFERENCES)
+    reference = SelectField('Reference year', [DataRequired()],
+                            choices=REFERENCES, default=DEFAULT_REFERENCE)
 
 
 class CountryDeliveryForm(_DeliveryForm):

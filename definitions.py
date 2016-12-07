@@ -431,6 +431,8 @@ REFERENCES = (
     ('20062012', '2006-2012'),
 )
 
+DEFAULT_REFERENCE = '2015'
+
 ALL_ROLES = [
     'ROLE_SP',
     'ROLE_ETC',
