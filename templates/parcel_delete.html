@@ -4,7 +4,7 @@
 {% from 'bits.html' import breadcrumb_items %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
-    (url_for('parcel.index'), 'GIO Land'),
+    (url_for('parcel.index'), 'Copernicus HRL'),
     (url_for('parcel.view', name=parcel.name),
              PRODUCT_MAP[parcel.metadata["product"]]),
     (url_for('parcel.delete', name=parcel.name), 'Delete parcel'),
@@ -14,7 +14,7 @@
 
 {% macro parcel_link(parcel) -%}
 <a href="{{ url_for('parcel.view', name=parcel.name) }}">
-{{- STAGE_MAP[parcel.metadata['stage']] -}}
+{{- ALL_STAGES_MAP[parcel.metadata['stage']] -}}
 </a>
   {{ parcel.metadata['upload_time'] }}
 {%- endmacro %}

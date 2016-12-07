@@ -23,7 +23,12 @@
     {{ pick_from_list('filter-extent', 'extent', EXTENTS, any=True) }}
   {% endif %}
 
-  {{ pick_from_list('filter-stage', 'stage', STAGES_PICKLIST, any=True) }}
+  {% if delivery_type == LOT %}
+    {{ pick_from_list('filter-stage', 'stage', PARTIAL_LOT_STAGES_PICKLIST, any=True) }}
+  {% elif delivery_type == COUNTRY %}
+    {{ pick_from_list('filter-stage', 'stage', STAGES_PICKLIST, any=True) }}
+  {% endif %}
+
   {{ pick_from_list('filter-reference', 'reference', REFERENCES, any=True) }}
   <div class="clear">
     <a href="{{ url_for('parcel.search') }}">Clear filters</a>

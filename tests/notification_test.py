@@ -23,9 +23,8 @@ class NotificationDeliveryTest(AppTestCase):
         parcel.save_metadata({
             'country': 'it',
             'lot': 'lot3',
-            'stage': 'enh',
+            'stage': 'c-fsc',
             'product': 'grl',
-            'projection': 'ntl',
             'resolution': '20m',
             'delivery_type': COUNTRY,
         })
@@ -61,7 +60,7 @@ class NotificationDeliveryTest(AppTestCase):
             RDF_URI['date']: now.strftime('%Y-%b-%d %H:%M:%S'),
             RDF_URI['actor']: "somewho",
             RDF_URI['locality']: "Italy",
-            RDF_URI['stage']: "Enhancement",
+            RDF_URI['stage']: "Final Semantic check",
             RDF_URI['title']: "Now hear this (stage reference: asdf)",
             RDF_URI['identifier']: "http://example.com/parcel/asdf",
             RDF_URI['product']: "Grassland",

@@ -41,7 +41,6 @@
           <li>
             <a href="{{ url_for('.view', name=partial_parcel.name) }}">
               {{ STAGE_MAP[partial_parcel.metadata['stage']] }}
-              ({{ partial_parcel.metadata['coverage'] }})
             </a>
           </li>
         {% endfor %}

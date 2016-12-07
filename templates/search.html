@@ -9,7 +9,7 @@
 {% from 'bits.html' import breadcrumb_items, report_overview with context %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
-    (url_for('parcel.index'), 'GIO Land'),
+    (url_for('parcel.index'), 'Copernicus HRL'),
     (url_for('parcel.search'), title),
   ]) }}
 {% endblock %}
@@ -119,7 +119,6 @@
           {{ PRODUCT_MAP[metadata['product']] }}
           {% if delivery_type == LOT %}
             {% if parcel.metadata['extent'] == 'partial' %}
-              ({{ parcel.metadata['coverage'] }})
             {% endif %}
           {% endif %}
         </td>
@@ -128,7 +127,7 @@
         {% endif %}
         <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
         <td><a href="{{ overview_url }}">workflow overview</a></td>
-        <td>{{ STAGE_MAP[metadata['stage']] }}</td>
+        <td>{{ ALL_STAGES_MAP[metadata['stage']] }}</td>
         <td>{{ parcel.last_modified|datetime }}</td>
         <td>{{ REFERENCE_MAP[metadata['reference']] }}</td>
       </tr>

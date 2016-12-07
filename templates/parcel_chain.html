@@ -4,7 +4,7 @@
 {% from 'bits.html' import breadcrumb_items %}
 {% block breadcrumb %}
   {{ breadcrumb_items([
-    (url_for('parcel.index'), 'GIO Land'),
+    (url_for('parcel.index'), 'Copernicus HRL'),
     (url_for('parcel.view', name=first_parcel.name),
              PRODUCT_MAP[first_parcel.metadata["product"]]),
     (url_for('parcel.chain', name=first_parcel.name),
@@ -45,9 +45,9 @@
           <td>
             {% set prev_parcel_url = url_for('parcel.view',
                                              name=prev_parcel.name) %}
-            {% set stage = STAGE_MAP[prev_parcel.metadata['stage']]  %}
+            {% set stage = ALL_STAGES_MAP[prev_parcel.metadata['stage']]  %}
             <a href="{{ prev_parcel_url }}">
-              {{ stage  }} ({{ prev_parcel.metadata['coverage'] }})</a>
+              {{ stage  }} </a>
           </td>
           <td>
             {{ prev_parcel.metadata['upload_time']|isoformat_to_datetime
@@ -75,7 +75,8 @@
 
         <td>
           {% set parcel_url = url_for('parcel.view', name=parcel.name) %}
-          {% set stage = STAGE_MAP[parcel.metadata['stage']]  %}
+          {% set DELIVERY_STAGES, _ = get_stages_for_parcel(parcel) %}
+          {% set stage = ALL_STAGES_MAP[parcel.metadata['stage']]  %}
           <a href="{{ parcel_url }}">
             {{ stage }}
             {% if parcel.metadata.get('merged') %}(merged){% endif %}
@@ -85,7 +86,7 @@
         <td>
           {% if parcel.uploading %}
 
-            {% if STAGES[parcel.metadata['stage']]['last'] %}
+            {% if DELIVERY_STAGES[parcel.metadata['stage']]['last'] %}
               <em>done</em>
             {% else %}
               <em>in progress</em>

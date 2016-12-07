@@ -30,4 +30,4 @@ class UploadTest(AppTestCase):
         self.new_parcel(delivery_type=LOT)
         response = self.client.get('/lot/' + self.LOT_METADATA['lot'])
         column_titles = select(response.data, "thead > tr:last-child > th")
-        self.assertEqual(3, len(column_titles))
+        self.assertEqual(6, len(column_titles))

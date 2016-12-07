@@ -16,136 +16,152 @@ LOT_EXCLUDE_METADATA = (
 )
 
 COUNTRY_EXCLUDE_METADATA = (
-    'coverage',
     'extent',
 )
 
 STREAM_EXCLUDE_METADATA = (
-    'coverage',
     'extent',
     'country',
     'resolution',
     'reference'
 )
 
-EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', 'coverage',)
+EDITABLE_METADATA = SIMILAR_METADATA + ('delivery_type', )
 METADATA = EDITABLE_METADATA + ('stage',)
 
 
 REPORT_METADATA = ('lot', 'product')
 
 
-STAGE_INT = 'int'
-STAGE_SCH = 'sch'
-STAGE_VER = 'ver'
-STAGE_VCH = 'vch'
-STAGE_ENH = 'enh'
-STAGE_ERH = 'erh'
-STAGE_ECH = 'ech'
-STAGE_FIN = 'fin'
-STAGE_FVA = 'fva'
-STAGE_FIH = 'fih'
+COUNTRY_STAGE_INT = 'c-int'
+COUNTRY_STAGE_FSC = 'c-fsc'
+COUNTRY_STAGE_FIH = 'c-fih'
+
+LOT_STAGE_INT = 'l-int'
+LOT_STAGE_VSC = 'l-vsc'
+LOT_STAGE_SCH = 'l-sch'
+LOT_STAGE_FIH = 'l-fih'
+LOT_STAGE_FMC = 'l-fmc'
+LOT_STAGE_FHM = 'l-fhm'
+
+STREAM_STAGE_INT = 's-int'
+STREAM_STAGE_SLC = 's-slc'
+STREAM_STAGE_FIH = 's-fih'
 
 
 STAGES = OrderedDict((
-    (STAGE_INT, {
+    (COUNTRY_STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
         'file_uploading': True,
     }),
 
-    (STAGE_SCH, {
-        'label': "Semantic check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
-        'reject': True,
-        'file_uploading': True,
-    }),
-
-    (STAGE_VER, {
-        'label': "Verification",
-        'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
-        'file_uploading': True,
-    }),
-
-    (STAGE_VCH, {
-        'label': "Verification check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN', 'ROLE_VEP'],
-        'reject': True,
-        'file_uploading': False,
-    }),
-
-    (STAGE_ENH, {
-        'label': "Enhancement",
-        'roles': ['ROLE_SP', 'ROLE_NRC', 'ROLE_ADMIN'],
-        'file_uploading': True,
-    }),
-
-    (STAGE_ERH, {
-        'label': "Enhancement Report Check",
-        'roles': ['ROLE_VEP', 'ROLE_ADMIN'],
-        'reject': True,
-        'file_uploading': False,
-    }),
-
-    (STAGE_ECH, {
-        'label': "Enhancement Semantic Check",
-        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
-        'reject': True,
-        'file_uploading': True,
-        'reject_stage': STAGE_ENH,
-    }),
-
-    (STAGE_FIN, {
-        'label': "Final integrated",
-        'roles': ['ROLE_ADMIN', 'ROLE_SP'],
-        'file_uploading': True,
-
-    }),
-
-    (STAGE_FVA, {
-        'label': "Final Semantic Check",
+    (COUNTRY_STAGE_FSC, {
+        'label': "Final Semantic check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
-        'reject_stage': STAGE_FIN,
+        'reject_stage': COUNTRY_STAGE_INT,
     }),
 
-    (STAGE_FIH, {
+    (COUNTRY_STAGE_FIH, {
         'label': "Final HRL",
-        'roles': ['ROLE_ADMIN'],
+        'roles': ['ROLE_SP',
+                  'ROLE_ADMIN'],
         'last': True,
     }),
 ))
 
 
 LOT_STAGES = OrderedDict((
-    (STAGE_INT, {
+    (LOT_STAGE_INT, {
         'label': "Service provider upload",
         'roles': ['ROLE_SP', 'ROLE_ADMIN'],
         'file_uploading': True,
     }),
 
-    (STAGE_FVA, {
-        'label': "Final Semantic Check",
+    (LOT_STAGE_VSC, {
+        'label': "Validation sample check",
         'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
         'file_uploading': True,
         'reject': True,
-        'reject_stage': STAGE_INT,
+        'reject_stage': LOT_STAGE_INT,
+        'partial': True,
     }),
 
-    (STAGE_FIH, {
-        'label': "Final HRL Lot Mosaic",
-        'roles': ['ROLE_ADMIN'],
+    (LOT_STAGE_SCH, {
+        'label': "Semantic Check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'file_uploading': True,
+        'reject': True,
+        'reject_stage': LOT_STAGE_INT,
+    }),
+
+    (LOT_STAGE_FIH, {
+        'label': "Final HRL",
+        'roles': ['ROLE_SP', 'ROLE_ADMIN'],
+        'file_uploading': True,
+    }),
+
+    (LOT_STAGE_FMC, {
+        'label': "Final mosaic check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'reject': True,
+        'reject_stage': LOT_STAGE_FIH,
+    }),
+
+    (LOT_STAGE_FHM, {
+        'label': "Final HRL mosaic",
+        'roles': ['ROLE_SP', 'ROLE_ETC', 'ROLE_ADMIN'],
         'last': True,
     }),
-
 ))
 
+STREAM_STAGES = OrderedDict((
+    (STREAM_STAGE_INT, {
+        'label': "Service provider upload",
+        'roles': ['ROLE_SP', 'ROLE_ADMIN'],
+        'file_uploading': True,
+    }),
 
-STAGES_FOR_MERGING = [STAGE_ENH]
+    (STREAM_STAGE_SLC, {
+        'label': "Streamlining check",
+        'roles': ['ROLE_ETC', 'ROLE_ADMIN'],
+        'file_uploading': True,
+        'reject': True,
+        'reject_stage': STREAM_STAGE_INT
+    }),
+
+    (STREAM_STAGE_FIH, {
+        'label': "Final streamlining",
+        'roles': ['ROLE_ETC',
+                  'ROLE_ADMIN'],
+        'last': True,
+    }),
+))
+
+PARTIAL_LOT_STAGES = LOT_STAGES
+FULL_LOT_STAGES = OrderedDict(
+    (k, v) for k, v in LOT_STAGES.items()
+    if not v.get('partial', False)
+)
+
+ALL_STAGES_MAP = {k: v['label'] for k, v in STREAM_STAGES.items() +
+                  LOT_STAGES.items() + STAGES.items()
+                  }
+
+STAGES_FOR_MERGING = []
 STAGE_ORDER = list(STAGES)
 LOT_STAGE_ORDER = list(LOT_STAGES)
-INITIAL_STAGE = STAGE_ORDER[0]
+PARTIAL_LOT_STAGES_ORDER = list(PARTIAL_LOT_STAGES)
+FULL_LOT_STAGES_ORDER = list(FULL_LOT_STAGES)
+STREAM_STAGES_ORDER = list(STREAM_STAGES)
+
+INITIAL_STAGE = {
+    'country': STAGE_ORDER[0],
+    'lot': LOT_STAGE_ORDER[0],
+    'stream': STREAM_STAGES_ORDER[0]
+}
 
 COUNTRIES_MC = (
     ('at', "Austria"),
@@ -292,10 +308,11 @@ LOT_PRODUCTS = {
 DEFAULT_LOT = 'lot1'
 DEFAULT_DELIVERY_TYPE = LOT
 
-STREAM_LOT_PRODUCTS = LOT3_PRODUCTS + \
-                      LOT4_PRODUCTS + \
-                      LOT5_PRODUCTS
-
+STREAM_LOT_PRODUCTS = {
+    "lot3": LOT3_PRODUCTS,
+    "lot4": LOT4_PRODUCTS,
+    "lot5": LOT5_PRODUCTS
+}
 
 PRODUCTS = remove_duplicates_preserve_order(
     LOT1_PRODUCTS +
@@ -313,7 +330,9 @@ COUNTRY_PRODUCTS = remove_duplicates_preserve_order(
     COUNTRY_LOT5_PRODUCTS
 )
 
-STREAM_PRODUCTS = remove_duplicates_preserve_order(STREAM_LOT_PRODUCTS)
+STREAM_PRODUCTS = remove_duplicates_preserve_order(
+    LOT3_PRODUCTS + LOT4_PRODUCTS + LOT5_PRODUCTS
+)
 
 PRODUCTS_FILTER = [
     ('imp-deg', 'Imperviousness Degree'),
@@ -362,7 +381,7 @@ RDF_URI = {
 }
 
 
-UNS_FIELD_DEFS = [
+UNS_FIELD_DEFS = [  # Need to update this list soon to the new format
 
     {'name': 'country',
      'label': "Country",
@@ -411,6 +430,8 @@ REFERENCES = (
     ('20122015', '2012-2015'),
     ('20062012', '2006-2012'),
 )
+
+DEFAULT_REFERENCE = '2015'
 
 ALL_ROLES = [
     'ROLE_SP',

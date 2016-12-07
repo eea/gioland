@@ -1,20 +1,22 @@
 from datetime import datetime
-from wtforms import Form, SelectField, StringField
+from wtforms import Form, SelectField
 from wtforms.validators import DataRequired, ValidationError
 from flask import g
 from warehouse import get_warehouse
-from definitions import COUNTRIES, LOTS, STREAM_LOTS,\
-    PRODUCTS, COUNTRY_PRODUCTS, RESOLUTIONS, LOT_PRODUCTS, \
-    COUNTRY_LOT_PRODUCTS
-from definitions import EXTENTS, PARTIAL, INITIAL_STAGE, REFERENCES
-from definitions import COUNTRY, LOT, STREAM
+from definitions import COUNTRIES, COUNTRY, COUNTRY_PRODUCTS
+from definitions import COUNTRY_LOT_PRODUCTS, DEFAULT_REFERENCE, EXTENTS
+from definitions import INITIAL_STAGE, LOT, LOT_PRODUCTS, LOTS, PRODUCTS
+from definitions import RESOLUTIONS, REFERENCES, STREAM,  STREAM_LOTS
+from definitions import STREAM_LOT_PRODUCTS
 
 
 def get_lot_products(lot_id, delivery_type):
     if delivery_type == COUNTRY:
         return COUNTRY_LOT_PRODUCTS.get(lot_id)
-    else:
+    elif delivery_type == LOT:
         return LOT_PRODUCTS.get(lot_id)
+    elif delivery_type == STREAM:
+        return STREAM_LOT_PRODUCTS.get(lot_id)
 
 
 class _BaseDeliveryForm(Form):
@@ -32,10 +34,8 @@ class _BaseDeliveryForm(Form):
 
     def save(self):
         data = dict(self.data)
-        data['stage'] = INITIAL_STAGE
+        data['stage'] = INITIAL_STAGE[self.DELIVERY_TYPE]
         data['delivery_type'] = self.DELIVERY_TYPE
-        if data['delivery_type'] == LOT and data['extent'] == 'full':
-            data['coverage'] = ''
         wh = get_warehouse()
         parcel = wh.new_parcel()
         parcel.save_metadata(data)
@@ -50,7 +50,8 @@ class _DeliveryForm(_BaseDeliveryForm):
 
     resolution = SelectField('Spatial resolution', [DataRequired()],
                              choices=RESOLUTIONS)
-    reference = SelectField('Reference year', [DataRequired()], choices=REFERENCES)
+    reference = SelectField('Reference year', [DataRequired()],
+                            choices=REFERENCES, default=DEFAULT_REFERENCE)
 
 
 class CountryDeliveryForm(_DeliveryForm):
@@ -66,11 +67,6 @@ class LotDeliveryForm(_DeliveryForm):
     DELIVERY_TYPE = LOT
 
     extent = SelectField('Extent', [DataRequired()], choices=EXTENTS)
-    coverage = StringField('Coverage')
-
-    def validate_coverage(self, field):
-        if self.extent.data == PARTIAL:
-            return field.validate(self, [DataRequired()])
 
 
 class StreamDeliveryForm(_BaseDeliveryForm):
