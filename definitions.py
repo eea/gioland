@@ -134,7 +134,7 @@ STREAM_STAGES = OrderedDict((
 
     (STREAM_STAGE_FIH, {
         'label': "Final streamlining",
-        'roles': ['ROLE_SP',
+        'roles': ['ROLE_ETC',
                   'ROLE_ADMIN'],
         'last': True,
     }),
