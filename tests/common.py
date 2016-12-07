@@ -5,7 +5,7 @@ import flask
 from mock import patch
 from path import path
 from werkzeug.datastructures import ImmutableDict
-from definitions import COUNTRY
+from definitions import COUNTRY, LOT
 
 
 def create_mock_app(warehouse_path=None):
@@ -90,6 +90,11 @@ class AppTestCase(unittest.TestCase):
         'reference': '2006',
     })
 
+    STREAM_METADATA = ImmutableDict({
+        'lot': 'lot4',
+        'product': 'wwp',
+        'delivery_type': 'stream'
+    })
     REPORT_METADATA = ImmutableDict({
         'lot': 'lot1',
         'product': 'imp-deg',
@@ -102,9 +107,12 @@ class AppTestCase(unittest.TestCase):
         if delivery_type == COUNTRY:
             metadata = dict(self.PARCEL_METADATA)
             url = '/parcel/new/country'
-        else:
+        elif delivery_type == LOT:
             metadata = dict(self.LOT_METADATA)
             url = '/parcel/new/lot'
+        else:
+            metadata = dict(self.STREAM_METADATA)
+            url = '/parcel/new/stream'
         with patch('auth.authorize'):
             resp = self.client.post(url, data=metadata)
         self.assertEqual(resp.status_code, 302)
