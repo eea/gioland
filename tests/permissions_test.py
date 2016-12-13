@@ -2,6 +2,7 @@ from StringIO import StringIO
 from mock import patch, call
 import flask
 from common import AppTestCase, record_events, select
+from definitions import COUNTRY, LOT, STREAM
 
 
 def setUpModule(self):
@@ -21,10 +22,17 @@ class PermisionsTest(AppTestCase):
             self.app.config[role_name] = [u for u in users
                                           if u != 'user_id:%s' % username]
 
-    def create_parcel(self, stage=None):
+    def create_parcel(self, stage=None, delivery_type=LOT):
         with patch('auth.authorize'):
-            post_resp = self.client.post('/parcel/new/lot',
-                                         data=self.LOT_METADATA)
+            if delivery_type == COUNTRY:
+                post_resp = self.client.post('parcel/new/country',
+                                             data=self.COUNTRY_METADATA)
+            elif delivery_type == STREAM:
+                post_resp = self.client.post('parcel/new/stream',
+                                             data=self.STREAM_METADATA)
+            else:
+                post_resp = self.client.post('/parcel/new/lot',
+                                             data=self.LOT_METADATA)
             self.assertEqual(post_resp.status_code, 302)
             parcel_name = post_resp.location.rsplit('/', 1)[-1]
 
@@ -245,6 +253,23 @@ class PermisionsTest(AppTestCase):
         self.add_to_role('somebody', 'ROLE_ADMIN')
         name = self.create_parcel(stage='l-fih')
         self.assertTrue(self.try_finalize(name))
+
+    def test_random_user_not_allowed_to_upload_at_streamlining_check(self):
+        name = self.create_parcel(stage='s-slc',
+                                  delivery_type=STREAM)
+        self.assertFalse(self.try_upload(name))
+
+    def test_sp_user_not_allowed_to_upload_at_streamlining_check(self):
+        self.add_to_role('somebody', 'ROLE_SP')
+        name = self.create_parcel(stage='s-slc',
+                                  delivery_type=STREAM)
+        self.assertFalse(self.try_upload(name))
+
+    def test_admin_user_allowed_to_upload_at_streamlining_check(self):
+        self.add_to_role('somebody', 'ROLE_ADMIN')
+        name = self.create_parcel(stage='s-slc',
+                                  delivery_type=STREAM)
+        self.assertTrue(self.try_upload(name))
 
     def test_random_user_not_allowed_to_delete_parcel(self):
         name = self.create_parcel()

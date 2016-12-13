@@ -1,4 +1,3 @@
-import unittest
 from datetime import datetime
 from StringIO import StringIO
 from mock import patch
@@ -42,6 +41,33 @@ class ParcelTest(AppTestCase):
                                           parcel.metadata)
             self.assertNotIn('bogus', parcel.metadata)
 
+    def test_begin_stream_parcel(self):
+        resp = self.client.post('parcel/new/stream', data=self.STREAM_METADATA)
+        parcel_name = resp.location.rsplit('/', 1)[-1]
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertDictContainsSubset(self.STREAM_METADATA,
+                                          parcel.metadata)
+            self.assertEqual(parcel.metadata['stage'], 's-int')
+
+    def test_finalize_triggers_next_step_with_references_stream(self):
+        with self.app.test_request_context():
+            parcel = self.wh.new_parcel()
+            parcel.save_metadata(self.STREAM_METADATA)
+            parcel.save_metadata({'stage': 's-slc'})
+            parcel_name = parcel.name
+
+        self.client.post('/parcel/%s/finalize' % parcel_name)
+
+        with self.app.test_request_context():
+            parcel = self.wh.get_parcel(parcel_name)
+            self.assertIn('next_parcel', parcel.metadata)
+            next_parcel_name = parcel.metadata['next_parcel']
+            next_parcel = self.wh.get_parcel(next_parcel_name)
+            self.assertIn(parcel.name,
+                          next_parcel.metadata['prev_parcel_list'])
+            self.assertEqual(next_parcel.metadata['stage'], 's-fih')
+
     def test_begin_parcel_saves_default_metadata(self):
         resp = self.client.post('/parcel/new/country',
                                 data=self.PARCEL_METADATA)
@@ -65,7 +91,7 @@ class ParcelTest(AppTestCase):
         self.assertIn('some.txt', resp2.data)
 
     def test_finalize_changes_parceling_flag(self):
-        resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/stream', data=self.STREAM_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         with self.app.test_request_context():
@@ -359,8 +385,8 @@ class ParcelHistoryTest(AppTestCase):
         utcnow = datetime.utcnow()
         self.mock_datetime.utcnow.return_value = utcnow
         self.mock_parcel_datetime.utcnow.return_value = utcnow
-        resp = self.client.post('/parcel/new/country',
-                                data=self.PARCEL_METADATA)
+        resp = self.client.post('/parcel/new/stream',
+                                data=self.STREAM_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
 
         comment = "test comment"

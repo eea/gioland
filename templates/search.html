@@ -80,6 +80,7 @@
 
   {% include "search_filter.html" %}
 
+  {% if parcels %}
   <table class="datatable">
 
     <thead>
@@ -135,6 +136,9 @@
     </tbody>
 
   </table>
+  {% else %}
+    <p> No deliveries found.</p>
+  {% endif %}
 
   {{ report_overview(all_reports) }}
 
