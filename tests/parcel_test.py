@@ -253,7 +253,7 @@ class ParcelTest(AppTestCase):
 
             parcel2.metadata['country'] = 'at'
 
-        resp = self.client.get('/search?country=ro&extent=partial')
+        resp = self.client.get('/search/country?country=ro&extent=partial')
         rows = select(resp.data, ".datatable tbody tr")
         self.assertEqual(1, len(rows))
 
@@ -262,7 +262,7 @@ class ParcelTest(AppTestCase):
             parcel1 = self.wh.new_parcel()
             parcel1.metadata['country'] = 'ro'
 
-        resp = self.client.get('/search?country=ro&extent=partial')
+        resp = self.client.get('/search/country?country=ro&extent=partial')
         data = select(resp.data, ".datatable tbody tr")
         self.assertEqual(0, len(data))
 
@@ -517,23 +517,23 @@ class LotTest(AppTestCase):
 
     def test_search_country_deliveries(self):
         self.new_parcel(stage='l-fih', delivery_type=COUNTRY)
-        resp = self.client.get('/search')
+        resp = self.client.get('/search/country')
         self.assertEqual(200, resp.status_code)
         self.assertEqual(1, len(select(resp.data, '.datatable tbody tr')))
 
     def test_search_lot_deliveries(self):
         self.new_parcel(stage='l-fih', delivery_type=LOT)
         self.new_parcel(stage='l-fih', delivery_type=LOT)
-        resp = self.client.get('/search/lot')
+        resp = self.client.get('/search/lot', follow_redirects=True)
         self.assertEqual(200, resp.status_code)
         self.assertEqual(2, len(select(resp.data, '.datatable tbody tr')))
 
     def test_search_lot_deliveries_filter_by_lot(self):
         self.new_parcel(stage='l-fih', delivery_type=LOT)
-        resp = self.client.get('/search/lot?lot=lot3')
+        resp = self.client.get('/search/lot?lot=lot3', follow_redirects=True)
         self.assertEqual(200, resp.status_code)
         self.assertEqual(1, len(select(resp.data, '.datatable tbody tr')))
-        resp = self.client.get('/search/lot?lot=lot2')
+        resp = self.client.get('/search/lot?lot=lot2', follow_redirects=True)
         self.assertEqual(200, resp.status_code)
         self.assertEqual(0, len(select(resp.data, '.datatable tbody tr')))
 

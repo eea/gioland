@@ -71,7 +71,7 @@
 
   <ul class="tabs">
     <li {% if delivery_type == COUNTRY %}class="active"{% endif %}>
-      <a href="{{ url_for('.search') }}" >
+      <a href="{{ url_for('.search', delivery_type=COUNTRY) }}" >
       Country deliveries</a></li>
     <li {% if delivery_type == LOT %}class="active"{% endif %}>
       <a href="{{ url_for('.search', delivery_type=LOT) }}">
@@ -84,11 +84,10 @@
   <table class="datatable">
 
     <thead>
-      {% if delivery_type == COUNTRY %}
-        <th>Country</th>
-      {% endif %}
       {% if delivery_type == LOT %}
         <th>Lot</th>
+      {% elif delivery_type == COUNTRY %}
+        <th>Country</th>
       {% endif %}
       <th>Product</th>
       {% if delivery_type == LOT %}
@@ -108,12 +107,10 @@
         {% set overview_url = url_for('parcel.chain', name=parcel.name) %}
         {% set metadata = parcel.metadata %}
 
-        {% if delivery_type == COUNTRY %}
-          <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
-        {% endif %}
-
         {% if delivery_type == LOT %}
           <td>{{ LOTS_MAP[metadata['lot']] }}</td>
+        {% elif delivery_type == COUNTRY %}
+          <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
         {% endif %}
 
         <td>

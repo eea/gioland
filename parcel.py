@@ -56,7 +56,7 @@ def get_filter_arguments():
             if k in METADATA and v}
 
 
-@parcel_views.route('/search', defaults={'delivery_type': COUNTRY})
+@parcel_views.route('/search', defaults={'delivery_type': LOT})
 @parcel_views.route('/search/<string:delivery_type>')
 def search(delivery_type):
     wh = get_warehouse()
