@@ -116,6 +116,7 @@ def configuration_from_environ():
         'LDAP_SERVER': STR,
         'LDAP_USER_DN_PATTERN': STR,
         'ALLOW_PARCEL_DELETION': BOOL,
+        'DOCS_URL': STR,
     }
     config = {}
     for name, converter in options.items():
