@@ -220,20 +220,6 @@ Use this dialogue to upload Product Delivery Reports.
    :width: 600px
    :target: _images/product-delivery-report.png
 
-Merging partial country workflows
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**At the xxx stage**, it is possible to merge multiple partial country HRL
-workflows if the data has been spatially merged during enhancement.
-
-Click on ‘Finalize and Merge’ when uploading the data.
-
-When checking the workflow overview for that HRL you will see that partial HRLs
-have been merged.
-
-The workflow histories of these merged parts are not lost, but remain as links
-on this page.
-
 Logout
 ~~~~~~
 Click on your name on the top right of the page, and then click the 'Log out'
