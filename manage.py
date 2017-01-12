@@ -7,7 +7,6 @@ import copy
 import flask
 from flask.ext import script
 
-
 default_config = {
     'LDAP_TIMEOUT': 10,
     'TIME_ZONE': 'Europe/Copenhagen',
@@ -128,12 +127,13 @@ def configuration_from_environ():
 class RunCherryPyCommand(script.Command):
 
     option_list = [
-        script.Option('--port', '-p', dest='port', type=int),
+        script.Option('--port', '-p', dest='port', type=int, default=5000),
+        script.Option('--host', '-H', dest='host', default='127.0.0.1'),
     ]
 
-    def handle(self, app, port):
+    def handle(self, app, port, host):
         import cherrypy.wsgiserver
-        listen = ('127.0.0.1', port)
+        listen = (host, port)
         wsgi_app = ReverseProxied(app.wsgi_app)
         server = cherrypy.wsgiserver.CherryPyWSGIServer(listen, wsgi_app)
         try:

@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+
+  gioland:
+    build:
+      context: .
+    container_name: gioland
+    env_file: .env
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./docs:/gioland/docs
+
+  apache:
+    image: eeacms/apache
+    ports:
+      - '80:80'
+    container_name: apache
+    volumes:
+      - ./conf.d/virtual-host.conf:/usr/local/apache2/conf/extra/vh-my-app.conf
+      - ./docs:/gioland/docs
+    links:
+      - gioland:gioland
