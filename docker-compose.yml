@@ -7,11 +7,12 @@ services:
       context: .
     container_name: gioland
     env_file: .env
-    command: python manage.py runcherrypy -p 5000 -H 0.0.0.0
     ports:
       - '5000:5000'
+    volumes:
+      - ./docs:/gioland/docs
 
-  server:
+  apache:
     image: eeacms/apache
     ports:
       - '80:80'
