@@ -1,0 +1,33 @@
+<VirtualHost *:80>
+  ServerName gioland.example.com
+
+  # if you want to override defaults
+  #SSLEngine On
+  #SSLProtocol all -SSLv2 -SSLv3
+  #SSLCipherSuite HIGH:MEDIUM:!aNull:!MD5
+  #SSLHonorCipherOrder on
+  #SSLCertificateFile /etc/pki/tls/certs/eeastjerne.crt
+  #SSLCertificateKeyFile /etc/pki/tls/private/eeastjerne.key
+  #SSLCertificateChainFile /etc/pki/tls/certs/rapidsslintermediate.pem
+  #
+
+  Alias /gioland/docs /gioland/docs/_build/html/
+  ProxyPass /gioland/docs !
+  <Location /gioland/docs>
+    Require all granted
+  </Location>
+
+
+      RewriteEngine On
+      RewriteCond %{REQUEST_URI} !/gioland/docs
+      RewriteRule  ^(/.*)$ http://gioland:5000$1 [P,L]
+  <Location /gioland>
+      Require all granted
+      <IfModule mod_headers.c>
+          RequestHeader set X-Script-Name "/gioland"
+          # RequestHeader set X-Scheme "https"
+      </IfModule>
+  </Location>
+  CustomLog logs/gioland-access combined
+
+</VirtualHost>

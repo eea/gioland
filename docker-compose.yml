@@ -1,6 +1,7 @@
 version: '2'
 
 services:
+
   gioland:
     build:
       context: .
@@ -9,21 +10,14 @@ services:
     command: python manage.py runcherrypy -p 5000 -H 0.0.0.0
     ports:
       - '5000:5000'
+
   server:
-    image: httpd
-    expose:
-      - '443'
+    image: eeacms/apache
     ports:
-      - '443:443'
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_BIND_SERVICE
-      - SETUID
-      - SETGID
+      - '80:80'
+    container_name: apache
     volumes:
-      - /home/dianaboiangiu/Desktop/gioland_docker/gioland/docs:/gioland/docs
-    environment:
-      SERVER_NAME: localhost
+      - ./conf.d/virtual-host.conf:/usr/local/apache2/conf/extra/vh-my-app.conf
+      - ./docs:/gioland/docs
     links:
       - gioland:gioland
