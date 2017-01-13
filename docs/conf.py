@@ -9,4 +9,3 @@ release = '2.0'
 exclude_patterns = ['_build']
 pygments_style = 'sphinx'
 html_theme = 'nature'
-html_static_path = ['_static']

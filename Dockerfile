@@ -8,7 +8,6 @@ RUN runDeps="gcc make libldap2-dev libsasl2-dev libssl-dev" \
 COPY . /gioland
 WORKDIR /gioland
 
-RUN pip install -r requirements.txt \
- && mkdir -p /gioland/instance/
+RUN pip install -r requirements.txt
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
