@@ -9,6 +9,7 @@ services:
       - '5000:5000'
     volumes:
       - ./docs:/gioland/docs
+      - ./instance:/gioland/instance
     env_file: .env
 
   apache:

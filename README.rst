@@ -17,8 +17,36 @@ Code repository: https://github.com/eea/gioland
 .. _`this issue`: http://taskman.eionet.europa.eu/issues/2
 
 
-Installation
-============
+Installation (using docker)
+===========================
+
+1. Clone the source repository::
+
+   $ git clone https://github.com/eea/gioland.git
+
+2. Change directory to project directory::
+
+   $ cd gioland/
+
+3. Create a configuration file (copy and modify the example)::
+
+   $ cp .env.example .env
+
+4. Create an Apache configuration file (copy and modify the example)::
+
+   $ cp conf.d/virtual-host.conf.example conf.d/virtual-host.conf
+
+5. Create an instance directory to store user data::
+
+   $ mkdir instance
+
+6. Run docker containers (as daemon)::
+
+   $ docker-compose up -d
+
+
+Installation (old style)
+========================
 
 Prerequisites
 ~~~~~~~~~~~~~
