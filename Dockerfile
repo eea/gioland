@@ -1,11 +1,14 @@
 FROM python:2.7-slim
 
-RUN apt-get update -y
-RUN apt-get install -y python-dev build-essential gcc python-pip git libldap2-dev libsasl2-dev libssl-dev
+RUN runDeps="gcc make libldap2-dev libsasl2-dev libssl-dev" \
+ && apt-get update -y \
+ && apt-get install -y --no-install-recommends $runDeps \
+ && rm -vrf /var/lib/apt/lists/*
 
 COPY . /gioland
 WORKDIR /gioland
-RUN pip install -r requirements.txt
-RUN mkdir -p /gioland/instance/
+
+RUN pip install -r requirements.txt \
+ && mkdir -p /gioland/instance/
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
