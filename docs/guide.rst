@@ -11,7 +11,7 @@ assigned to a specific role, contact the **EEA administrator**. Currently this
 is **Tobias Langanke (EEA NSV)**.
 
 
-URL: https://gaur.eea.europa.eu/gioland/
+URL: https://hrl-copernicus.eea.europa.eu
 
 .. image:: screenshots/homepage.png
    :width: 600px

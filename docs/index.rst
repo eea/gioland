@@ -21,7 +21,7 @@ HRLs are produced by service providers as European projection mosaics, covering 
 
 The main products of all HRLs go through a technical (semantic) check, and through a validation (for selected samples of initial products). This entails several processes, which are the responsibilities of different stakeholders, including the service providers, EEA and ETC ULS. With such a complex workflow, it was necessary to develop a system to manage the data transfers, to monitor the work flows and to provide workflow-triggered notifications to stakeholders.
 
-URL: https://gaur.eea.europa.eu/gioland/
+URL: https://hrl-copernicus.eea.europa.eu
 
 Contents:
 
