@@ -157,13 +157,12 @@ class ParcelHistoryItem(Persistent):
 
 class Report(Persistent):
 
-    def __init__(self, lot, product, filename=None):
+    def __init__(self, lot, filename=None):
         self.lot = lot
-        self.product = product
 
     @property
     def name(self):
-        return '%s - %s' % (self.lot, self.product)
+        return '%s' % self.lot
 
 
 class Warehouse(Persistent):
@@ -213,8 +212,8 @@ class Warehouse(Persistent):
     def get_all_parcels(self):
         return iter(self._parcels.values())
 
-    def new_report(self, lot, product):
-        report = Report(lot, product)
+    def new_report(self, lot):
+        report = Report(lot)
         pk = max(self._reports.keys() or [0]) + 1
         report.pk = pk
         report.user = _current_user()
