@@ -97,7 +97,6 @@ class AppTestCase(unittest.TestCase):
     })
     REPORT_METADATA = ImmutableDict({
         'lot': 'lot1',
-        'product': 'imp-deg',
     })
 
     def add_to_role(self, username, role_name):
