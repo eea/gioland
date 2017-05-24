@@ -217,10 +217,8 @@
   {% if reports|count > 0 %}
 
     <h1>Product Delivery Reports</h1>
-    {% for group in reports|groupby('product') %}
-      <h4 style="margin-bottom: 0">{{ COUNTRY_PRODUCTS_MAP[group.grouper] }}</h4>
       <ul class="report-list">
-      {% for report in group.list %}
+      {% for report in reports %}
         <li>
           <a href="{{ url_for('parcel.download_report_file', report_id=report.pk) }}">
             {{ report.filename }}</a> by {{ report.user }}
@@ -230,8 +228,6 @@
         </li>
       {% endfor %}
       </ul>
-    {% endfor %}
-
   {% endif %}
 {% endmacro %}
 
