@@ -8,7 +8,7 @@ services:
     depends_on:
     - gioland
     ports:
-      - '80:80'
+    - '80:80'
     environment:
       APACHE_CONFIG: |-
         <VirtualHost *:80>
@@ -33,7 +33,7 @@ services:
     image: eeacms/gioland:1.0
     container_name: gioland.app
     ports:
-      - '127.0.0.1:5000:5000'
+    - '127.0.0.1:5000:5000'
     volumes:
     - gioland-docs:/gioland/docs
     - /var/lib/docker/volumes/gioland:/gioland/instance
