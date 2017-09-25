@@ -1,13 +1,13 @@
-from datetime import datetime
-from StringIO import StringIO
-from mock import patch
-
 import string
-import flask
+from datetime import datetime
 
-from definitions import COUNTRY, LOT
+import flask
+from StringIO import StringIO
 from common import AppTestCase, authorization_patch, select
-from parcel import _get_stages_for_parcel
+from mock import patch
+from gioland.parcel import _get_stages_for_parcel
+
+from gioland.definitions import COUNTRY, LOT
 
 
 class ParcelTest(AppTestCase):
@@ -185,7 +185,7 @@ class ParcelTest(AppTestCase):
                 self.assertTrue(parcel.metadata['rejection'])
 
     def test_get_parcels_by_stage(self):
-        import parcel
+        from gioland import parcel
         self.new_parcel(stage='c-int')
         parcel_name_1 = self.new_parcel(stage='c-fsc')
         self.client.post('/parcel/%s/finalize' % parcel_name_1,
@@ -313,8 +313,8 @@ class ParcelHistoryTest(AppTestCase):
     CREATE_WAREHOUSE = True
 
     def setUp(self):
-        datetime_patch = patch('forms.datetime')
-        datetime_parcel_patch = patch('parcel.datetime')
+        datetime_patch = patch('gioland.forms.datetime')
+        datetime_parcel_patch = patch('gioland.parcel.datetime')
         self.mock_datetime = datetime_patch.start()
         self.mock_parcel_datetime = datetime_parcel_patch.start()
         self.addCleanup(datetime_patch.stop)
@@ -568,7 +568,7 @@ class ApiTest(AppTestCase):
         self.assertItemsEqual(resp['parcels'], [name])
 
     def test_get_parcel_metadata(self):
-        import warehouse
+        from gioland import warehouse
         name = self.new_parcel()
         resp = self.get_json('/api/parcel/' + name)
         with self.app.test_request_context():

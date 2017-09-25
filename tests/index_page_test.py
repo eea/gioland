@@ -1,5 +1,6 @@
 from common import AppTestCase, authorization_patch, select
-from definitions import LOT
+
+from gioland.definitions import LOT
 
 
 class UploadTest(AppTestCase):

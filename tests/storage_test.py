@@ -1,11 +1,13 @@
-import unittest
 import tempfile
-from datetime import datetime
+import unittest
 from contextlib import contextmanager
-from path import path
+from datetime import datetime
+
 import transaction
 from common import AppTestCase
-from definitions import COUNTRY_EXCLUDE_METADATA
+from path import path
+
+from gioland.definitions import COUNTRY_EXCLUDE_METADATA
 
 BAD_METADATA_VALUES = [
     {2: 'a'},
@@ -16,7 +18,7 @@ BAD_METADATA_VALUES = [
 
 
 def setUpModule(self):
-    import warehouse
+    from gioland import warehouse
     self.warehouse = warehouse
 
 
@@ -274,7 +276,7 @@ class DeleteParcelTest(AppTestCase):
         return parcel
 
     def test_delete_removes_subsequent_parcels(self):
-        from parcel import finalize_parcel, delete_parcel_and_followers
+        from gioland.parcel import finalize_parcel, delete_parcel_and_followers
         parcel = self.create_initial_parcel()
         finalize_parcel(self.wh, parcel, reject=False)
         parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
@@ -282,7 +284,7 @@ class DeleteParcelTest(AppTestCase):
         self.assertRaises(KeyError, self.wh.get_parcel, parcel2.name)
 
     def test_delete_keeps_previous_parcels(self):
-        from parcel import finalize_parcel, delete_parcel_and_followers
+        from gioland.parcel import finalize_parcel, delete_parcel_and_followers
         parcel = self.create_initial_parcel()
         finalize_parcel(self.wh, parcel, reject=False)
         parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
@@ -292,7 +294,7 @@ class DeleteParcelTest(AppTestCase):
         self.assertIs(self.wh.get_parcel(parcel.name), parcel)
 
     def test_delete_leaves_previous_parcel_unfinalized(self):
-        from parcel import finalize_parcel, delete_parcel_and_followers
+        from gioland.parcel import finalize_parcel, delete_parcel_and_followers
         parcel = self.create_initial_parcel()
         finalize_parcel(self.wh, parcel, reject=False)
         parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
@@ -302,7 +304,7 @@ class DeleteParcelTest(AppTestCase):
         self.assertNotIn('upload_time', parcel.metadata)
 
     def test_delete_adds_comment_on_previous_parcel(self):
-        from parcel import finalize_parcel, delete_parcel_and_followers
+        from gioland.parcel import finalize_parcel, delete_parcel_and_followers
         parcel = self.create_initial_parcel()
         finalize_parcel(self.wh, parcel, reject=False)
         parcel2 = self.wh.get_parcel(parcel.metadata['next_parcel'])
@@ -402,7 +404,7 @@ class FilesystemSymlinkTest(AppTestCase):
             return parcel.name
 
     def symlink_path(self, metadata, *extra):
-        from definitions import EDITABLE_METADATA
+        from gioland.definitions import EDITABLE_METADATA
         filtered_metadata = tuple(set(EDITABLE_METADATA) ^ set(COUNTRY_EXCLUDE_METADATA))
         symlink_path = self.symlinks_root
         for name in filtered_metadata:

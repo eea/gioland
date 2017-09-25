@@ -2,37 +2,35 @@ import json
 import os
 import re
 import tempfile
-
 from cgi import escape
-from itertools import groupby
 from datetime import datetime
+from itertools import groupby
 
-import flask
 import blinker
-
+import flask
 from flask.views import MethodView
-from werkzeug.utils import secure_filename
-from werkzeug.security import safe_join
-
 from path import path
+from werkzeug.security import safe_join
+from werkzeug.utils import secure_filename
 
-import notification
-import auth
-from definitions import ALL_STAGES_MAP, ALL_ROLES, CATEGORIES, COUNTRIES
-from definitions import COUNTRIES_CC, COUNTRIES_MC, COUNTRY_PRODUCTS, COUNTRY
-from definitions import COUNTRY_LOT_PRODUCTS, DOCUMENTS, EDITABLE_METADATA
-from definitions import EXTENTS, FULL_LOT_STAGES, FULL_LOT_STAGES_ORDER
-from definitions import INITIAL_STAGE, LOT, LOTS, LOT_STAGES, METADATA, PARTIAL
-from definitions import PARTIAL_LOT_STAGES, PARTIAL_LOT_STAGES_ORDER
-from definitions import PRODUCTS, PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
-from definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
-from definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
-from definitions import STREAM_LOTS, STREAM_STAGES, STREAM_STAGES_ORDER
-from definitions import UNS_FIELD_DEFS
-from warehouse import get_warehouse, _current_user
-from utils import format_datetime, exclusive_lock, isoformat_to_datetime
-from forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
-from forms import get_lot_products
+import gioland.auth as auth
+import gioland.notification as notification
+
+from gioland.definitions import ALL_STAGES_MAP, ALL_ROLES, CATEGORIES, COUNTRIES
+from gioland.definitions import COUNTRIES_CC, COUNTRIES_MC, COUNTRY_PRODUCTS, COUNTRY
+from gioland.definitions import DOCUMENTS, EDITABLE_METADATA
+from gioland.definitions import EXTENTS, FULL_LOT_STAGES, FULL_LOT_STAGES_ORDER
+from gioland.definitions import INITIAL_STAGE, LOT, LOTS, LOT_STAGES, METADATA, PARTIAL
+from gioland.definitions import PARTIAL_LOT_STAGES, PARTIAL_LOT_STAGES_ORDER
+from gioland.definitions import PRODUCTS, PRODUCTS_FILTER, PRODUCTS_IDS, REFERENCES
+from gioland.definitions import REPORT_METADATA, RESOLUTIONS, SIMILAR_METADATA
+from gioland.definitions import STAGE_ORDER, STAGES, STAGES_FOR_MERGING, STREAM
+from gioland.definitions import STREAM_LOTS, STREAM_STAGES, STREAM_STAGES_ORDER
+from gioland.definitions import UNS_FIELD_DEFS
+from gioland.forms import CountryDeliveryForm, LotDeliveryForm, StreamDeliveryForm
+from gioland.forms import get_lot_products
+from gioland.utils import format_datetime, exclusive_lock, isoformat_to_datetime
+from gioland.warehouse import get_warehouse, _current_user
 
 parcel_views = flask.Blueprint('parcel', __name__)
 

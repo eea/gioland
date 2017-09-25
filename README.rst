@@ -16,6 +16,15 @@ Code repository: https://github.com/eea/gioland
 
 .. _`this issue`: http://taskman.eionet.europa.eu/issues/2
 
+.. image:: https://travis-ci.org/eea/gioland.svg?branch=master
+    :target: https://travis-ci.org/eea/gioland
+
+.. image:: https://coveralls.io/repos/github/eea/gioland/badge.svg?branch=master
+    :target: https://coveralls.io/github/eea/gioland?branch=master
+
+.. image:: https://dockerbuildbadges.quelltext.eu/status.svg?organization=eeacms&repository=gioland
+   :target: https://hub.docker.com/r/eeacms/gioland/builds
+
 
 Installation (using docker)
 ===========================

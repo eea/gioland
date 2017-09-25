@@ -93,6 +93,7 @@ sandbox/
 
 # macOS auto-generated files
 .DS_Store
+.idea/
 
 # Apache conf file
 conf.d/virtual-host.conf
