@@ -25,8 +25,8 @@ goes through a workflow of checks, resubmissions and enhancement. See
 
 2. Customize env file:
 
-        $ cp app.env.example app.env
-        $ vim app.env
+        $ cp docker/app.env.example docker/app.env
+        $ vim docker/app.env
 
 3. Start application stack:
 
