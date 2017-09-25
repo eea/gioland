@@ -1,22 +1,45 @@
-version: '3'
+version: '2'
 
 services:
 
-  gioland:
-    image: eeacms/gioland
-    container_name: gioland
-    ports:
-      - '5000:5000'
-    volumes:
-      - ./docs:/gioland/docs
-      - ./instance:/gioland/instance
-    env_file: .env
-
   apache:
-    image: eeacms/apache
-    container_name: apache
+    image: eeacms/apache:2.4-2.1-alpine
+    container_name: gioland.apache
+    depends_on:
+    - gioland
     ports:
       - '80:80'
+    environment:
+      APACHE_CONFIG: |-
+        <VirtualHost *:80>
+          ServerName hrl-copernicus.eea.europa.eu
+
+          Alias /docs /gioland/docs/_build/html/
+          ProxyPass /docs !
+          <Location /docs>
+              Require all granted
+          </Location>
+
+          RewriteEngine On
+          RewriteCond %{REQUEST_URI} !/gioland/docs
+          RewriteRule  ^(/.*)$$ http://gioland:5000$$1 [P,L]
+
+          CustomLog logs/gioland-access combined
+        </VirtualHost>
     volumes:
-      - ./docker/virtual-host.conf:/usr/local/apache2/conf/extra/vh-my-app.conf
-      - ./docs:/gioland/docs
+      - gioland-docs:/gioland/docs:ro
+
+  gioland:
+    image: eeacms/gioland
+    container_name: gioland.app
+    ports:
+      - '127.0.0.1:5000:5000'
+    volumes:
+    - gioland-docs:/gioland/docs
+    - /var/lib/docker/volumes/gioland:/gioland/instance
+    env_file: 
+    - docker/app.env
+
+volumes:
+  gioland-docs:
+    driver: local
