@@ -1,8 +1,8 @@
 language: python
 python:
   - "2.7"
-install: sudo apt-get install -y libxslt-dev libffi-dev && pip install -r requirements-dev.txt
-script:  py.test --cov=gioland tests
+install: pip install -r requirements-dev.txt
+script:  PYTHONPATH=`pwd` py.test --cov=gioland tests
 after_success: coveralls
 notifications:
   email:
