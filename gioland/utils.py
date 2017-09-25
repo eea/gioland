@@ -1,12 +1,12 @@
-import time
-from functools import wraps
 import logging
+import time
 from contextlib import contextmanager
-from werkzeug.contrib.cache import NullCache, SimpleCache
+from functools import wraps
+
 import flask
 from dateutil import tz, parser
+from werkzeug.contrib.cache import NullCache, SimpleCache
 from zc.lockfile import LockFile, LockError
-
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -41,7 +41,7 @@ def initialize_app(app):
 
 def format_datetime(value, format_name='long'):
     """ Formats a datetime according to the given format. """
-    from definitions import DATE_FORMAT
+    from gioland.definitions import DATE_FORMAT
     timezone = flask.current_app.config.get("TIME_ZONE")
     if timezone:
         from_zone = tz.gettz("UTC")

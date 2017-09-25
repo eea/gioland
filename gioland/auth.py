@@ -1,11 +1,12 @@
-import urlparse
 from functools import wraps
+
 import flask
 import ldap
+import urlparse
 from eea.usersdb import UsersDB
-from utils import cached
-from definitions import ALL_ROLES
 
+from gioland.definitions import ALL_ROLES
+from gioland.utils import cached
 
 auth_views = flask.Blueprint('auth', __name__)
 
@@ -145,7 +146,7 @@ def roles_debug():
 @auth_views.route('/logs')
 @require_admin
 def view_logs():
-    import warehouse
+    from gioland import warehouse
     app = flask.current_app
     warehouse_log_file = app.config['WAREHOUSE_PATH'] / warehouse.LOG_FILE_NAME
     with warehouse_log_file.open('rb') as log_file:

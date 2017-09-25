@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import os
-import logging
 import code
 import copy
+import logging
+import os
 import flask
 from flask.ext import script
 
@@ -24,7 +24,7 @@ LOG_FORMAT = "[%(asctime)s] %(name)s %(levelname)s %(message)s"
 
 
 def register_monitoring_views(app):
-    import warehouse
+    from gioland import warehouse
 
     @app.route('/ping')
     def ping():
@@ -37,10 +37,10 @@ def register_monitoring_views(app):
 
 
 def create_app(config={}, testing=False):
-    import auth
-    import parcel
-    import warehouse
-    import utils
+    from gioland import auth
+    from gioland import parcel
+    from gioland import warehouse
+    from gioland import utils
     app = flask.Flask(__name__)
     app.config.update(copy.deepcopy(default_config))
     if testing:
@@ -154,7 +154,7 @@ def shell(warehouse=False):
     context = {'app': app}
 
     if warehouse:
-        import warehouse
+        from gioland import warehouse
         import transaction
         context['wh'] = warehouse.get_warehouse()
         context['transaction'] = transaction
@@ -169,7 +169,7 @@ def shell(warehouse=False):
 
 @manager.command
 def migrate_prev_parcel_to_list():
-    from warehouse import get_warehouse
+    from gioland.warehouse import get_warehouse
 
     wh = get_warehouse()
     parcels = wh.get_all_parcels()
@@ -183,7 +183,7 @@ def migrate_prev_parcel_to_list():
 
 @manager.command
 def fsck():
-    from warehouse import get_warehouse, checksum
+    from gioland.warehouse import get_warehouse, checksum
 
     wh = get_warehouse()
     parcels = wh.get_all_parcels()
@@ -198,7 +198,7 @@ def fsck():
 
 @manager.command
 def update_tree():
-    from warehouse import get_warehouse
+    from gioland.warehouse import get_warehouse
     wh = get_warehouse()
     parcels = [p for p in wh.get_all_parcels() if not p.uploading]
     parcels.sort(key=lambda p: p.metadata['upload_time'])

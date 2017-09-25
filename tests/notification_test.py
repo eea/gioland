@@ -1,20 +1,22 @@
-from datetime import datetime
 from contextlib import contextmanager
-from mock import Mock, patch, call
-from dateutil import tz
+from datetime import datetime
+
 from common import AppTestCase, record_events, authorization_patch
-from definitions import COUNTRY
+from dateutil import tz
+from mock import Mock, patch, call
+
+from gioland.definitions import COUNTRY
 
 
 def setUpModule(self):
-    import notification
+    from gioland import notification
     self.notification = notification
 
 
 class NotificationDeliveryTest(AppTestCase):
 
     def setUp(self):
-        import warehouse
+        from gioland import warehouse
 
         self.app.config['BASE_URL'] = 'http://example.com'
 
@@ -41,7 +43,7 @@ class NotificationDeliveryTest(AppTestCase):
         self.assertEqual(len(events), 1)
 
     def test_notification_rdf(self):
-        from definitions import RDF_URI
+        from gioland.definitions import RDF_URI
 
         zone = 'Asia/Tokyo'
         self.app.config['TIME_ZONE'] = zone
@@ -70,7 +72,7 @@ class NotificationDeliveryTest(AppTestCase):
 
     @contextmanager
     def record_uns_calls(self):
-        with patch('notification.get_uns_proxy') as mock_get_uns_proxy:
+        with patch('gioland.notification.get_uns_proxy') as mock_get_uns_proxy:
             sendNotification = mock_get_uns_proxy.return_value.sendNotification
             with self.app.test_request_context():
                 yield sendNotification.mock_calls
@@ -118,7 +120,7 @@ class NotificationTriggerTest(AppTestCase):
             self.assertEqual(events, [])
 
     def test_notification_triggered_once_on_finalize_parcel(self):
-        from definitions import RDF_URI
+        from gioland.definitions import RDF_URI
         resp_1 = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         self.assertEqual(resp_1.status_code, 302)
         parcel_name = resp_1.location.rsplit('/', 1)[-1]
@@ -134,9 +136,9 @@ class NotificationTriggerTest(AppTestCase):
                           " (stage reference: %s)" % parcel_name))
         self.assertNotIn(RDF_URI['decision'], event_rdf)
 
-    @patch('parcel.authorize_for_parcel', Mock(return_value=True))
+    @patch('gioland.parcel.authorize_for_parcel', Mock(return_value=True))
     def test_parcel_rejection_triggers_accept_notification(self):
-        from definitions import RDF_URI
+        from gioland.definitions import RDF_URI
         resp_1 = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         self.assertEqual(resp_1.status_code, 302)
         parcel1_name = resp_1.location.rsplit('/', 1)[-1]
@@ -155,9 +157,9 @@ class NotificationTriggerTest(AppTestCase):
         event_rdf = rdfdata(events[0])
         self.assertEqual(event_rdf[RDF_URI['decision']], "accepted")
 
-    @patch('parcel.authorize_for_parcel', Mock(return_value=True))
+    @patch('gioland.parcel.authorize_for_parcel', Mock(return_value=True))
     def test_parcel_rejection_triggers_rejection_notification(self):
-        from definitions import RDF_URI
+        from gioland.definitions import RDF_URI
         resp_1 = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         self.assertEqual(resp_1.status_code, 302)
         parcel1_name = resp_1.location.rsplit('/', 1)[-1]
@@ -184,15 +186,15 @@ class NotificationSubscriptionTest(AppTestCase):
         self.channel_id = '1234'
         self.app.config['UNS_CHANNEL_ID'] = self.channel_id
 
-    @patch('notification.get_uns_proxy')
+    @patch('gioland.notification.get_uns_proxy')
     def test_subscribe_calls_to_uns(self, mock_proxy):
         self.client.post('/subscribe')
         self.assertEqual(mock_proxy.return_value.makeSubscription.mock_calls,
                          [call(self.channel_id, 'somebody', [])])
 
-    @patch('notification.get_uns_proxy')
+    @patch('gioland.notification.get_uns_proxy')
     def test_subscribe_with_filters_passes_filters_to_uns(self, mock_proxy):
-        from definitions import RDF_URI
+        from gioland.definitions import RDF_URI
 
         self.client.post('/subscribe', data={
             'country': 'dk',

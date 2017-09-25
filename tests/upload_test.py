@@ -1,4 +1,5 @@
 import json
+
 from StringIO import StringIO
 from common import AppTestCase, authorization_patch, select
 
@@ -184,7 +185,7 @@ class UploadTest(AppTestCase):
         return temp
 
     def test_create_file_from_chunks(self):
-        from parcel import create_file_from_chunks
+        from gioland.parcel import create_file_from_chunks
         resp = self.client.post('/parcel/new/country', data=self.PARCEL_METADATA)
         parcel_name = resp.location.rsplit('/', 1)[-1]
         with self.app.test_request_context():

@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+install: apt-get install -y libxslt-dev libffi-dev && pip install -r requirements-dev.txt
+script:  py.test --cov=gioland tests
+after_success: coveralls
+notifications:
+  email:
+    recipients:
+      - purepython@eaudeweb.ro

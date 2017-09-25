@@ -1,11 +1,13 @@
+import tempfile
 import unittest
 from contextlib import contextmanager
-import tempfile
+
 import flask
 from mock import patch
 from path import path
 from werkzeug.datastructures import ImmutableDict
-from definitions import COUNTRY, LOT
+
+from gioland.definitions import COUNTRY, LOT
 
 
 def create_mock_app(warehouse_path=None):
@@ -37,7 +39,7 @@ def create_mock_app(warehouse_path=None):
 
 
 def authorization_patch():
-    authorize_patch = patch('auth.authorize')
+    authorize_patch = patch('gioland.auth.authorize')
     authorize_patch.start()
     return authorize_patch
 
@@ -58,8 +60,7 @@ def record_events(signal):
 
 def select(container, selector):
     """ Select elements using CSS """
-    import lxml.html
-    import lxml.cssselect
+    import lxml.cssselect, lxml.html
     if isinstance(container, basestring):
         doc = lxml.html.fromstring(container.decode('utf-8'))
     else:
@@ -112,7 +113,7 @@ class AppTestCase(unittest.TestCase):
         else:
             metadata = dict(self.STREAM_METADATA)
             url = '/parcel/new/stream'
-        with patch('auth.authorize'):
+        with patch('gioland.auth.authorize'):
             resp = self.client.post(url, data=metadata)
         self.assertEqual(resp.status_code, 302)
         parcel_name = resp.location.rsplit('/', 1)[-1]
@@ -141,7 +142,7 @@ class AppTestCase(unittest.TestCase):
 
     @property
     def wh(self):
-        import warehouse
+        from gioland import warehouse
         return warehouse.get_warehouse()
 
     def __call__(self, result=None):

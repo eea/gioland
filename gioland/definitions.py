@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from utils import remove_duplicates_preserve_order
 
+from gioland.utils import remove_duplicates_preserve_order
 
 SIMILAR_METADATA = (
     'country',

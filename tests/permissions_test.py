@@ -1,13 +1,14 @@
-from StringIO import StringIO
-from mock import patch, call
 import flask
+from StringIO import StringIO
 from common import AppTestCase, record_events, select
-from definitions import COUNTRY, LOT, STREAM
+from mock import patch, call
+
+from gioland.definitions import COUNTRY, LOT, STREAM
 
 
 def setUpModule(self):
-    import parcel
-    import warehouse
+    from gioland import parcel
+    from gioland import warehouse
     self.parcel = parcel
     self.warehouse = warehouse
 
@@ -23,7 +24,7 @@ class PermisionsTest(AppTestCase):
                                           if u != 'user_id:%s' % username]
 
     def create_parcel(self, stage=None, delivery_type=LOT):
-        with patch('auth.authorize'):
+        with patch('gioland.auth.authorize'):
             if delivery_type == COUNTRY:
                 post_resp = self.client.post('parcel/new/country',
                                              data=self.COUNTRY_METADATA)
@@ -329,12 +330,12 @@ class RolesTest(AppTestCase):
 
     def setUp(self):
         self.app.config['LDAP_SERVER'] = 'ldap://some.ldap.server'
-        UsersDB_patch = patch('auth.UsersDB')
+        UsersDB_patch = patch('gioland.auth.UsersDB')
         self.mock_UsersDB = UsersDB_patch.start()
         self.addCleanup(UsersDB_patch.stop)
 
     def test_users_db_connection(self):
-        import auth
+        from gioland import auth
         mock_udb = self.mock_UsersDB.return_value
         mock_udb.member_roles_info.return_value = []
         with self.app.test_request_context():
@@ -343,7 +344,7 @@ class RolesTest(AppTestCase):
                          call(ldap_server='some.ldap.server'))
 
     def test_role_list_fetched_from_ldap(self):
-        import auth
+        from gioland import auth
         mock_udb = self.mock_UsersDB.return_value
         mock_udb.member_roles_info.return_value = [
             ('eionet', None),
@@ -359,7 +360,7 @@ class RolesTest(AppTestCase):
                          [call('user', 'somebody')])
 
     def test_authorize_looks_into_ldap_groups(self):
-        import auth
+        from gioland import auth
         mock_udb = self.mock_UsersDB.return_value
         mock_udb.member_roles_info.return_value = [('eionet-nrc', None)]
         self.app.config['ROLE_NRC'] = ['ldap_group:eionet-nrc']
@@ -370,7 +371,7 @@ class RolesTest(AppTestCase):
             self.assertTrue(auth.authorize(['ROLE_NRC']))
 
     def test_authorize_for_anonymous_returns_false(self):
-        import auth
+        from gioland import auth
         self.app.config['ROLE_ETC'] = ['user_id:somebody']
         with self.app.test_request_context():
             self.app.preprocess_request()
@@ -380,7 +381,7 @@ class RolesTest(AppTestCase):
 class RequireAdminTest(AppTestCase):
 
     def setUp(self):
-        import auth
+        from gioland import auth
 
         @self.app.route('/some_view')
         @auth.require_admin

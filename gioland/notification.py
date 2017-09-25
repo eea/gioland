@@ -1,13 +1,14 @@
 import logging
-from xmlrpclib import ServerProxy
-import flask
-import blinker
-from definitions import COUNTRY, COUNTRY_EXCLUDE_METADATA, LOT
-from definitions import LOT_EXCLUDE_METADATA, METADATA, RDF_URI
-from definitions import STREAM_EXCLUDE_METADATA, UNS_FIELD_DEFS
-import auth
-from utils import format_datetime
 
+import blinker
+import flask
+from utils import format_datetime
+from xmlrpclib import ServerProxy
+
+import gioland.auth as auth
+from gioland.definitions import COUNTRY, COUNTRY_EXCLUDE_METADATA, LOT
+from gioland.definitions import LOT_EXCLUDE_METADATA, METADATA, RDF_URI
+from gioland.definitions import STREAM_EXCLUDE_METADATA, UNS_FIELD_DEFS
 
 metadata_rdf_fields = [(field['rdf_uri'], field['name'], dict(field['range']))
                        for field in UNS_FIELD_DEFS

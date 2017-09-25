@@ -1,19 +1,18 @@
-import tempfile
 import hashlib
-from datetime import datetime
 import logging
 import logging.handlers
+import tempfile
+from datetime import datetime
+
+import transaction
+from BTrees.OOBTree import OOBTree
+from path import path
+from persistent import Persistent
 from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
-from BTrees.OOBTree import OOBTree
-from persistent import Persistent
-import transaction
-from path import path
 
-from definitions import METADATA, STAGES, LOT_STAGES, COUNTRY_EXCLUDE_METADATA, STREAM, STREAM_EXCLUDE_METADATA
-from definitions import STAGE_ORDER, LOT_STAGE_ORDER
-from definitions import LOT, COUNTRY
-
+from gioland.definitions import COUNTRY
+from gioland.definitions import METADATA, COUNTRY_EXCLUDE_METADATA, STREAM, STREAM_EXCLUDE_METADATA
 
 log = logging.getLogger(__name__)
 
@@ -80,7 +79,7 @@ class Parcel(Persistent):
 
     @property
     def file_uploading(self):
-        from parcel import _get_stages_for_parcel
+        from gioland.parcel import _get_stages_for_parcel
         DELIVERY_STAGES, _ = _get_stages_for_parcel(self)
         stage = DELIVERY_STAGES.get(self.metadata.get('stage'), {})
         return stage.get('file_uploading', False)
@@ -312,7 +311,7 @@ def _cleanup_warehouse(err=None):
 
 def initialize_app(app):
     import flask
-    import auth
+    from gioland import auth
 
     if 'WAREHOUSE_PATH' not in app.config:
         return
