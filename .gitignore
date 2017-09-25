@@ -97,3 +97,4 @@ sandbox/
 
 # Apache conf file
 conf.d/virtual-host.conf
+docker-compose.override.yml
