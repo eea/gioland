@@ -1,13 +1,18 @@
 FROM python:2.7-slim
 
+ENV PROJ_DIR=/gioland
+
 RUN runDeps="gcc make libldap2-dev libsasl2-dev libssl-dev" \
  && apt-get update -y \
  && apt-get install -y --no-install-recommends $runDeps \
- && rm -vrf /var/lib/apt/lists/*
+ && rm -vrf /var/lib/apt/lists/* \
+ && mkdir -p $PROJ_DIR \
+ && mkdir -p $PROJ_DIR\instance
 
-COPY . /gioland
-WORKDIR /gioland
-
+COPY requirements.txt $PROJ_DIR
+WORKDIR $PROJ_DIR
 RUN pip install -r requirements.txt
+
+COPY . $PROJ_DIR
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

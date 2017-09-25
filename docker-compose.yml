@@ -18,5 +18,5 @@ services:
     ports:
       - '80:80'
     volumes:
-      - ./conf.d/virtual-host.conf:/usr/local/apache2/conf/extra/vh-my-app.conf
+      - ./docker/virtual-host.conf:/usr/local/apache2/conf/extra/vh-my-app.conf
       - ./docs:/gioland/docs
