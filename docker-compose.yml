@@ -30,7 +30,7 @@ services:
       - gioland-docs:/gioland/docs:ro
 
   gioland:
-    image: eeacms/gioland:1.1
+    image: eeacms/gioland:1.2
     container_name: gioland.app
     ports:
     - '127.0.0.1:5000:5000'

@@ -1,6 +1,7 @@
 FROM python:2.7-slim
 
 ENV PROJ_DIR=/gioland
+ENV PYTHONPATH=$PYTHONPATH:$PROJ_DIR/gioland
 
 RUN runDeps="gcc make libldap2-dev libsasl2-dev libssl-dev" \
  && apt-get update -y \
