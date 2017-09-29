@@ -30,14 +30,14 @@ services:
       - gioland-docs:/gioland/docs:ro
 
   gioland:
-    image: eeacms/gioland:1.0
+    image: eeacms/gioland:1.1
     container_name: gioland.app
     ports:
     - '127.0.0.1:5000:5000'
     volumes:
     - gioland-docs:/gioland/docs
     - /var/lib/docker/volumes/gioland:/gioland/instance
-    env_file: 
+    env_file:
     - docker/app.env
 
 volumes:
