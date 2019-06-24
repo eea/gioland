@@ -5,7 +5,7 @@ import copy
 import logging
 import os
 import flask
-from flask.ext import script
+import flask_script
 
 default_config = {
     'LDAP_TIMEOUT': 10,
@@ -88,7 +88,7 @@ class ReverseProxied(object):
         return self.app(environ, start_response)
 
 
-manager = script.Manager(create_app)
+manager = flask_script.Manager(create_app)
 
 
 def configuration_from_environ():
@@ -124,11 +124,11 @@ def configuration_from_environ():
     return config
 
 
-class RunCherryPyCommand(script.Command):
+class RunCherryPyCommand(flask_script.Command):
 
     option_list = [
-        script.Option('--port', '-p', dest='port', type=int, default=5000),
-        script.Option('--host', '-H', dest='host', default='127.0.0.1'),
+        flask_script.Option('--port', '-p', dest='port', type=int, default=5000),
+        flask_script.Option('--host', '-H', dest='host', default='127.0.0.1'),
     ]
 
     def handle(self, app, port, host):
